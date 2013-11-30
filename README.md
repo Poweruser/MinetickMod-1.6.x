@@ -15,6 +15,8 @@ Here is a graphical overview on what changed:
 
 
 
+As you probably notice: I'm using 4 worlds in this example here and by default a server only has 3 worlds (Overworld, nether and the end). This is a hint to you, that your gain from this mod is greater the more you spread the players on your server, and therefore the load on the worlds, equally among several worlds.
+To load up additional worlds, I can recommend the plugin [Multiverse](http://dev.bukkit.org/bukkit-plugins/multiverse-core/)
 
 An important guideline in this project is to do as little changes as possible, but as much as necessary.
 Therefore this project is not, and will not be, a complete rewrite of Minecrafts server side, to get as much benefit out of parallel processing as possible. Instead I carefully examine and profile the various parts of the server code and decide then, what is worth to be optimized with a reasonable amount of work.
