@@ -28,6 +28,7 @@ class ThreadLoginVerifier extends Thread {
 
     public void run() {
         try {
+            if(this.server.getOnlineMode()) { // Poweruser
             String s = (new BigInteger(MinecraftEncryption.a(PendingConnection.a(this.pendingConnection), PendingConnection.b(this.pendingConnection).H().getPublic(), PendingConnection.c(this.pendingConnection)))).toString(16);
             URL url = new URL("http://session.minecraft.net/game/checkserver.jsp?user=" + URLEncoder.encode(PendingConnection.d(this.pendingConnection), "UTF-8") + "&serverId=" + URLEncoder.encode(s, "UTF-8"));
             BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(url.openConnection(PendingConnection.b(this.pendingConnection).ap()).getInputStream()));
@@ -38,9 +39,10 @@ class ThreadLoginVerifier extends Thread {
                 this.pendingConnection.disconnect("Failed to verify username!");
                 return;
             }
-
+            }
             // CraftBukkit start
-            if (this.pendingConnection.getSocket() == null) {
+            //if (this.pendingConnection.getSocket() == null) {
+            if (this.pendingConnection == null || this.pendingConnection.getSocket() == null) { // Poweruser - in some rare cases pendingConnection could be null
                 return;
             }
 
