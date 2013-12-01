@@ -13,7 +13,8 @@ public class GenLayerZoomFuzzy extends GenLayer {
         int k1 = (k >> 1) + 3;
         int l1 = (l >> 1) + 3;
         int[] aint = this.a.a(i1, j1, k1, l1);
-        int[] aint1 = IntCache.a(k1 * 2 * l1 * 2);
+        //int[] aint1 = IntCache.a(k1 * 2 * l1 * 2);
+        int[] aint1 = this.intCache.a(k1 * 2 * l1 * 2); // Poweruser
         int i2 = k1 << 1;
 
         int j2;
@@ -38,7 +39,8 @@ public class GenLayerZoomFuzzy extends GenLayer {
             }
         }
 
-        int[] aint2 = IntCache.a(k * l);
+        //int[] aint2 = IntCache.a(k * l);
+        int[] aint2 = this.intCache.a(k * l); // Poweruser
 
         for (j2 = 0; j2 < l; ++j2) {
             System.arraycopy(aint1, (j2 + (j & 1)) * (k1 << 1) + (i & 1), aint2, j2 * k, k);

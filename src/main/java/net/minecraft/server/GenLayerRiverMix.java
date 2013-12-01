@@ -20,7 +20,8 @@ public class GenLayerRiverMix extends GenLayer {
     public int[] a(int i, int j, int k, int l) {
         int[] aint = this.b.a(i, j, k, l);
         int[] aint1 = this.c.a(i, j, k, l);
-        int[] aint2 = IntCache.a(k * l);
+        //int[] aint2 = IntCache.a(k * l);
+        int[] aint2 = this.intCache.a(k * l); // Poweruser
 
         for (int i1 = 0; i1 < k * l; ++i1) {
             if (aint[i1] == BiomeBase.OCEAN.id) {

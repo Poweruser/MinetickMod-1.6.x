@@ -7,7 +7,8 @@ public class LayerIsland extends GenLayer {
     }
 
     public int[] a(int i, int j, int k, int l) {
-        int[] aint = IntCache.a(k * l);
+        //int[] aint = IntCache.a(k * l);
+        int[] aint = this.intCache.a(k * l); // Poweruser
 
         for (int i1 = 0; i1 < l; ++i1) {
             for (int j1 = 0; j1 < k; ++j1) {
