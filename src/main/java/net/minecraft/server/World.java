@@ -93,6 +93,8 @@ public abstract class World implements IBlockAccess {
 
     // Poweruser start
     private HashSet<Long> alreadyCheckedChunks = new HashSet<Long>();
+    protected boolean cancelHeavyCalculations = false;
+    private int nextTickEntityIndex = 0;
     // Poweruser end
 
     // CraftBukkit start
@@ -1203,21 +1205,47 @@ public abstract class World implements IBlockAccess {
         this.f.clear();
         this.methodProfiler.c("regular");
 
-        // Poweruser
+        // Poweruser start
+        /*
+         * Instead of running through the list from 0 to size-1 everytime, I'm going to
+         * rotate through it, by remembering the index of the last ticked entity and resuming there
+         * on the next tick. This is crucial with the just added skipping of entities when the server
+         * is overloaded. If it wasn't done, the entities at the end of the list would eventually miss
+         * several seconds or minutes.
+         */
         this.alreadyCheckedChunks.clear(); // Maybe clear less frequent
-
+        /*
         for (i = 0; i < this.entityList.size(); ++i) {
             entity = (Entity) this.entityList.get(i);
-
+        */
+        int count = 0, size = this.entityList.size();
+        int countI = this.nextTickEntityIndex;
+        while(count < size ) {
+            if(countI >= this.entityList.size()) {
+                countI = countI % this.entityList.size();
+            }
+            entity = (Entity) this.entityList.get(countI);
+            if(!this.cancelHeavyCalculations) {
+                this.nextTickEntityIndex = countI + 1;
+            }
+        // Poweruser end
             // CraftBukkit start - Don't tick entities in chunks queued for unload
             ChunkProviderServer chunkProviderServer = ((WorldServer) this).chunkProviderServer;
             if (chunkProviderServer.unloadQueue.contains(MathHelper.floor(entity.locX) >> 4, MathHelper.floor(entity.locZ) >> 4)) {
+                // Poweruser start - Increasing the counters, as this entity wasnt skipped by me
+                countI++;
+                count++;
+                // Poweruser end
                 continue;
             }
             // CraftBukkit end
 
             if (entity.vehicle != null) {
                 if (!entity.vehicle.dead && entity.vehicle.passenger == entity) {
+                    // Poweruser start - Increasing the counters, as this entity wasnt skipped by me
+                    countI++;
+                    count++;
+                    // Poweruser end
                     continue;
                 }
 
@@ -1228,7 +1256,16 @@ public abstract class World implements IBlockAccess {
             this.methodProfiler.a("tick");
             if (!entity.dead) {
                 try {
-                    this.playerJoinedWorld(entity);
+                    //this.playerJoinedWorld(entity);
+                    // Poweruser start
+                    boolean playerIsPassenger = false;
+                    if(entity.passenger != null) {
+                        playerIsPassenger = entity.passenger.isImportantEntity();
+                    }
+                    if(entity.isImportantEntity() || playerIsPassenger || !this.cancelHeavyCalculations) {
+                        this.playerJoinedWorld(entity);
+                    }
+                    // Poweruser end
                 } catch (Throwable throwable1) {
                     crashreport = CrashReport.a(throwable1, "Ticking entity");
                     crashreportsystemdetails = crashreport.a("Entity being ticked");
@@ -1249,6 +1286,12 @@ public abstract class World implements IBlockAccess {
                 this.entityList.remove(i--);
                 this.b(entity);
             }
+            // Poweruser start
+            else {
+                countI++; // Increasing the counter to the index of the next entity
+            }
+            count++;
+            // Poweruser end
 
             this.methodProfiler.b();
         }

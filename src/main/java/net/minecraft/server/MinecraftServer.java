@@ -1,6 +1,8 @@
 package net.minecraft.server;
 
 import java.awt.GraphicsEnvironment;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.Proxy;
 import java.security.KeyPair;
@@ -17,6 +19,8 @@ import java.util.logging.Logger;
 
 // CraftBukkit start
 import java.io.IOException;
+
+import javax.swing.Timer;
 
 import jline.console.ConsoleReader;
 import joptsimple.OptionSet;
@@ -100,6 +104,20 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
     private LinkedList<WorldServer> autoSaveWorlds = new LinkedList<WorldServer>();
     private int autoSaveDelay = 0;
     private boolean autoSaveOrdered = false;
+
+    private boolean cancelHeavyCalculations = false;
+    private long tickTime = 0L;
+    private int timerDelay = 45;
+
+    private Timer timer = new Timer(this.timerDelay, new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            cancelHeavyCalculations = true;
+            for(WorldServer ws: worlds) {
+                ws.cancelHeavyCalculations(cancelHeavyCalculations);
+            }
+        }
+    });
     // Poweruser end
 
     public MinecraftServer(OptionSet options) { // CraftBukkit - signature file -> OptionSet
@@ -118,6 +136,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
 
         // Poweruser
         this.threadPool = new ThreadPool();
+        this.timer.setRepeats(false);
 
         // CraftBukkit start
         this.options = options;
@@ -517,6 +536,12 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
     protected void s() throws ExceptionWorldConflict { // CraftBukkit - added throws
         long i = System.nanoTime();
 
+        // Poweruser start
+        this.cancelHeavyCalculations = false;
+        this.timer.setDelay(this.timerDelay);
+        this.timer.restart();
+        // Poweruser end
+
         AxisAlignedBB.a().a();
         ++this.ticks;
         if (this.T) {
@@ -551,10 +576,20 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                 this.server.getPluginManager().callEvent(event);
             }
         }
+
+        this.tickTime = System.nanoTime() - i;
+
+        if(this.tickTime > 45000000L) {
+            if(this.timerDelay > 20) {
+                this.timerDelay--;
+            }
+        } else if(this.tickTime < 35000000L && this.timerDelay < 45) {
+            this.timerDelay++;
+        }
         // Poweruser end
 
         this.methodProfiler.a("tallying");
-        this.j[this.ticks % 100] = System.nanoTime() - i;
+        this.j[this.ticks % 100] = this.tickTime; // Poweruser - just measured the time, a few lines up
         this.f[this.ticks % 100] = Packet.q - this.E;
         this.E = Packet.q;
         this.g[this.ticks % 100] = Packet.r - this.F;

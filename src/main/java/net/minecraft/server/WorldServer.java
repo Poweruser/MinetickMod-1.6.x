@@ -49,6 +49,10 @@ public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
     public long getLastTickAvg() {
         return this.lastTickAvg;
     }
+
+    public void cancelHeavyCalculations(boolean cancel) {
+        this.cancelHeavyCalculations = cancel;
+    }
     // Poweruser end
 
     // CraftBukkit start

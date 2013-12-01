@@ -110,6 +110,13 @@ public abstract class Entity {
     public EnumEntitySize at;
     public boolean valid; // CraftBukkit
 
+    // Poweruser start
+    protected boolean isImportantEntity = false;
+    public boolean isImportantEntity() {
+        return this.isImportantEntity;
+    }
+    // Poweruser end
+
     public Entity(World world) {
         this.id = entityCount++;
         this.l = 1.0D;

@@ -32,6 +32,9 @@ public class EntityWither extends EntityMonster implements IRangedEntity {
         this.targetSelector.a(1, new PathfinderGoalHurtByTarget(this, false));
         this.targetSelector.a(2, new PathfinderGoalNearestAttackableTarget(this, EntityInsentient.class, 0, false, false, bw));
         this.b = 50;
+
+        // Poweruser
+        this.isImportantEntity = true;
     }
 
     protected void a() {
