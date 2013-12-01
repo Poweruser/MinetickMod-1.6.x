@@ -270,6 +270,16 @@ public class ChunkProviderServer implements IChunkProvider {
             }
         }
 
+        // Poweruser start
+        /*
+         * This call to b() was moved to WorldServer:flushSave() in the CraftBukkit update to version 1.5.2
+         * BUT flushSave() ISNT CALLED ANYWHERE!! So I restored the pre-1.5.2 status
+         */
+        if (flag) {
+            this.b();
+        }
+        // Poweruser end
+
         return true;
     }
 
