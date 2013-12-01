@@ -94,6 +94,7 @@ public class GenLayerZoom extends GenLayer {
     }
 
     public static GenLayer a(long i, GenLayer genlayer, int j) {
+        /*
         Object object = genlayer;
 
         for (int k = 0; k < j; ++k) {
@@ -101,5 +102,16 @@ public class GenLayerZoom extends GenLayer {
         }
 
         return (GenLayer) object;
+        */
+        // Poweruser start - casting not necessary
+        GenLayer object = genlayer;
+
+        for (int k = 0; k < j; ++k) {
+            object = new GenLayerZoom(i + (long) k, object);
+            object.setIntCache(genlayer.intCache);
+        }
+
+        return object;
+        // Poweruser end
     }
 }
