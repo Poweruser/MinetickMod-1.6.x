@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 
 // CraftBukkit start
 import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.util.LongHash;
 import org.bukkit.craftbukkit.util.LongHashSet;
 import org.bukkit.craftbukkit.util.UnsafeList;
 import org.bukkit.generator.ChunkGenerator;
@@ -89,6 +90,10 @@ public abstract class World implements IBlockAccess {
     public WorldChunkManager getWorldChunkManager() {
         return this.worldProvider.e;
     }
+
+    // Poweruser start
+    private HashSet<Long> alreadyCheckedChunks = new HashSet<Long>();
+    // Poweruser end
 
     // CraftBukkit start
     private final CraftWorld world;
@@ -1198,6 +1203,9 @@ public abstract class World implements IBlockAccess {
         this.f.clear();
         this.methodProfiler.c("regular");
 
+        // Poweruser
+        this.alreadyCheckedChunks.clear(); // Maybe clear less frequent
+
         for (i = 0; i < this.entityList.size(); ++i) {
             entity = (Entity) this.entityList.get(i);
 
@@ -1338,9 +1346,20 @@ public abstract class World implements IBlockAccess {
     public void entityJoinedWorld(Entity entity, boolean flag) {
         int i = MathHelper.floor(entity.locX);
         int j = MathHelper.floor(entity.locZ);
-        byte b0 = 32;
+        //byte b0 = 32;
+        // Poweruser start
+        byte b0 = 4; // It should be enough to check the chunks within a range of 4 blocks, instead of always 25 chunks
+        long hash = LongHash.toLong(i, j);
+        boolean isChunkLoaded = this.alreadyCheckedChunks.contains(hash);
+        if(!isChunkLoaded) {
+            isChunkLoaded = this.e(i - b0, 0, j - b0, i + b0, 0, j + b0);
+            if(isChunkLoaded) {
+                this.alreadyCheckedChunks.add(hash);
+            }
+        }
+        // Poweruser end
 
-        if (!flag || this.e(i - b0, 0, j - b0, i + b0, 0, j + b0)) {
+        if (!flag || isChunkLoaded) {
             entity.U = entity.locX;
             entity.V = entity.locY;
             entity.W = entity.locZ;
