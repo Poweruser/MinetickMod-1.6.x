@@ -701,6 +701,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
          this.threadPool.prepareTick(worldCount);
          for(i = 0; i < worldCount; i++) {
              WorldServer worldserver = this.sortedWorldsArray[i];
+             worldserver.cancelHeavyCalculations(false);
              worldserver.getVec3DPool().a();
              try {
                  worldserver.doTick();

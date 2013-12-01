@@ -1283,7 +1283,8 @@ public abstract class World implements IBlockAccess {
                     this.getChunkAt(j, k).b(entity);
                 }
 
-                this.entityList.remove(i--);
+                //this.entityList.remove(i--);
+                this.entityList.remove(countI); // Poweruser
                 this.b(entity);
             }
             // Poweruser start
