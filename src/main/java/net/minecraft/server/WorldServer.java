@@ -39,6 +39,18 @@ public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
     private List U = new ArrayList();
     private IntHashMap entitiesById;
 
+    // Poweruser start
+    private long lastTickAvg = 0L;
+
+    public void setLastTickAvg(long avg) {
+        this.lastTickAvg = avg;
+    }
+
+    public long getLastTickAvg() {
+        return this.lastTickAvg;
+    }
+    // Poweruser end
+
     // CraftBukkit start
     public final int dimension;
 

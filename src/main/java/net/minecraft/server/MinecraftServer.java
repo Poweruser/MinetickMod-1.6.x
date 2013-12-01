@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,6 +26,9 @@ import org.bukkit.craftbukkit.util.Waitable;
 import org.bukkit.event.server.RemoteServerCommandEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 // CraftBukkit end
+
+import de.minetick.ThreadPool;
+import de.minetick.profiler.ProfilingComperator;
 
 public abstract class MinecraftServer implements ICommandListener, Runnable, IMojangStatistics {
 
@@ -89,6 +93,10 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
     // CraftBukkit end
 
     // Poweruser start
+    public ThreadPool threadPool;
+    private WorldServer sortedWorldsArray[] = null;
+    private PriorityQueue<WorldServer> priQueue = new PriorityQueue<WorldServer>(20, new ProfilingComperator());
+
     private LinkedList<WorldServer> autoSaveWorlds = new LinkedList<WorldServer>();
     private int autoSaveDelay = 0;
     private boolean autoSaveOrdered = false;
@@ -107,6 +115,9 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
         this.q = new CommandDispatcher();
         // this.convertable = new WorldLoaderServer(server.getWorldContainer()); // CraftBukkit - moved to DedicatedServer.init
         this.ar();
+
+        // Poweruser
+        this.threadPool = new ThreadPool();
 
         // CraftBukkit start
         this.options = options;
@@ -433,13 +444,19 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                     j += l;
                     i = k;
                     if (this.worlds.get(0).everyoneDeeplySleeping()) { // CraftBukkit
+                        this.threadPool.profiler.start("GameLogicLoop");
                         this.s();
+                        this.threadPool.profiler.stop("GameLogicLoop");
+                        this.threadPool.profiler.newTick();
                         j = 0L;
                     } else {
                         while (j > 50L) {
                             MinecraftServer.currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
                             j -= 50L;
+                            this.threadPool.profiler.start("GameLogicLoop");
                             this.s();
+                            this.threadPool.profiler.stop("GameLogicLoop");
+                            this.threadPool.profiler.newTick();
                         }
                     }
 
@@ -470,6 +487,9 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
             this.a(crashreport);
         } finally {
             try {
+                // Poweruser start
+                this.threadPool.shutdown();
+                // Poweruser end
                 this.stop();
                 this.isStopped = true;
             } catch (Throwable throwable1) {
@@ -580,6 +600,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
 
         int i;
 
+        /*
         for (i = 0; i < this.worlds.size(); ++i) {
             long j = System.nanoTime();
 
@@ -597,7 +618,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                     this.methodProfiler.b();
                 }
                 // CraftBukkit end */
-
+        /*
                 this.methodProfiler.a("tick");
 
                 CrashReport crashreport;
@@ -627,6 +648,37 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
 
             // this.k[i][this.ticks % 100] = System.nanoTime() - j; // CraftBukkit
         }
+        */
+        // Poweruser start
+        int worldCount = this.worlds.size();
+        if(this.sortedWorldsArray == null || this.threadPool.profiler.checkAvgs() ||
+                this.sortedWorldsArray.length != worldCount) {
+             this.priQueue.clear();
+             this.priQueue.addAll(this.worlds);
+             if(this.sortedWorldsArray == null || this.sortedWorldsArray.length < worldCount) {
+                 this.sortedWorldsArray = new WorldServer[worldCount];
+             }
+             for(i = 0; !this.priQueue.isEmpty(); i++) {
+                 this.sortedWorldsArray[i] = this.priQueue.poll();
+             }
+         }
+
+         this.threadPool.prepareTick(worldCount);
+         for(i = 0; i < worldCount; i++) {
+             WorldServer worldserver = this.sortedWorldsArray[i];
+             worldserver.getVec3DPool().a();
+             try {
+                 worldserver.doTick();
+             } catch (Throwable throwable) {
+                 CrashReport crashreport = CrashReport.a(throwable, "Exception ticking world");
+                 worldserver.a(crashreport);
+                 throw new ReportedException(crashreport);
+             }
+             this.threadPool.tickWorld(worldserver);
+         }
+         this.threadPool.waitUntilDone();
+         // Poweruser end
+
 
         this.methodProfiler.c("connection");
         this.ag().b();
