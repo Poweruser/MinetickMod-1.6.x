@@ -11,7 +11,7 @@ The main achievements so far:
 - Prioritized parallel processing of the entities of different worlds
 - Queued, limited and parallel chunk generation in different worlds
 
-Here is a graphical overview on what changed:
+Here is a (very abstract) graphical overview on what changed:
 
 ![](https://raw.github.com/wiki/Poweruser/MinetickMod/minetickmod_en.png)
 
