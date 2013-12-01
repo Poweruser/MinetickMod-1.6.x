@@ -144,7 +144,12 @@ public class PendingConnection extends Connection {
     }
 
     public void a(String s, Object[] aobject) {
-        this.server.getLogger().info(this.getName() + " lost connection");
+        // Poweruser start - show message only for players that were logged in and had a name
+        //this.server.getLogger().info(this.getName() + " lost connection");
+        if(this.g != null) {
+            this.server.getLogger().info(this.getName() + " lost connection");
+        }
+        // Poweruser end
         this.b = true;
     }
 

@@ -118,10 +118,10 @@ public abstract class Packet {
 
         // CraftBukkit start
         catch (java.net.SocketTimeoutException exception) {
-            iconsolelogmanager.info("Read timed out");
+            //iconsolelogmanager.info("Read timed out"); // Poweruser - less console spam
             return null;
         } catch (java.net.SocketException exception) {
-            iconsolelogmanager.info("Connection reset");
+            //iconsolelogmanager.info("Connection reset"); // Poweruser - less console spam
             return null;
         }
         // CraftBukkit end
