@@ -79,6 +79,22 @@ public class ChunkProviderServer implements IChunkProvider {
         }
     }
 
+    // Poweruser start
+    private ChunkRegionLoader checked = null;
+
+    public boolean doesChunkExist(int x, int z) {
+        if(this.checked == null) {
+            if (this.e instanceof ChunkRegionLoader) {
+                this.checked = (ChunkRegionLoader) this.e;
+            }
+        }
+        if(this.checked != null) {
+            return this.checked.chunkExists(this.world, x, z);
+        }
+        return false;
+    }
+    // Poweruser end
+
     // CraftBukkit start - Add async variant, provide compatibility
     public Chunk getChunkAt(int i, int j) {
         return getChunkAt(i, j, null);
@@ -120,6 +136,7 @@ public class ChunkProviderServer implements IChunkProvider {
                     }
                 }
                 newChunk = true; // CraftBukkit
+                chunk.newChunk = true; // Poweruser
             }
 
             this.chunks.put(LongHash.toLong(i, j), chunk); // CraftBukkit

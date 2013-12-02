@@ -3,7 +3,7 @@ package net.minecraft.server;
 import java.util.ArrayList;
 import java.util.List;
 
-class PlayerChunk {
+public class PlayerChunk { // Poweruser - added public
 
     private final List b;
     private final ChunkCoordIntPair location;
@@ -15,23 +15,42 @@ class PlayerChunk {
 
     final PlayerChunkMap playerChunkMap;
 
+    //Poweruser start
+    public boolean newChunk = false;
+    public boolean isNewChunk() {
+        boolean out = this.newChunk;
+        this.newChunk = false;
+        return out;
+    }
+    // Poweruser end
+
     public PlayerChunk(PlayerChunkMap playerchunkmap, int i, int j) {
         this.playerChunkMap = playerchunkmap;
         this.b = new ArrayList();
         this.dirtyBlocks = new short[64];
         this.location = new ChunkCoordIntPair(i, j);
         // CraftBukkit start
-        playerchunkmap.a().chunkProviderServer.getChunkAt(i, j, new Runnable() {
+        Chunk c = playerchunkmap.a().chunkProviderServer.getChunkAt(i, j, new Runnable() {
             public void run() {
                 PlayerChunk.this.loaded = true;
             }
         });
         // CraftBukkit end
+        // Poweruser start
+        if(c != null && !(c instanceof EmptyChunk)) {
+            this.newChunk = c.newChunk;
+            c.newChunk = false;
+        }
+        // Poweruser end
     }
 
     public void a(final EntityPlayer entityplayer) { // CraftBukkit - added final to argument
         if (this.b.contains(entityplayer)) {
-            throw new IllegalStateException("Failed to add player. " + entityplayer + " already is in chunk " + this.location.x + ", " + this.location.z);
+            // Poweruser
+            /*
+             * Just skip adding the player to this chunk, if he is already enlisted.
+             */
+            //throw new IllegalStateException("Failed to add player. " + entityplayer + " already is in chunk " + this.location.x + ", " + this.location.z);
         } else {
             if (this.b.isEmpty()) {
                 this.g = PlayerChunkMap.a(this.playerChunkMap).getTime();

@@ -726,6 +726,12 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
             ((IUpdatePlayerListBox) this.p.get(i)).a();
         }
 
+        // Poweruser start
+        for(i = 0; i < worldCount; i++) {
+            this.sortedWorldsArray[i].loadAndGenerateChunks();
+        }
+        // Poweruser end
+
         this.methodProfiler.b();
     }
 
