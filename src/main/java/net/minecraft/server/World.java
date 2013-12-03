@@ -101,6 +101,7 @@ public abstract class World implements IBlockAccess {
     public BiomeBaseDB getBiomeBaseDB() {
         return this.worldProvider.e.getBiomeBaseObj();
     }
+    public ChunkProviderServer chunkProviderServer; // moved here from the class WorldServer
 
     // Poweruser end
 
@@ -109,7 +110,10 @@ public abstract class World implements IBlockAccess {
     public boolean pvpMode;
     public boolean keepSpawnInMemory = true;
     public ChunkGenerator generator;
-    Chunk lastChunkAccessed;
+    //Chunk lastChunkAccessed;
+    // Poweruser
+    // Setting a valid start value, so we can get rid of the check for null in getChunkAt(..)
+    private Chunk lastChunkAccessed = new EmptyChunk(this, Integer.MIN_VALUE, Integer.MIN_VALUE);
     int lastXAccessed = Integer.MIN_VALUE;
     int lastZAccessed = Integer.MIN_VALUE;
     final Object chunkLock = new Object();
@@ -286,6 +290,34 @@ public abstract class World implements IBlockAccess {
     // CraftBukkit start
     public Chunk getChunkAt(int i, int j) {
         Chunk result = null;
+        // Poweruser start
+        Chunk last = this.lastChunkAccessed;
+        if(last.x == i && last.z == j) {
+            result = last;
+        } else {
+            // Synchronizing shouldnt be necessary for getting loaded chunks
+            if(this.chunkProviderServer.isChunkLoaded(i, j)) {
+                result = this.chunkProviderServer.getChunkAt(i, j);
+                this.lastChunkAccessed = result;
+            } else {
+                synchronized (this.chunkLock) {
+                    result = this.chunkProvider.getOrCreateChunk(i, j);
+                    this.lastChunkAccessed = result;
+                }
+            }
+        }
+        // A backup, in case my assumption above was wrong and some other chunk was delivered
+        if(result.x != i || result.z != j) {
+            if(!result.isEmpty()) {
+                synchronized(this.chunkLock) {
+                    result = this.chunkProvider.getOrCreateChunk(i, j);
+                    this.lastChunkAccessed = result;
+                }
+            }
+        }
+        // Poweruser end
+
+        /*
         synchronized (this.chunkLock) {
             if (this.lastChunkAccessed == null || this.lastXAccessed != i || this.lastZAccessed != j) {
                 this.lastChunkAccessed = this.chunkProvider.getOrCreateChunk(i, j);
@@ -294,6 +326,7 @@ public abstract class World implements IBlockAccess {
             }
             result = this.lastChunkAccessed;
         }
+        */
         return result;
     }
     // CraftBukkit end
