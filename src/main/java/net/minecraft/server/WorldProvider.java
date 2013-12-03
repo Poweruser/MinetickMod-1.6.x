@@ -1,5 +1,7 @@
 package net.minecraft.server;
 
+
+
 public abstract class WorldProvider {
 
     public static final float[] a = new float[] { 1.0F, 0.75F, 0.5F, 0.25F, 0.0F, 0.25F, 0.5F, 0.75F};
@@ -12,6 +14,9 @@ public abstract class WorldProvider {
     public float[] h = new float[16];
     public int dimension;
     private float[] j = new float[4];
+
+    // Poweruser
+    private BiomeBaseDB biomeBase = new BiomeBaseDB();
 
     public WorldProvider() {}
 
@@ -37,7 +42,8 @@ public abstract class WorldProvider {
         if (this.b.getWorldData().getType() == WorldType.FLAT) {
             WorldGenFlatInfo worldgenflatinfo = WorldGenFlatInfo.a(this.b.getWorldData().getGeneratorOptions());
 
-            this.e = new WorldChunkManagerHell(BiomeBase.biomes[worldgenflatinfo.a()], 0.5F, 0.5F);
+            //this.e = new WorldChunkManagerHell(BiomeBase.biomes[worldgenflatinfo.a()], 0.5F, 0.5F);
+            this.e = new WorldChunkManagerHell(worldgenflatinfo.a(), 0.5F, 0.5F); // Poweruser
         } else {
             this.e = new WorldChunkManager(this.b);
         }

@@ -3,6 +3,8 @@ package net.minecraft.server;
 import java.util.Iterator;
 import java.util.Random;
 
+
+
 public class BlockBed extends BlockDirectional {
 
     public static final int[][] a = new int[][] { { 0, 1}, { -1, 0}, { 0, -1}, { 1, 0}};
@@ -30,7 +32,10 @@ public class BlockBed extends BlockDirectional {
                 i1 = world.getData(i, j, k);
             }
 
-            if (world.worldProvider.e() && world.getBiome(i, k) != BiomeBase.HELL) {
+            BiomeBaseDB base = world.getBiomeBaseDB(); // Poweruser
+
+            //if (world.worldProvider.e() && world.getBiome(i, k) != BiomeBase.HELL) {
+            if (world.worldProvider.e() && !world.getBiome(i, k).equals(base.HELL)) { // Poweruser
                 if (c(i1)) {
                     EntityHuman entityhuman1 = null;
                     Iterator iterator = world.players.iterator();

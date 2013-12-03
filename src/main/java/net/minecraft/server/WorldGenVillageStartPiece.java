@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+
+
 public class WorldGenVillageStartPiece extends WorldGenVillageWell {
 
     public final WorldChunkManager a;
@@ -21,7 +23,10 @@ public class WorldGenVillageStartPiece extends WorldGenVillageWell {
         this.c = l;
         BiomeBase biomebase = worldchunkmanager.getBiome(j, k);
 
-        this.b = biomebase == BiomeBase.DESERT || biomebase == BiomeBase.DESERT_HILLS;
+        BiomeBaseDB biomeBaseDB = worldchunkmanager.getBiomeBaseObj();
+
+        //this.b = biomebase == BiomeBase.DESERT || biomebase == BiomeBase.DESERT_HILLS;
+        this.b = biomebase.equals(biomeBaseDB.DESERT) || biomebase.equals(biomeBaseDB.DESERT_HILLS); // Poweruser
         this.k = this;
     }
 

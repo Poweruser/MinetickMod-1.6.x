@@ -26,6 +26,8 @@ import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.weather.ThunderChangeEvent;
 // CraftBukkit end
 
+
+
 public abstract class World implements IBlockAccess {
 
     public boolean d;
@@ -95,6 +97,11 @@ public abstract class World implements IBlockAccess {
     private HashSet<Long> alreadyCheckedChunks = new HashSet<Long>();
     protected boolean cancelHeavyCalculations = false;
     private int nextTickEntityIndex = 0;
+
+    public BiomeBaseDB getBiomeBaseDB() {
+        return this.worldProvider.e.getBiomeBaseObj();
+    }
+
     // Poweruser end
 
     // CraftBukkit start

@@ -134,9 +134,11 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
         // this.convertable = new WorldLoaderServer(server.getWorldContainer()); // CraftBukkit - moved to DedicatedServer.init
         this.ar();
 
-        // Poweruser
+        // Poweruser start
         this.threadPool = new ThreadPool();
         this.timer.setRepeats(false);
+        new BiomeBaseDB().initStaticField();
+        // Poweruser end
 
         // CraftBukkit start
         this.options = options;

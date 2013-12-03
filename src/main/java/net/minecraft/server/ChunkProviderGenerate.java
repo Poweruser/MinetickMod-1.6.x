@@ -3,6 +3,8 @@ package net.minecraft.server;
 import java.util.List;
 import java.util.Random;
 
+
+
 public class ChunkProviderGenerate implements IChunkProvider {
 
     private Random k;
@@ -356,7 +358,10 @@ public class ChunkProviderGenerate implements IChunkProvider {
         int l1;
         int i2;
 
-        if (biomebase != BiomeBase.DESERT && biomebase != BiomeBase.DESERT_HILLS && !flag && this.k.nextInt(4) == 0) {
+        BiomeBaseDB biomeBaseDB = this.p.getBiomeBaseDB(); // Poweruser
+
+        //if (biomebase != BiomeBase.DESERT && biomebase != BiomeBase.DESERT_HILLS && !flag && this.k.nextInt(4) == 0) {
+        if (!biomebase.equals(biomeBaseDB.DESERT) && !biomebase.equals(biomeBaseDB.DESERT_HILLS) && !flag && this.k.nextInt(4) == 0) { // Poweruser
             k1 = k + this.k.nextInt(16) + 8;
             l1 = this.k.nextInt(128);
             i2 = l + this.k.nextInt(16) + 8;
@@ -422,7 +427,10 @@ public class ChunkProviderGenerate implements IChunkProvider {
     public List getMobsFor(EnumCreatureType enumcreaturetype, int i, int j, int k) {
         BiomeBase biomebase = this.p.getBiome(i, k);
 
-        return biomebase == null ? null : (biomebase == BiomeBase.SWAMPLAND && enumcreaturetype == EnumCreatureType.MONSTER && this.x.a(i, j, k) ? this.x.a() : biomebase.getMobs(enumcreaturetype));
+        BiomeBaseDB biomeBaseDB = this.p.getBiomeBaseDB(); // Poweruser
+
+        //return biomebase == null ? null : (biomebase == BiomeBase.SWAMPLAND && enumcreaturetype == EnumCreatureType.MONSTER && this.x.a(i, j, k) ? this.x.a() : biomebase.getMobs(enumcreaturetype));
+        return biomebase == null ? null : (biomebase.equals(biomeBaseDB.SWAMPLAND) && enumcreaturetype == EnumCreatureType.MONSTER && this.x.a(i, j, k) ? this.x.a() : biomebase.getMobs(enumcreaturetype)); // Poweruser
     }
 
     public ChunkPosition findNearestMapFeature(World world, String s, int i, int j, int k) {

@@ -11,6 +11,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
+import de.minetick.BiomeBaseIDEnum;
+
 public class WorldLoaderServer extends WorldLoader {
 
     public WorldLoaderServer(File file1) {
@@ -61,14 +63,17 @@ public class WorldLoaderServer extends WorldLoader {
         Object object = null;
 
         if (worlddata.getType() == WorldType.FLAT) {
-            object = new WorldChunkManagerHell(BiomeBase.PLAINS, 0.5F, 0.5F);
+            //object = new WorldChunkManagerHell(BiomeBase.PLAINS, 0.5F, 0.5F);
+            object = new WorldChunkManagerHell(BiomeBaseIDEnum.PLAINS.getId(), 0.5F, 0.5F); // Poweruser
         } else {
             object = new WorldChunkManager(worlddata.getSeed(), worlddata.getType());
         }
 
         this.a(new File(file1, "region"), (Iterable) arraylist, (WorldChunkManager) object, 0, i, iprogressupdate);
-        this.a(new File(file2, "region"), (Iterable) arraylist1, new WorldChunkManagerHell(BiomeBase.HELL, 1.0F, 0.0F), arraylist.size(), i, iprogressupdate);
-        this.a(new File(file3, "region"), (Iterable) arraylist2, new WorldChunkManagerHell(BiomeBase.SKY, 0.5F, 0.0F), arraylist.size() + arraylist1.size(), i, iprogressupdate);
+        //this.a(new File(file2, "region"), (Iterable) arraylist1, new WorldChunkManagerHell(BiomeBase.HELL, 1.0F, 0.0F), arraylist.size(), i, iprogressupdate);
+        this.a(new File(file2, "region"), (Iterable) arraylist1, new WorldChunkManagerHell(BiomeBaseIDEnum.HELL.getId(), 1.0F, 0.0F), arraylist.size(), i, iprogressupdate); // Poweruser
+        //this.a(new File(file3, "region"), (Iterable) arraylist2, new WorldChunkManagerHell(BiomeBase.SKY, 0.5F, 0.0F), arraylist.size() + arraylist1.size(), i, iprogressupdate);
+        this.a(new File(file3, "region"), (Iterable) arraylist2, new WorldChunkManagerHell(BiomeBaseIDEnum.SKY.getId(), 0.5F, 0.0F), arraylist.size() + arraylist1.size(), i, iprogressupdate); // Poweruser
         worlddata.e(19133);
         if (worlddata.getType() == WorldType.NORMAL_1_1) {
             worlddata.setType(WorldType.NORMAL);

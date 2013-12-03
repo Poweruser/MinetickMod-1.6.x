@@ -7,6 +7,7 @@ import java.util.Random;
 public abstract class BiomeBase {
 
     public static final BiomeBase[] biomes = new BiomeBase[256];
+    /*
     public static final BiomeBase OCEAN = (new BiomeOcean(0)).b(112).a("Ocean").b(-1.0F, 0.4F);
     public static final BiomeBase PLAINS = (new BiomePlains(1)).b(9286496).a("Plains").a(0.8F, 0.4F);
     public static final BiomeBase DESERT = (new BiomeDesert(2)).b(16421912).a("Desert").m().a(2.0F, 0.0F).b(0.1F, 0.2F);
@@ -30,6 +31,7 @@ public abstract class BiomeBase {
     public static final BiomeBase SMALL_MOUNTAINS = (new BiomeBigHills(20)).b(7501978).a("Extreme Hills Edge").b(0.2F, 0.8F).a(0.2F, 0.3F);
     public static final BiomeBase JUNGLE = (new BiomeJungle(21)).b(5470985).a("Jungle").a(5470985).a(1.2F, 0.9F).b(0.2F, 0.4F);
     public static final BiomeBase JUNGLE_HILLS = (new BiomeJungle(22)).b(2900485).a("JungleHills").a(5470985).a(1.2F, 0.9F).b(1.8F, 0.5F);
+    */
     public String y;
     public int z;
     public byte A;
@@ -72,7 +74,7 @@ public abstract class BiomeBase {
         this.Q = new WorldGenForest(false);
         this.R = new WorldGenSwampTree();
         this.id = i;
-        biomes[i] = this;
+        //biomes[i] = this;
         this.I = this.a();
         this.K.add(new BiomeMeta(EntitySheep.class, 12, 4, 4));
         this.K.add(new BiomeMeta(EntityPig.class, 10, 4, 4));
@@ -92,7 +94,8 @@ public abstract class BiomeBase {
         return new BiomeDecorator(this);
     }
 
-    private BiomeBase a(float f, float f1) {
+    //private BiomeBase a(float f, float f1) {
+    protected BiomeBase a(float f, float f1) { // Poweruser
         if (f > 0.1F && f < 0.2F) {
             throw new IllegalArgumentException("Please avoid temperatures in the range 0.1 - 0.2 because of snow");
         } else {
@@ -102,13 +105,15 @@ public abstract class BiomeBase {
         }
     }
 
-    private BiomeBase b(float f, float f1) {
+    //private BiomeBase b(float f, float f1) {
+    protected BiomeBase b(float f, float f1) { // Poweruser
         this.D = f;
         this.E = f1;
         return this;
     }
 
-    private BiomeBase m() {
+    //private BiomeBase m() {
+    protected BiomeBase m() { // Poweruser
         this.T = false;
         return this;
     }
@@ -176,4 +181,20 @@ public abstract class BiomeBase {
     public void a(World world, Random random, int i, int j) {
         this.I.a(world, random, i, j);
     }
+
+    // Poweruser start
+    /*
+     * Comparing the BiomeBase objects by object reference with == doesn't work anymore,
+     * as every world and some other parts of the code, like the structure generator,
+     * have their own now. Instead they're compared by their id.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if(o instanceof BiomeBase) {
+            return ((BiomeBase) o).id == this.id;
+        } else {
+            return false;
+        }
+    }
+    // Poweruser end
 }

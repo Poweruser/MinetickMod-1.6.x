@@ -10,6 +10,8 @@ import java.util.Random;
 
 import org.bukkit.Bukkit; // CraftBukkit
 
+
+
 public class Chunk {
 
     public static boolean a;
@@ -880,7 +882,11 @@ public class Chunk {
             this.s[j << 4 | i] = (byte) (k & 255);
         }
 
-        return BiomeBase.biomes[k] == null ? BiomeBase.PLAINS : BiomeBase.biomes[k];
+        //return BiomeBase.biomes[k] == null ? BiomeBase.PLAINS : BiomeBase.biomes[k];
+        // Poweruser start
+        BiomeBaseDB base = worldchunkmanager.getBiomeBaseObj();
+        return base.biomes[k] == null ? base.PLAINS : base.biomes[k];
+        // Poweruser end
     }
 
     public byte[] m() {

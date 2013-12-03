@@ -8,9 +8,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
 
+import de.minetick.BiomeBaseIDEnum;
+
 public class WorldGenLargeFeature extends StructureGenerator {
 
-    private static List e = Arrays.asList(new BiomeBase[] { BiomeBase.DESERT, BiomeBase.DESERT_HILLS, BiomeBase.JUNGLE, BiomeBase.JUNGLE_HILLS, BiomeBase.SWAMPLAND});
+    //private static List e = Arrays.asList(new BiomeBase[] { BiomeBase.DESERT, BiomeBase.DESERT_HILLS, BiomeBase.JUNGLE, BiomeBase.JUNGLE_HILLS, BiomeBase.SWAMPLAND});
+    private static List<BiomeBaseIDEnum> e = Arrays.asList(new BiomeBaseIDEnum[] { BiomeBaseIDEnum.DESERT, BiomeBaseIDEnum.DESERT_HILLS, BiomeBaseIDEnum.JUNGLE, BiomeBaseIDEnum.JUNGLE_HILLS, BiomeBaseIDEnum.SWAMPLAND}); // Poweruser
     private List f;
     private int g;
     private int h;
@@ -57,6 +60,7 @@ public class WorldGenLargeFeature extends StructureGenerator {
         j1 += random.nextInt(this.g - this.h);
         if (k == i1 && l == j1) {
             BiomeBase biomebase = this.c.getWorldChunkManager().getBiome(k * 16 + 8, l * 16 + 8);
+            /*
             Iterator iterator = e.iterator();
 
             while (iterator.hasNext()) {
@@ -66,6 +70,16 @@ public class WorldGenLargeFeature extends StructureGenerator {
                     return true;
                 }
             }
+            */
+            // Poweruser start
+            Iterator<BiomeBaseIDEnum> iterator = e.iterator();
+            while(iterator.hasNext()) {
+                BiomeBaseIDEnum biomeId = iterator.next();
+                if(biomebase.id == biomeId.getId()) {
+                    return true;
+                }
+            }
+            // Poweruser end
         }
 
         return false;

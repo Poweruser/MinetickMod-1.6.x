@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.server.BiomeBase;
+import net.minecraft.server.BiomeBaseDB;
 import net.minecraft.server.BlockRedstoneWire;
 import net.minecraft.server.Direction;
 import net.minecraft.server.EnumSkyBlock;
@@ -35,6 +36,7 @@ public class CraftBlock implements Block {
     private final int z;
     private static final Biome BIOME_MAPPING[];
     private static final BiomeBase BIOMEBASE_MAPPING[];
+    private static BiomeBaseDB biomeDB = new BiomeBaseDB(); // Poweruser
 
     public CraftBlock(CraftChunk chunk, int x, int y, int z) {
         this.x = x;
@@ -439,6 +441,7 @@ public class CraftBlock implements Block {
 
     /* Build biome index based lookup table for BiomeBase to Biome mapping */
     static {
+        /*
         BIOME_MAPPING = new Biome[BiomeBase.biomes.length];
         BIOMEBASE_MAPPING = new BiomeBase[Biome.values().length];
         BIOME_MAPPING[BiomeBase.SWAMPLAND.id] = Biome.SWAMPLAND;
@@ -464,14 +467,45 @@ public class CraftBlock implements Block {
         BIOME_MAPPING[BiomeBase.SMALL_MOUNTAINS.id] = Biome.SMALL_MOUNTAINS;
         BIOME_MAPPING[BiomeBase.JUNGLE.id] = Biome.JUNGLE;
         BIOME_MAPPING[BiomeBase.JUNGLE_HILLS.id] = Biome.JUNGLE_HILLS;
+        */
+
+        // Poweruser start
+        BIOME_MAPPING = new Biome[biomeDB.biomes.length];
+        BIOMEBASE_MAPPING = new BiomeBase[Biome.values().length];
+        // Poweruser end
+        BIOME_MAPPING[biomeDB.SWAMPLAND.id] = Biome.SWAMPLAND;
+        BIOME_MAPPING[biomeDB.FOREST.id] = Biome.FOREST;
+        BIOME_MAPPING[biomeDB.TAIGA.id] = Biome.TAIGA;
+        BIOME_MAPPING[biomeDB.DESERT.id] = Biome.DESERT;
+        BIOME_MAPPING[biomeDB.PLAINS.id] = Biome.PLAINS;
+        BIOME_MAPPING[biomeDB.HELL.id] = Biome.HELL;
+        BIOME_MAPPING[biomeDB.SKY.id] = Biome.SKY;
+        BIOME_MAPPING[biomeDB.RIVER.id] = Biome.RIVER;
+        BIOME_MAPPING[biomeDB.EXTREME_HILLS.id] = Biome.EXTREME_HILLS;
+        BIOME_MAPPING[biomeDB.OCEAN.id] = Biome.OCEAN;
+        BIOME_MAPPING[biomeDB.FROZEN_OCEAN.id] = Biome.FROZEN_OCEAN;
+        BIOME_MAPPING[biomeDB.FROZEN_RIVER.id] = Biome.FROZEN_RIVER;
+        BIOME_MAPPING[biomeDB.ICE_PLAINS.id] = Biome.ICE_PLAINS;
+        BIOME_MAPPING[biomeDB.ICE_MOUNTAINS.id] = Biome.ICE_MOUNTAINS;
+        BIOME_MAPPING[biomeDB.MUSHROOM_ISLAND.id] = Biome.MUSHROOM_ISLAND;
+        BIOME_MAPPING[biomeDB.MUSHROOM_SHORE.id] = Biome.MUSHROOM_SHORE;
+        BIOME_MAPPING[biomeDB.BEACH.id] = Biome.BEACH;
+        BIOME_MAPPING[biomeDB.DESERT_HILLS.id] = Biome.DESERT_HILLS;
+        BIOME_MAPPING[biomeDB.FOREST_HILLS.id] = Biome.FOREST_HILLS;
+        BIOME_MAPPING[biomeDB.TAIGA_HILLS.id] = Biome.TAIGA_HILLS;
+        BIOME_MAPPING[biomeDB.SMALL_MOUNTAINS.id] = Biome.SMALL_MOUNTAINS;
+        BIOME_MAPPING[biomeDB.JUNGLE.id] = Biome.JUNGLE;
+        BIOME_MAPPING[biomeDB.JUNGLE_HILLS.id] = Biome.JUNGLE_HILLS;
         /* Sanity check - we should have a record for each record in the BiomeBase.a table */
         /* Helps avoid missed biomes when we upgrade bukkit to new code with new biomes */
         for (int i = 0; i < BIOME_MAPPING.length; i++) {
-            if ((BiomeBase.biomes[i] != null) && (BIOME_MAPPING[i] == null)) {
+            //if ((BiomeBase.biomes[i] != null) && (BIOME_MAPPING[i] == null)) {
+            if ((biomeDB.biomes[i] != null) && (BIOME_MAPPING[i] == null)) { // Poweruser
                 throw new IllegalArgumentException("Missing Biome mapping for BiomeBase[" + i + "]");
             }
             if (BIOME_MAPPING[i] != null) {  /* Build reverse mapping for setBiome */
-                BIOMEBASE_MAPPING[BIOME_MAPPING[i].ordinal()] = BiomeBase.biomes[i];
+                //BIOMEBASE_MAPPING[BIOME_MAPPING[i].ordinal()] = BiomeBase.biomes[i];
+                BIOMEBASE_MAPPING[BIOME_MAPPING[i].ordinal()] = biomeDB.biomes[i]; // Poweruser
             }
         }
     }

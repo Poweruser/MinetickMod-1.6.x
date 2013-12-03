@@ -8,23 +8,29 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
 
+import de.minetick.BiomeBaseIDEnum;
+
 public class WorldGenStronghold extends StructureGenerator {
 
-    private BiomeBase[] e;
+    //private BiomeBase[] e;
+    private BiomeBaseIDEnum[] e; // Poweruser
+
     private boolean f;
     private ChunkCoordIntPair[] g;
     private double h;
     private int i;
 
     public WorldGenStronghold() {
-        this.e = new BiomeBase[] { BiomeBase.DESERT, BiomeBase.FOREST, BiomeBase.EXTREME_HILLS, BiomeBase.SWAMPLAND, BiomeBase.TAIGA, BiomeBase.ICE_PLAINS, BiomeBase.ICE_MOUNTAINS, BiomeBase.DESERT_HILLS, BiomeBase.FOREST_HILLS, BiomeBase.SMALL_MOUNTAINS, BiomeBase.JUNGLE, BiomeBase.JUNGLE_HILLS};
+        //this.e = new BiomeBase[] { BiomeBase.DESERT, BiomeBase.FOREST, BiomeBase.EXTREME_HILLS, BiomeBase.SWAMPLAND, BiomeBase.TAIGA, BiomeBase.ICE_PLAINS, BiomeBase.ICE_MOUNTAINS, BiomeBase.DESERT_HILLS, BiomeBase.FOREST_HILLS, BiomeBase.SMALL_MOUNTAINS, BiomeBase.JUNGLE, BiomeBase.JUNGLE_HILLS};
+        this.e = new BiomeBaseIDEnum[] { BiomeBaseIDEnum.DESERT, BiomeBaseIDEnum.FOREST, BiomeBaseIDEnum.EXTREME_HILLS, BiomeBaseIDEnum.SWAMPLAND, BiomeBaseIDEnum.TAIGA, BiomeBaseIDEnum.ICE_PLAINS, BiomeBaseIDEnum.ICE_MOUNTAINS, BiomeBaseIDEnum.DESERT_HILLS, BiomeBaseIDEnum.FOREST_HILLS, BiomeBaseIDEnum.SMALL_MOUNTAINS, BiomeBaseIDEnum.JUNGLE, BiomeBaseIDEnum.JUNGLE_HILLS}; // Poweruser
         this.g = new ChunkCoordIntPair[3];
         this.h = 32.0D;
         this.i = 3;
     }
 
     public WorldGenStronghold(Map map) {
-        this.e = new BiomeBase[] { BiomeBase.DESERT, BiomeBase.FOREST, BiomeBase.EXTREME_HILLS, BiomeBase.SWAMPLAND, BiomeBase.TAIGA, BiomeBase.ICE_PLAINS, BiomeBase.ICE_MOUNTAINS, BiomeBase.DESERT_HILLS, BiomeBase.FOREST_HILLS, BiomeBase.SMALL_MOUNTAINS, BiomeBase.JUNGLE, BiomeBase.JUNGLE_HILLS};
+        //this.e = new BiomeBase[] { BiomeBase.DESERT, BiomeBase.FOREST, BiomeBase.EXTREME_HILLS, BiomeBase.SWAMPLAND, BiomeBase.TAIGA, BiomeBase.ICE_PLAINS, BiomeBase.ICE_MOUNTAINS, BiomeBase.DESERT_HILLS, BiomeBase.FOREST_HILLS, BiomeBase.SMALL_MOUNTAINS, BiomeBase.JUNGLE, BiomeBase.JUNGLE_HILLS};
+        this.e = new BiomeBaseIDEnum[] { BiomeBaseIDEnum.DESERT, BiomeBaseIDEnum.FOREST, BiomeBaseIDEnum.EXTREME_HILLS, BiomeBaseIDEnum.SWAMPLAND, BiomeBaseIDEnum.TAIGA, BiomeBaseIDEnum.ICE_PLAINS, BiomeBaseIDEnum.ICE_MOUNTAINS, BiomeBaseIDEnum.DESERT_HILLS, BiomeBaseIDEnum.FOREST_HILLS, BiomeBaseIDEnum.SMALL_MOUNTAINS, BiomeBaseIDEnum.JUNGLE, BiomeBaseIDEnum.JUNGLE_HILLS}; // Poweruser
         this.g = new ChunkCoordIntPair[3];
         this.h = 32.0D;
         this.i = 3;
@@ -57,7 +63,13 @@ public class WorldGenStronghold extends StructureGenerator {
                 int j1 = (int) Math.round(Math.sin(d0) * d1);
                 ArrayList arraylist = new ArrayList();
 
-                Collections.addAll(arraylist, this.e);
+                //Collections.addAll(arraylist, this.e);
+                // Poweruser start
+                BiomeBaseDB biomeBaseDB = this.c.getBiomeBaseDB();
+                for(BiomeBaseIDEnum id: this.e) {
+                    arraylist.add(biomeBaseDB.biomes[id.getId()]);
+                }
+                // Poweruser end
                 ChunkPosition chunkposition = this.c.getWorldChunkManager().a((i1 << 4) + 8, (j1 << 4) + 8, 112, arraylist, random);
 
                 if (chunkposition != null) {
