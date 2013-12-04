@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
@@ -87,6 +88,12 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
     public java.util.Queue<Runnable> processQueue = new java.util.concurrent.ConcurrentLinkedQueue<Runnable>();
     public int autosavePeriod;
     // CraftBukkit end
+
+    // Poweruser start
+    private LinkedList<WorldServer> autoSaveWorlds = new LinkedList<WorldServer>();
+    private int autoSaveDelay = 0;
+    private boolean autoSaveOrdered = false;
+    // Poweruser end
 
     public MinecraftServer(OptionSet options) { // CraftBukkit - signature file -> OptionSet
         this.c = Proxy.NO_PROXY;
@@ -337,6 +344,22 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
         }
     }
 
+    // Poweruser start
+    protected void queueWorldsForAutoSave() throws ExceptionWorldConflict { // CraftBukkit - added throws
+        if (!this.O) {
+            this.autoSaveWorlds.clear();
+            for (int j = 0; j < this.worlds.size(); ++j) {
+                WorldServer worldserver = this.worlds.get(j);
+                if(worldserver != null) {
+                    this.autoSaveWorlds.addLast(worldserver);
+                }
+            }
+            this.autoSaveDelay = 0;
+            this.autoSaveOrdered = true;
+        }
+    }
+    // Poweruser end
+
     public void stop() throws ExceptionWorldConflict { // CraftBukkit - added throws
         if (!this.P) {
             this.getLogger().info("Stopping server");
@@ -489,9 +512,28 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
         if ((this.autosavePeriod > 0) && ((this.ticks % this.autosavePeriod) == 0)) { // CraftBukkit
             this.methodProfiler.a("save");
             this.t.savePlayers();
-            this.saveChunks(true);
+
+            // Poweruser start
+            //this.saveChunks(true);
+            this.queueWorldsForAutoSave();
+            // Poweruser end
+
             this.methodProfiler.b();
         }
+
+        // Poweruser start - Saving one world at a time with a little delay inbetween, and not all worlds between two ticks 
+        if(!this.autoSaveWorlds.isEmpty()) {
+            if(this.autoSaveDelay++ > 100) {
+                this.autoSaveDelay = 0;
+                WorldServer ws = this.autoSaveWorlds.removeFirst();
+                this.getLogger().info("Saving chunks for level \'" + ws.getWorldData().getName() + "\'/" + ws.worldProvider.getName());
+                ws.save(true, (IProgressUpdate) null);
+                ws.saveLevel();
+                WorldSaveEvent event = new WorldSaveEvent(ws.getWorld());
+                this.server.getPluginManager().callEvent(event);
+            }
+        }
+        // Poweruser end
 
         this.methodProfiler.a("tallying");
         this.j[this.ticks % 100] = System.nanoTime() - i;
