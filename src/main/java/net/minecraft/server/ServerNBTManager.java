@@ -31,11 +31,12 @@ public class ServerNBTManager extends WorldNBTStorage {
     }
 
     public void a() {
-        try {
+        // Poweruser - Apparently there is no exception to catch here
+        //try {
             FileIOThread.a.a();
-        } catch (InterruptedException interruptedexception) {
-            interruptedexception.printStackTrace();
-        }
+        //} catch (InterruptedException interruptedexception) {
+        //    interruptedexception.printStackTrace();
+        //}
 
         RegionFileCache.a();
     }
