@@ -1,17 +1,34 @@
 package net.minecraft.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class IntCache {
 
+    /*
     private static int a = 256;
     private static List b = new ArrayList();
     private static List c = new ArrayList();
     private static List d = new ArrayList();
     private static List e = new ArrayList();
+    */
+    // Poweruser start - no more static
+    private int a = 256;
+    private List<int[]> b = new ArrayList<int[]>();
+    private List<int[]> c = new ArrayList<int[]>();
+    private List<int[]> d = new ArrayList<int[]>();
+    private List<int[]> e = new ArrayList<int[]>();
+    private static List<IntCache> allCaches = Collections.synchronizedList(new LinkedList<IntCache>());
 
-    public static synchronized int[] a(int i) {
+    public IntCache() {
+        allCaches.add(this);
+    }
+    // Poweruser end
+
+    //public static synchronized int[] a(int i) {
+    public synchronized int[] a(int i) { // Poweruser - no more static
         int[] aint;
 
         if (i <= 256) {
@@ -42,7 +59,8 @@ public class IntCache {
         }
     }
 
-    public static synchronized void a() {
+    //public static synchronized void a() {
+    public synchronized void a() { // Poweruser - no more static
         if (!d.isEmpty()) {
             d.remove(d.size() - 1);
         }
@@ -57,7 +75,16 @@ public class IntCache {
         c.clear();
     }
 
-    public static synchronized String b() {
-        return "cache: " + d.size() + ", tcache: " + b.size() + ", allocated: " + e.size() + ", tallocated: " + c.size();
+    public static String b() {
+        // Poweruser start
+        int d = 0, b = 0, e = 0, c = 0;
+        for(IntCache ic: allCaches) {
+            d += ic.d.size();
+            b += ic.b.size();
+            e += ic.e.size();
+            c += ic.c.size();
+        }
+        return "cache: " + d + ", tcache: " + b + ", allocated: " + e + ", tallocated: " + c;
+        // Poweruser end
     }
 }

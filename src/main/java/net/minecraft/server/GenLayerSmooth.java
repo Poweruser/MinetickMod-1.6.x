@@ -13,7 +13,8 @@ public class GenLayerSmooth extends GenLayer {
         int k1 = k + 2;
         int l1 = l + 2;
         int[] aint = this.a.a(i1, j1, k1, l1);
-        int[] aint1 = IntCache.a(k * l);
+        //int[] aint1 = IntCache.a(k * l);
+        int[] aint1 = this.intCache.a(k * l); // Poweruser
 
         for (int i2 = 0; i2 < l; ++i2) {
             for (int j2 = 0; j2 < k; ++j2) {

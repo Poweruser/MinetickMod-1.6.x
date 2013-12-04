@@ -19,7 +19,8 @@ public class GenLayerZoomVoronoi extends GenLayer {
         int[] aint = this.a.a(j1, k1, l1, i2);
         int j2 = l1 << b0;
         int k2 = i2 << b0;
-        int[] aint1 = IntCache.a(j2 * k2);
+        //int[] aint1 = IntCache.a(j2 * k2);
+        int[] aint1 = this.intCache.a(j2 * k2); // Poweruser
 
         int l2;
 
@@ -74,7 +75,8 @@ public class GenLayerZoomVoronoi extends GenLayer {
             }
         }
 
-        int[] aint2 = IntCache.a(k * l);
+        //int[] aint2 = IntCache.a(k * l);
+        int[] aint2 = this.intCache.a(k * l); // Poweruser
 
         for (l2 = 0; l2 < l; ++l2) {
             System.arraycopy(aint1, (l2 + (j & i1 - 1)) * (l1 << b0) + (i & i1 - 1), aint2, l2 * k, k);
