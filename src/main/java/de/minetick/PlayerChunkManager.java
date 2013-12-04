@@ -115,10 +115,15 @@ public class PlayerChunkManager {
                 if(!exists && (!allowGeneration || this.skipChunkGeneration || allGenerated > (this.world.getWorldData().getType().equals(WorldType.FLAT) ? 1 : 0))) {
                     buff.skippedChunks++;
                 } else {
+                    int playerChunkPosX, playerChunkPosZ;
                     PlayerChunk c = this.pcm.a(p.x, p.z, false);
                     if(c == null) {
                         c = this.pcm.a(p.x, p.z, true);
-                        c.a(entityplayer);
+                        playerChunkPosX = (int) entityplayer.locX >> 4;
+                        playerChunkPosZ = (int) entityplayer.locZ >> 4;
+                        if(this.isWithinRadius(p.x, p.z, playerChunkPosX, playerChunkPosZ, this.pcm.getViewDistance())) {
+                            c.a(entityplayer);
+                        }
                         if(c.isNewChunk()) {
                             buff.generatedChunks++;
                             allGenerated++;
@@ -126,7 +131,11 @@ public class PlayerChunkManager {
                             buff.loadedChunks++;
                         }
                     } else {
-                        c.a(entityplayer);
+                        playerChunkPosX = (int) entityplayer.locX >> 4;
+                        playerChunkPosZ = (int) entityplayer.locZ >> 4;
+                        if(this.isWithinRadius(p.x, p.z, playerChunkPosX, playerChunkPosZ, this.pcm.getViewDistance())) {
+                            c.a(entityplayer);
+                        }
                         buff.enlistedChunks++;
                     }
                     buff.remove(p);
@@ -141,5 +150,12 @@ public class PlayerChunkManager {
             }
         }
         return allGenerated;
+    }
+
+    private boolean isWithinRadius(int positionx, int positionz, int centerx, int centerz, int radius) {
+        int distancex = positionx - centerx;
+        int distancez = positionz - centerz;
+
+        return distancex >= -radius && distancex <= radius ? distancez >= -radius && distancez <= radius : false;
     }
 }
