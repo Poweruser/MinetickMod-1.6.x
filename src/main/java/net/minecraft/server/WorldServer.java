@@ -30,7 +30,7 @@ public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
     //private Set L;
     private Set<NextTickListEntry> L; // Poweruser
     //private TreeSet M; // Poweruser - replaced by an PriorityQueue
-    public ChunkProviderServer chunkProviderServer;
+    //public ChunkProviderServer chunkProviderServer; // Poweruser - moved this field to World
     public boolean savingDisabled;
     private boolean N;
     private int emptyTime;
