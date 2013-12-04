@@ -10,7 +10,12 @@ import org.bukkit.event.block.BlockRedstoneEvent; // CraftBukkit
 public class BlockRedstoneWire extends Block {
 
     private boolean a = true;
-    private Set b = new HashSet();
+
+    // Poweruser start
+    // private Set b = new HashSet();
+    private Set<ChunkPosition> b = new HashSet<ChunkPosition>();
+    private Object lock = new Object();
+    // Poweruser end
 
     public BlockRedstoneWire(int i) {
         super(i, Material.ORIENTABLE);
@@ -38,10 +43,22 @@ public class BlockRedstoneWire extends Block {
     }
 
     private void k(World world, int i, int j, int k) {
+        /*
         this.a(world, i, j, k, i, j, k);
+
         ArrayList arraylist = new ArrayList(this.b);
 
         this.b.clear();
+        */
+
+        // Poweruser start - synchronizing access to the HashSet b, to avoid a concurrentmodification exception
+        ArrayList arraylist;
+        synchronized(this.lock) {
+            this.a(world, i, j, k, i, j, k);
+            arraylist = new ArrayList(this.b);
+            this.b.clear();
+        }
+        // Poweruser end
 
         for (int l = 0; l < arraylist.size(); ++l) {
             ChunkPosition chunkposition = (ChunkPosition) arraylist.get(l);
