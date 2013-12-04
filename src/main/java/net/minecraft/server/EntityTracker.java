@@ -13,6 +13,10 @@ public class EntityTracker {
     public IntHashMap trackedEntities = new IntHashMap(); // CraftBukkit - private -> public
     private int d;
 
+    // Poweruser start
+    private Object hashSetLock = new Object();
+    // Poweruser end
+
     public EntityTracker(WorldServer worldserver) {
         this.world = worldserver;
         this.d = worldserver.getMinecraftServer().getPlayerList().a();
@@ -22,6 +26,7 @@ public class EntityTracker {
         if (entity instanceof EntityPlayer) {
             this.addEntity(entity, 512, 2);
             EntityPlayer entityplayer = (EntityPlayer) entity;
+            /*
             Iterator iterator = this.b.iterator();
 
             while (iterator.hasNext()) {
@@ -31,6 +36,20 @@ public class EntityTracker {
                     entitytrackerentry.updatePlayer(entityplayer);
                 }
             }
+            */
+            // Poweruser start
+            synchronized(this.hashSetLock) {
+                Iterator iterator = this.b.iterator();
+
+                while (iterator.hasNext()) {
+                    EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
+
+                    if (entitytrackerentry.tracker != entityplayer) {
+                        entitytrackerentry.updatePlayer(entityplayer);
+                    }
+                }
+            }
+            // Poweruser end
         } else if (entity instanceof EntityFishingHook) {
             this.addEntity(entity, 64, 5, true);
         } else if (entity instanceof EntityArrow) {
@@ -98,7 +117,12 @@ public class EntityTracker {
 
             EntityTrackerEntry entitytrackerentry = new EntityTrackerEntry(entity, i, j, flag);
 
-            this.b.add(entitytrackerentry);
+            //this.b.add(entitytrackerentry);
+            // Poweruser start
+            synchronized(this.hashSetLock) {
+                this.b.add(entitytrackerentry);
+            }
+            // Poweruser end
             this.trackedEntities.a(entity.id, entitytrackerentry);
             entitytrackerentry.scanPlayers(this.world.players);
         } catch (Throwable throwable) {
@@ -124,6 +148,7 @@ public class EntityTracker {
     public void untrackEntity(Entity entity) {
         if (entity instanceof EntityPlayer) {
             EntityPlayer entityplayer = (EntityPlayer) entity;
+            /*
             Iterator iterator = this.b.iterator();
 
             while (iterator.hasNext()) {
@@ -131,18 +156,36 @@ public class EntityTracker {
 
                 entitytrackerentry.a(entityplayer);
             }
+            */
+            // Poweruser start
+            synchronized(this.hashSetLock) {
+                Iterator iterator = this.b.iterator();
+
+                while (iterator.hasNext()) {
+                    EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
+
+                    entitytrackerentry.a(entityplayer);
+                }
+            }
+            // Poweruser end
         }
 
         EntityTrackerEntry entitytrackerentry1 = (EntityTrackerEntry) this.trackedEntities.d(entity.id);
 
         if (entitytrackerentry1 != null) {
-            this.b.remove(entitytrackerentry1);
+            //this.b.remove(entitytrackerentry1);
+            // Poweruser start
+            synchronized(this.hashSetLock) {
+                this.b.remove(entitytrackerentry1);
+            }
+            // Poweruser end
             entitytrackerentry1.a();
         }
     }
 
     public void updatePlayers() {
         ArrayList arraylist = new ArrayList();
+        /*
         Iterator iterator = this.b.iterator();
 
         while (iterator.hasNext()) {
@@ -153,9 +196,25 @@ public class EntityTracker {
                 arraylist.add((EntityPlayer) entitytrackerentry.tracker);
             }
         }
+        */
+        // Poweruser start
+        synchronized(this.hashSetLock) {
+            Iterator iterator = this.b.iterator();
+
+            while (iterator.hasNext()) {
+                EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
+
+                entitytrackerentry.track(this.world.players);
+                if (entitytrackerentry.n && entitytrackerentry.tracker instanceof EntityPlayer) {
+                    arraylist.add((EntityPlayer) entitytrackerentry.tracker);
+                }
+            }
+        }
+        // Poweruser end
 
         for (int i = 0; i < arraylist.size(); ++i) {
             EntityPlayer entityplayer = (EntityPlayer) arraylist.get(i);
+            /*
             Iterator iterator1 = this.b.iterator();
 
             while (iterator1.hasNext()) {
@@ -165,6 +224,20 @@ public class EntityTracker {
                     entitytrackerentry1.updatePlayer(entityplayer);
                 }
             }
+            */
+            // Poweruser start
+            synchronized(this.hashSetLock) {
+                Iterator iterator1 = this.b.iterator();
+
+                while (iterator1.hasNext()) {
+                    EntityTrackerEntry entitytrackerentry1 = (EntityTrackerEntry) iterator1.next();
+
+                    if (entitytrackerentry1.tracker != entityplayer) {
+                        entitytrackerentry1.updatePlayer(entityplayer);
+                    }
+                }
+            }
+            // Poweruser end
         }
     }
 
@@ -185,6 +258,7 @@ public class EntityTracker {
     }
 
     public void untrackPlayer(EntityPlayer entityplayer) {
+        /*
         Iterator iterator = this.b.iterator();
 
         while (iterator.hasNext()) {
@@ -192,9 +266,22 @@ public class EntityTracker {
 
             entitytrackerentry.clear(entityplayer);
         }
+        */
+        // Poweruser start
+        synchronized(this.hashSetLock) {
+            Iterator iterator = this.b.iterator();
+
+            while (iterator.hasNext()) {
+                EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
+
+                entitytrackerentry.clear(entityplayer);
+            }
+        }
+        // Poweruser end
     }
 
     public void a(EntityPlayer entityplayer, Chunk chunk) {
+        /*
         Iterator iterator = this.b.iterator();
 
         while (iterator.hasNext()) {
@@ -204,5 +291,19 @@ public class EntityTracker {
                 entitytrackerentry.updatePlayer(entityplayer);
             }
         }
+        */
+        // Poweruser start
+        synchronized(this.hashSetLock) {
+            Iterator iterator = this.b.iterator();
+
+            while (iterator.hasNext()) {
+                EntityTrackerEntry entitytrackerentry = (EntityTrackerEntry) iterator.next();
+
+                if (entitytrackerentry.tracker != entityplayer && entitytrackerentry.tracker.aj == chunk.x && entitytrackerentry.tracker.al == chunk.z) {
+                    entitytrackerentry.updatePlayer(entityplayer);
+                }
+            }
+        }
+        // Poweruser end
     }
 }
