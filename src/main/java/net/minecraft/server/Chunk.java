@@ -34,6 +34,15 @@ public class Chunk {
     public long q;
     private int u;
 
+    // Poweruser start
+    public boolean newChunk = false;
+    public boolean isNew() {
+        boolean out = newChunk;
+        this.newChunk = false;
+        return out;
+    }
+    // Poweruser end
+
     public Chunk(World world, int i, int j) {
         this.sections = new ChunkSection[16];
         this.s = new byte[256];
