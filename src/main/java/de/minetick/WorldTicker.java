@@ -45,6 +45,8 @@ public class WorldTicker extends Observable implements Runnable {
 					this.worldToTick.getTracker().updatePlayers();
 				}
 
+				this.worldToTick.loadAndGenerateChunks();
+
 	            Profile profile = this.profiler.stop(this.worldName + "_thread");
 		        if(profile != null) {
 		            this.worldToTick.setLastTickAvg(profile.getLastAvg());
