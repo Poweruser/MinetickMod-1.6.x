@@ -18,6 +18,9 @@ public abstract class EntityProjectile extends Entity implements IProjectile {
     public EntityProjectile(World world) {
         super(world);
         this.a(0.25F, 0.25F);
+
+        // Poweruser
+        this.isImportantEntity = true;
     }
 
     protected void a() {}
@@ -38,6 +41,9 @@ public abstract class EntityProjectile extends Entity implements IProjectile {
         this.motZ = (double) (MathHelper.cos(this.yaw / 180.0F * 3.1415927F) * MathHelper.cos(this.pitch / 180.0F * 3.1415927F) * f);
         this.motY = (double) (-MathHelper.sin((this.pitch + this.d()) / 180.0F * 3.1415927F) * f);
         this.shoot(this.motX, this.motY, this.motZ, this.c(), 1.0F);
+
+        // Poweruser
+        this.isImportantEntity = true;
     }
 
     public EntityProjectile(World world, double d0, double d1, double d2) {
@@ -46,6 +52,9 @@ public abstract class EntityProjectile extends Entity implements IProjectile {
         this.a(0.25F, 0.25F);
         this.setPosition(d0, d1, d2);
         this.height = 0.0F;
+
+        // Poweruser
+        this.isImportantEntity = true;
     }
 
     protected float c() {

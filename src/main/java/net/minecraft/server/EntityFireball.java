@@ -21,6 +21,9 @@ public abstract class EntityFireball extends Entity {
     public EntityFireball(World world) {
         super(world);
         this.a(1.0F, 1.0F);
+
+        // Poweruser
+        this.isImportantEntity = true;
     }
 
     protected void a() {}
@@ -35,6 +38,9 @@ public abstract class EntityFireball extends Entity {
         this.dirX = d3 / d6 * 0.1D;
         this.dirY = d4 / d6 * 0.1D;
         this.dirZ = d5 / d6 * 0.1D;
+
+        // Poweruser
+        this.isImportantEntity = true;
     }
 
     public EntityFireball(World world, EntityLiving entityliving, double d0, double d1, double d2) {
@@ -47,6 +53,9 @@ public abstract class EntityFireball extends Entity {
         this.motX = this.motY = this.motZ = 0.0D;
         // CraftBukkit start - Added setDirection method
         this.setDirection(d0, d1, d2);
+
+        // Poweruser
+        this.isImportantEntity = true;
     }
 
     public void setDirection(double d0, double d1, double d2) {
