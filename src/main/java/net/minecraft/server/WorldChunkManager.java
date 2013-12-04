@@ -11,12 +11,23 @@ public class WorldChunkManager {
     private BiomeCache f;
     private List g;
 
-    // Poweruser
+    // Poweruser end
     private IntCache intCache = new IntCache();
+    protected BiomeBaseDB biomeBaseObj = new BiomeBaseDB();
+
+    public BiomeBase getBiomeBase(int index) {
+        return this.biomeBaseObj.biomes[index];
+    }
+
+    public BiomeBaseDB getBiomeBaseObj() {
+        return this.biomeBaseObj;
+    }
+    // Poweruser end
 
     protected WorldChunkManager() {
         this.f = new BiomeCache(this);
         this.g = new ArrayList();
+        /*
         this.g.add(BiomeBase.FOREST);
         this.g.add(BiomeBase.PLAINS);
         this.g.add(BiomeBase.TAIGA);
@@ -24,11 +35,21 @@ public class WorldChunkManager {
         this.g.add(BiomeBase.FOREST_HILLS);
         this.g.add(BiomeBase.JUNGLE);
         this.g.add(BiomeBase.JUNGLE_HILLS);
+        */
+        // Poweruser start
+        this.g.add(this.biomeBaseObj.FOREST);
+        this.g.add(this.biomeBaseObj.PLAINS);
+        this.g.add(this.biomeBaseObj.TAIGA);
+        this.g.add(this.biomeBaseObj.TAIGA_HILLS);
+        this.g.add(this.biomeBaseObj.FOREST_HILLS);
+        this.g.add(this.biomeBaseObj.JUNGLE);
+        this.g.add(this.biomeBaseObj.JUNGLE_HILLS);
+        // Poweruser end
     }
 
     public WorldChunkManager(long i, WorldType worldtype) {
         this();
-        GenLayer[] agenlayer = GenLayer.a(i, worldtype, this.intCache);
+        GenLayer[] agenlayer = GenLayer.a(i, worldtype, this.intCache, this.biomeBaseObj);
 
         this.d = agenlayer[0];
         this.e = agenlayer[1];
@@ -56,7 +77,8 @@ public class WorldChunkManager {
         int[] aint = this.e.a(i, j, k, l);
 
         for (int i1 = 0; i1 < k * l; ++i1) {
-            float f = (float) BiomeBase.biomes[aint[i1]].g() / 65536.0F;
+            //float f = (float) BiomeBase.biomes[aint[i1]].g() / 65536.0F;
+            float f = (float) this.biomeBaseObj.biomes[aint[i1]].g() / 65536.0F; // Poweruser
 
             if (f > 1.0F) {
                 f = 1.0F;
@@ -78,7 +100,8 @@ public class WorldChunkManager {
         int[] aint = this.e.a(i, j, k, l);
 
         for (int i1 = 0; i1 < k * l; ++i1) {
-            float f = (float) BiomeBase.biomes[aint[i1]].h() / 65536.0F;
+            //float f = (float) BiomeBase.biomes[aint[i1]].h() / 65536.0F;
+            float f = (float) this.biomeBaseObj.biomes[aint[i1]].h() / 65536.0F; // Poweruser
 
             if (f > 1.0F) {
                 f = 1.0F;
@@ -100,7 +123,8 @@ public class WorldChunkManager {
         int[] aint = this.d.a(i, j, k, l);
 
         for (int i1 = 0; i1 < k * l; ++i1) {
-            abiomebase[i1] = BiomeBase.biomes[aint[i1]];
+            //abiomebase[i1] = BiomeBase.biomes[aint[i1]];
+            abiomebase[i1] = this.biomeBaseObj.biomes[aint[i1]]; // Poweruser
         }
 
         return abiomebase;
@@ -126,7 +150,8 @@ public class WorldChunkManager {
             int[] aint = this.e.a(i, j, k, l);
 
             for (int i1 = 0; i1 < k * l; ++i1) {
-                abiomebase[i1] = BiomeBase.biomes[aint[i1]];
+                //abiomebase[i1] = BiomeBase.biomes[aint[i1]];
+                abiomebase[i1] = this.biomeBaseObj.biomes[aint[i1]]; // Poweruser
             }
 
             return abiomebase;
@@ -145,7 +170,8 @@ public class WorldChunkManager {
         int[] aint = this.d.a(l, i1, l1, i2);
 
         for (int j2 = 0; j2 < l1 * i2; ++j2) {
-            BiomeBase biomebase = BiomeBase.biomes[aint[j2]];
+            //BiomeBase biomebase = BiomeBase.biomes[aint[j2]];
+            BiomeBase biomebase = this.biomeBaseObj.biomes[aint[j2]]; // Poweruser
 
             if (!list.contains(biomebase)) {
                 return false;
@@ -171,7 +197,8 @@ public class WorldChunkManager {
         for (int k2 = 0; k2 < l1 * i2; ++k2) {
             int l2 = l + k2 % l1 << 2;
             int i3 = i1 + k2 / l1 << 2;
-            BiomeBase biomebase = BiomeBase.biomes[aint[k2]];
+            //BiomeBase biomebase = BiomeBase.biomes[aint[k2]];
+            BiomeBase biomebase = this.biomeBaseObj.biomes[aint[k2]]; // Poweruser
 
             if (list.contains(biomebase) && (chunkposition == null || random.nextInt(j2 + 1) == 0)) {
                 chunkposition = new ChunkPosition(l2, 0, i3);

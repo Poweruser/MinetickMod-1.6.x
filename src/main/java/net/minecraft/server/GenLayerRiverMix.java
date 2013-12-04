@@ -24,6 +24,7 @@ public class GenLayerRiverMix extends GenLayer {
         int[] aint2 = this.intCache.a(k * l); // Poweruser
 
         for (int i1 = 0; i1 < k * l; ++i1) {
+            /*
             if (aint[i1] == BiomeBase.OCEAN.id) {
                 aint2[i1] = aint[i1];
             } else if (aint1[i1] >= 0) {
@@ -37,6 +38,22 @@ public class GenLayerRiverMix extends GenLayer {
             } else {
                 aint2[i1] = aint[i1];
             }
+            */
+            // Poweruser start
+            if (aint[i1] == this.biomeBaseDB.OCEAN.id) {
+                aint2[i1] = aint[i1];
+            } else if (aint1[i1] >= 0) {
+                if (aint[i1] == this.biomeBaseDB.ICE_PLAINS.id) {
+                    aint2[i1] = this.biomeBaseDB.FROZEN_RIVER.id;
+                } else if (aint[i1] != this.biomeBaseDB.MUSHROOM_ISLAND.id && aint[i1] != this.biomeBaseDB.MUSHROOM_SHORE.id) {
+                    aint2[i1] = aint1[i1];
+                } else {
+                    aint2[i1] = this.biomeBaseDB.MUSHROOM_SHORE.id;
+                }
+            } else {
+                aint2[i1] = aint[i1];
+            }
+            // Poweruser end
         }
 
         return aint2;

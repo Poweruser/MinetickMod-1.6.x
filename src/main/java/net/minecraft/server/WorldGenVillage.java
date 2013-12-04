@@ -2,14 +2,28 @@ package net.minecraft.server;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
 
+import de.minetick.BiomeBaseIDEnum;
+
 public class WorldGenVillage extends StructureGenerator {
 
-    public static final List e = Arrays.asList(new BiomeBase[] { BiomeBase.PLAINS, BiomeBase.DESERT});
+    //public static final List e = Arrays.asList(new BiomeBase[] { BiomeBase.PLAINS, BiomeBase.DESERT});
+
+    //Poweruser start
+    /*
+     * Currently I don't see any other easy way to create this static list,
+     * than to create a seperate de.minetick.BiomeBaseDB object and use its BiomeBase objects.
+     * I checked, what these objects are being used for, and so far only for comparing biomes,
+     * more specifically: their ids
+     */
+    private static BiomeBaseDB biomeBaseDB = new BiomeBaseDB();
+    public static final List e = Arrays.asList(new BiomeBase[] { biomeBaseDB.PLAINS, biomeBaseDB.DESERT});
+    // Poweruser end
     private int f;
     private int g;
     private int h;

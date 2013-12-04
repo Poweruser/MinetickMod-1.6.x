@@ -1,11 +1,14 @@
 package net.minecraft.server;
 
+import de.minetick.BiomeBaseIDEnum;
+
 public class WorldProviderTheEnd extends WorldProvider {
 
     public WorldProviderTheEnd() {}
 
     public void b() {
-        this.e = new WorldChunkManagerHell(BiomeBase.SKY, 0.5F, 0.0F);
+        //this.e = new WorldChunkManagerHell(BiomeBase.SKY, 0.5F, 0.0F);
+        this.e = new WorldChunkManagerHell(BiomeBaseIDEnum.SKY.getId(), 0.5F, 0.0F); // Poweruser
         this.dimension = 1;
         this.g = true;
     }

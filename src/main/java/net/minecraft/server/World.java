@@ -95,6 +95,11 @@ public abstract class World implements IBlockAccess {
     private HashSet<Long> alreadyCheckedChunks = new HashSet<Long>();
     protected boolean cancelHeavyCalculations = false;
     private int nextTickEntityIndex = 0;
+
+    public BiomeBaseDB getBiomeBaseDB() {
+        return this.worldProvider.e.getBiomeBaseObj();
+    }
+
     // Poweruser end
 
     // CraftBukkit start

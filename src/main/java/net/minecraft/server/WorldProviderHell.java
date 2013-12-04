@@ -1,11 +1,14 @@
 package net.minecraft.server;
 
+import de.minetick.BiomeBaseIDEnum;
+
 public class WorldProviderHell extends WorldProvider {
 
     public WorldProviderHell() {}
 
     public void b() {
-        this.e = new WorldChunkManagerHell(BiomeBase.HELL, 1.0F, 0.0F);
+        //this.e = new WorldChunkManagerHell(BiomeBase.HELL, 1.0F, 0.0F);
+        this.e = new WorldChunkManagerHell(BiomeBaseIDEnum.HELL.getId(), 1.0F, 0.0F); // Poweruser
         this.f = true;
         this.g = true;
         this.dimension = -1;

@@ -21,35 +21,44 @@ public class GenLayerMushroomShore extends GenLayer {
                 int j2;
                 int k2;
 
-                if (k1 == BiomeBase.MUSHROOM_ISLAND.id) {
+                //if (k1 == BiomeBase.MUSHROOM_ISLAND.id) {
+                if (k1 == this.biomeBaseDB.MUSHROOM_ISLAND.id) { // Poweruser
                     l1 = aint[j1 + 1 + (i1 + 1 - 1) * (k + 2)];
                     i2 = aint[j1 + 1 + 1 + (i1 + 1) * (k + 2)];
                     j2 = aint[j1 + 1 - 1 + (i1 + 1) * (k + 2)];
                     k2 = aint[j1 + 1 + (i1 + 1 + 1) * (k + 2)];
-                    if (l1 != BiomeBase.OCEAN.id && i2 != BiomeBase.OCEAN.id && j2 != BiomeBase.OCEAN.id && k2 != BiomeBase.OCEAN.id) {
+                    //if (l1 != BiomeBase.OCEAN.id && i2 != BiomeBase.OCEAN.id && j2 != BiomeBase.OCEAN.id && k2 != BiomeBase.OCEAN.id) {
+                    if (l1 != this.biomeBaseDB.OCEAN.id && i2 != this.biomeBaseDB.OCEAN.id && j2 != this.biomeBaseDB.OCEAN.id && k2 != this.biomeBaseDB.OCEAN.id) { // Poweruser
                         aint1[j1 + i1 * k] = k1;
                     } else {
-                        aint1[j1 + i1 * k] = BiomeBase.MUSHROOM_SHORE.id;
+                        //aint1[j1 + i1 * k] = BiomeBase.MUSHROOM_SHORE.id;
+                        aint1[j1 + i1 * k] = this.biomeBaseDB.MUSHROOM_SHORE.id; // Poweruser
                     }
-                } else if (k1 != BiomeBase.OCEAN.id && k1 != BiomeBase.RIVER.id && k1 != BiomeBase.SWAMPLAND.id && k1 != BiomeBase.EXTREME_HILLS.id) {
+                //} else if (k1 != BiomeBase.OCEAN.id && k1 != BiomeBase.RIVER.id && k1 != BiomeBase.SWAMPLAND.id && k1 != BiomeBase.EXTREME_HILLS.id) {
+                } else if (k1 != this.biomeBaseDB.OCEAN.id && k1 != this.biomeBaseDB.RIVER.id && k1 != this.biomeBaseDB.SWAMPLAND.id && k1 != this.biomeBaseDB.EXTREME_HILLS.id) { // Poweruser
                     l1 = aint[j1 + 1 + (i1 + 1 - 1) * (k + 2)];
                     i2 = aint[j1 + 1 + 1 + (i1 + 1) * (k + 2)];
                     j2 = aint[j1 + 1 - 1 + (i1 + 1) * (k + 2)];
                     k2 = aint[j1 + 1 + (i1 + 1 + 1) * (k + 2)];
-                    if (l1 != BiomeBase.OCEAN.id && i2 != BiomeBase.OCEAN.id && j2 != BiomeBase.OCEAN.id && k2 != BiomeBase.OCEAN.id) {
+                    //if (l1 != BiomeBase.OCEAN.id && i2 != BiomeBase.OCEAN.id && j2 != BiomeBase.OCEAN.id && k2 != BiomeBase.OCEAN.id) {
+                    if (l1 != this.biomeBaseDB.OCEAN.id && i2 != this.biomeBaseDB.OCEAN.id && j2 != this.biomeBaseDB.OCEAN.id && k2 != this.biomeBaseDB.OCEAN.id) { // Poweruser
                         aint1[j1 + i1 * k] = k1;
                     } else {
-                        aint1[j1 + i1 * k] = BiomeBase.BEACH.id;
+                        //aint1[j1 + i1 * k] = BiomeBase.BEACH.id;
+                        aint1[j1 + i1 * k] = this.biomeBaseDB.BEACH.id; // Poweruser
                     }
-                } else if (k1 == BiomeBase.EXTREME_HILLS.id) {
+                //} else if (k1 == BiomeBase.EXTREME_HILLS.id) {
+                } else if (k1 == this.biomeBaseDB.EXTREME_HILLS.id) { // Poweruser
                     l1 = aint[j1 + 1 + (i1 + 1 - 1) * (k + 2)];
                     i2 = aint[j1 + 1 + 1 + (i1 + 1) * (k + 2)];
                     j2 = aint[j1 + 1 - 1 + (i1 + 1) * (k + 2)];
                     k2 = aint[j1 + 1 + (i1 + 1 + 1) * (k + 2)];
-                    if (l1 == BiomeBase.EXTREME_HILLS.id && i2 == BiomeBase.EXTREME_HILLS.id && j2 == BiomeBase.EXTREME_HILLS.id && k2 == BiomeBase.EXTREME_HILLS.id) {
+                    //if (l1 == BiomeBase.EXTREME_HILLS.id && i2 == BiomeBase.EXTREME_HILLS.id && j2 == BiomeBase.EXTREME_HILLS.id && k2 == BiomeBase.EXTREME_HILLS.id) {
+                    if (l1 == this.biomeBaseDB.EXTREME_HILLS.id && i2 == this.biomeBaseDB.EXTREME_HILLS.id && j2 == this.biomeBaseDB.EXTREME_HILLS.id && k2 == this.biomeBaseDB.EXTREME_HILLS.id) { // Poweruser
                         aint1[j1 + i1 * k] = k1;
                     } else {
-                        aint1[j1 + i1 * k] = BiomeBase.SMALL_MOUNTAINS.id;
+                        //aint1[j1 + i1 * k] = BiomeBase.SMALL_MOUNTAINS.id;
+                        aint1[j1 + i1 * k] = this.biomeBaseDB.SMALL_MOUNTAINS.id; // Poweruser
                     }
                 } else {
                     aint1[j1 + i1 * k] = k1;

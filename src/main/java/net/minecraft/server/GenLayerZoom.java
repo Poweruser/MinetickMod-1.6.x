@@ -109,6 +109,7 @@ public class GenLayerZoom extends GenLayer {
         for (int k = 0; k < j; ++k) {
             object = new GenLayerZoom(i + (long) k, object);
             object.setIntCache(genlayer.intCache);
+            object.setBiomeBaseDB(genlayer.getBiomeBaseDB());
         }
 
         return object;

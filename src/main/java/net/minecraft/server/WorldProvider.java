@@ -13,6 +13,9 @@ public abstract class WorldProvider {
     public int dimension;
     private float[] j = new float[4];
 
+    // Poweruser
+    private BiomeBaseDB biomeBase = new BiomeBaseDB();
+
     public WorldProvider() {}
 
     public final void a(World world) {
@@ -37,7 +40,8 @@ public abstract class WorldProvider {
         if (this.b.getWorldData().getType() == WorldType.FLAT) {
             WorldGenFlatInfo worldgenflatinfo = WorldGenFlatInfo.a(this.b.getWorldData().getGeneratorOptions());
 
-            this.e = new WorldChunkManagerHell(BiomeBase.biomes[worldgenflatinfo.a()], 0.5F, 0.5F);
+            //this.e = new WorldChunkManagerHell(BiomeBase.biomes[worldgenflatinfo.a()], 0.5F, 0.5F);
+            this.e = new WorldChunkManagerHell(worldgenflatinfo.a(), 0.5F, 0.5F); // Poweruser
         } else {
             this.e = new WorldChunkManager(this.b);
         }

@@ -6,10 +6,15 @@ public class GenLayerBiome extends GenLayer {
 
     public GenLayerBiome(long i, GenLayer genlayer, WorldType worldtype) {
         super(i);
-        this.b = new BiomeBase[] { BiomeBase.DESERT, BiomeBase.FOREST, BiomeBase.EXTREME_HILLS, BiomeBase.SWAMPLAND, BiomeBase.PLAINS, BiomeBase.TAIGA, BiomeBase.JUNGLE};
+
+        BiomeBaseDB biomeBaseDB = genlayer.getBiomeBaseDB(); // Poweruser
+
+        //this.b = new BiomeBase[] { BiomeBase.DESERT, BiomeBase.FOREST, BiomeBase.EXTREME_HILLS, BiomeBase.SWAMPLAND, BiomeBase.PLAINS, BiomeBase.TAIGA, BiomeBase.JUNGLE};
+        this.b = new BiomeBase[] { biomeBaseDB.DESERT, biomeBaseDB.FOREST, biomeBaseDB.EXTREME_HILLS, biomeBaseDB.SWAMPLAND, biomeBaseDB.PLAINS, biomeBaseDB.TAIGA, biomeBaseDB.JUNGLE}; // Poweruser
         this.a = genlayer;
         if (worldtype == WorldType.NORMAL_1_1) {
-            this.b = new BiomeBase[] { BiomeBase.DESERT, BiomeBase.FOREST, BiomeBase.EXTREME_HILLS, BiomeBase.SWAMPLAND, BiomeBase.PLAINS, BiomeBase.TAIGA};
+            //this.b = new BiomeBase[] { BiomeBase.DESERT, BiomeBase.FOREST, BiomeBase.EXTREME_HILLS, BiomeBase.SWAMPLAND, BiomeBase.PLAINS, BiomeBase.TAIGA};
+            this.b = new BiomeBase[] { biomeBaseDB.DESERT, biomeBaseDB.FOREST, biomeBaseDB.EXTREME_HILLS, biomeBaseDB.SWAMPLAND, biomeBaseDB.PLAINS, biomeBaseDB.TAIGA}; // Poweruser
         }
     }
 
@@ -25,17 +30,20 @@ public class GenLayerBiome extends GenLayer {
 
                 if (k1 == 0) {
                     aint1[j1 + i1 * k] = 0;
-                } else if (k1 == BiomeBase.MUSHROOM_ISLAND.id) {
+                //} else if (k1 == BiomeBase.MUSHROOM_ISLAND.id) {
+                } else if (k1 == this.biomeBaseDB.MUSHROOM_ISLAND.id) { // Poweruser
                     aint1[j1 + i1 * k] = k1;
                 } else if (k1 == 1) {
                     aint1[j1 + i1 * k] = this.b[this.a(this.b.length)].id;
                 } else {
                     int l1 = this.b[this.a(this.b.length)].id;
 
-                    if (l1 == BiomeBase.TAIGA.id) {
+                    //if (l1 == BiomeBase.TAIGA.id) {
+                    if (l1 == this.biomeBaseDB.TAIGA.id) { // Poweruser
                         aint1[j1 + i1 * k] = l1;
                     } else {
-                        aint1[j1 + i1 * k] = BiomeBase.ICE_PLAINS.id;
+                        //aint1[j1 + i1 * k] = BiomeBase.ICE_PLAINS.id;
+                        aint1[j1 + i1 * k] = this.biomeBaseDB.ICE_PLAINS.id; // Poweruser
                     }
                 }
             }
