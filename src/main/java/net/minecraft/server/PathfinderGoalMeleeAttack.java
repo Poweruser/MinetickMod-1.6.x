@@ -63,7 +63,7 @@ public class PathfinderGoalMeleeAttack extends PathfinderGoal {
                 } else if(this.failedPathFindingPenalty < 60) {
                     this.failedPathFindingPenalty += penalty;
                 }
-                this.h = this.failedPathFindingPenalty + 4 + this.b.aC().nextInt(7);
+                this.h = this.failedPathFindingPenalty + 4 + this.b.aD().nextInt(7);
                 return this.f != null;
             } else {
                 return true;
@@ -110,7 +110,7 @@ public class PathfinderGoalMeleeAttack extends PathfinderGoal {
             // Spigot start
             double targetMovement = entityliving.e( pathX, pathY, pathZ );
             // If this is true, then we are re-pathing
-            if ( ( this.h <= 0 && targetMovement >= 1.0D ) || ( this.h <= 0 && this.b.aC().nextInt( 200 ) == 0 ) ) /* EntityCreature random instance */
+            if ( ( this.h <= 0 && targetMovement >= 1.0D ) || ( this.h <= 0 && this.b.aD().nextInt( 200 ) == 0 ) ) /* EntityCreature random instance */
 
             {
                 AttributeInstance rangeAttr = this.b.getAttributeInstance( GenericAttributes.b );
@@ -160,7 +160,7 @@ public class PathfinderGoalMeleeAttack extends PathfinderGoal {
                 } else if(failedPathFindingPenalty < 60) {
                     this.failedPathFindingPenalty += penalty;
                 }
-                this.h = this.failedPathFindingPenalty + 4 + this.b.aC().nextInt(7);
+                this.h = this.failedPathFindingPenalty + 4 + this.b.aD().nextInt(7);
                 // Poweruser end
                 //this.h = 4 + this.b.aC().nextInt( 7 ); /* EntityCreature random instance */
 
@@ -182,7 +182,7 @@ public class PathfinderGoalMeleeAttack extends PathfinderGoal {
                 {
                     if ( fullRangeSearchDelay <= 0 )
                     {
-                        fullRangeSearchDelay = 4 + this.b.aC().nextInt( 4 ); /* EntityCreature random instance */
+                        fullRangeSearchDelay = 4 + this.b.aD().nextInt( 4 ); /* EntityCreature random instance */
                     }
                 }
             }
