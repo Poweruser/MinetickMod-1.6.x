@@ -45,7 +45,7 @@ public class Packet51MapChunk extends Packet {
         }
     }
 
-    public void a(DataInput datainput) {
+    public void a(DataInput datainput) throws IOException {
         this.a = datainput.readInt();
         this.b = datainput.readInt();
         this.e = datainput.readBoolean();
@@ -84,7 +84,7 @@ public class Packet51MapChunk extends Packet {
         }
     }
 
-    public void a(DataOutput dataoutput) {
+    public void a(DataOutput dataoutput) throws IOException {
         dataoutput.writeInt(this.a);
         dataoutput.writeInt(this.b);
         dataoutput.writeBoolean(this.e);
