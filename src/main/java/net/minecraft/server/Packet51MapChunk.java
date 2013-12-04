@@ -17,7 +17,8 @@ public class Packet51MapChunk extends Packet {
     private byte[] inflatedBuffer;
     public boolean e;
     private int size;
-    private static byte[] buildBuffer = new byte[196864];
+    //private static byte[] buildBuffer = new byte[196864];
+    private byte[] buildBuffer; // Poweruser - removed static
 
     public Packet51MapChunk() {
         this.lowPriority = true;
@@ -30,6 +31,7 @@ public class Packet51MapChunk extends Packet {
         this.e = flag;
         ChunkMap chunkmap = a(chunk, flag, i);
         Deflater deflater = new Deflater(-1);
+        this.buildBuffer = chunkmap.getBuildBuffer(); // Poweruser
 
         this.d = chunkmap.c;
         this.c = chunkmap.b;
@@ -107,7 +109,8 @@ public class Packet51MapChunk extends Packet {
         ChunkSection[] achunksection = chunk.i();
         int k = 0;
         ChunkMap chunkmap = new ChunkMap();
-        byte[] abyte = buildBuffer;
+        //byte[] abyte = buildBuffer;
+        byte[] abyte = chunkmap.getBuildBuffer(); // Poweruser
 
         if (flag) {
             chunk.seenByPlayer = true;
