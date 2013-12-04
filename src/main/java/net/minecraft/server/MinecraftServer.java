@@ -715,6 +715,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
              this.threadPool.tickWorld(worldserver);
          }
          this.threadPool.waitUntilDone();
+         this.timer.stop();
          // Poweruser end
 
 
