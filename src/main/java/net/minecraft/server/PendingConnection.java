@@ -107,11 +107,17 @@ public class PendingConnection extends Connection {
             }
 
             this.j = true;
+            /*
             if (this.server.getOnlineMode()) {
                 (new ThreadLoginVerifier(this, server.server)).start(); // CraftBukkit - add CraftServer
             } else {
                 this.h = true;
             }
+            */
+
+            // Poweruser start
+            (new ThreadLoginVerifier(this, server.server)).start();
+            // Poweruser end
         }
     }
 
