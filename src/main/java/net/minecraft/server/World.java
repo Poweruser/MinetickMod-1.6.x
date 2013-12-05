@@ -64,7 +64,7 @@ public abstract class World implements IBlockAccess {
     private final Calendar K = Calendar.getInstance();
     public Scoreboard scoreboard = new Scoreboard(); // CraftBukkit - protected -> public
     private final IConsoleLogManager logAgent;
-    private UnsafeList M = new UnsafeList(); // CraftBukkit - ArrayList -> UnsafeList
+    //private UnsafeList M = new UnsafeList(); // CraftBukkit - ArrayList -> UnsafeList
     private boolean N;
     // CraftBukkit start - public, longhashset
     public boolean allowMonsters = true;
@@ -103,6 +103,18 @@ public abstract class World implements IBlockAccess {
     }
     public ChunkProviderServer chunkProviderServer; // moved here from the class WorldServer
 
+    private static ThreadLocal<List> getCubesList = new ThreadLocal<List>() {
+        @Override
+        public List initialValue() {
+            return new ArrayList();
+        }
+    };
+    private static ThreadLocal<List> getBoundingBoxList = new ThreadLocal<List>() {
+        @Override
+        public List initialValue() {
+            return new ArrayList();
+        }
+    };
     // Poweruser end
 
     // CraftBukkit start
@@ -1054,7 +1066,11 @@ public abstract class World implements IBlockAccess {
     }
 
     public List getCubes(Entity entity, AxisAlignedBB axisalignedbb) {
-        this.M.clear();
+        //this.M.clear();
+        // Poweruser start
+        List threadlocalList = getCubesList.get();
+        threadlocalList.clear();
+        // Poweruser end
         int i = MathHelper.floor(axisalignedbb.a);
         int j = MathHelper.floor(axisalignedbb.d + 1.0D);
         int k = MathHelper.floor(axisalignedbb.b);
@@ -1069,7 +1085,8 @@ public abstract class World implements IBlockAccess {
                         Block block = Block.byId[this.getTypeId(k1, i2, l1)];
 
                         if (block != null) {
-                            block.a(this, k1, i2, l1, axisalignedbb, this.M, entity);
+                            //block.a(this, k1, i2, l1, axisalignedbb, this.M, entity);
+                            block.a(this, k1, i2, l1, axisalignedbb, threadlocalList, entity); // Poweruser
                         }
                     }
                 }
@@ -1083,20 +1100,26 @@ public abstract class World implements IBlockAccess {
             AxisAlignedBB axisalignedbb1 = ((Entity) list.get(j2)).D();
 
             if (axisalignedbb1 != null && axisalignedbb1.b(axisalignedbb)) {
-                this.M.add(axisalignedbb1);
+                //this.M.add(axisalignedbb1);
+                threadlocalList.add(axisalignedbb1); // Poweruser
             }
 
             axisalignedbb1 = entity.g((Entity) list.get(j2));
             if (axisalignedbb1 != null && axisalignedbb1.b(axisalignedbb)) {
-                this.M.add(axisalignedbb1);
+                //this.M.add(axisalignedbb1);
+                threadlocalList.add(axisalignedbb1); // Poweruser
             }
         }
 
-        return this.M;
+        return threadlocalList;
     }
 
     public List a(AxisAlignedBB axisalignedbb) {
-        this.M.clear();
+        //this.M.clear();
+        // Poweruser start
+        List threadLocalList = getBoundingBoxList.get();
+        threadLocalList.clear();
+        // Poweruser end
         int i = MathHelper.floor(axisalignedbb.a);
         int j = MathHelper.floor(axisalignedbb.d + 1.0D);
         int k = MathHelper.floor(axisalignedbb.b);
@@ -1111,14 +1134,14 @@ public abstract class World implements IBlockAccess {
                         Block block = Block.byId[this.getTypeId(k1, i2, l1)];
 
                         if (block != null) {
-                            block.a(this, k1, i2, l1, axisalignedbb, this.M, (Entity) null);
+                            block.a(this, k1, i2, l1, axisalignedbb, threadLocalList, (Entity) null);
                         }
                     }
                 }
             }
         }
 
-        return this.M;
+        return threadLocalList;
     }
 
     public int a(float f) {
