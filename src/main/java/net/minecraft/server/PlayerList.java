@@ -48,6 +48,7 @@ public abstract class PlayerList {
     private EnumGamemode l;
     private boolean m;
     private int n;
+    private int indexCounter = 0; // Poweruser
 
     // CraftBukkit start
     private CraftServer cserver;
@@ -709,8 +710,19 @@ public abstract class PlayerList {
     }
 
     public void tick() {
-        if (++this.n > 600) {
+        //if (++this.n > 600) {
+        if (++this.n > 100) { // Poweruser
             this.n = 0;
+            // Poweruser start - 1 player info is broadcasted every 5 seconds
+            if(this.players.size() > 0) {
+                this.indexCounter++;
+                if(this.indexCounter >= this.players.size()) {
+                    this.indexCounter = 0;
+                }
+                EntityPlayer entityplayer = (EntityPlayer) this.players.get(this.indexCounter);
+                this.sendAll(new Packet201PlayerInfo(entityplayer.getName(), true, entityplayer.ping));
+            }
+            // Poweruser
         }
 
         /* CraftBukkit start - Remove updating of lag to players -- it spams way to much on big servers.
