@@ -21,6 +21,7 @@ public abstract class EntityProjectile extends Entity implements IProjectile {
 
         // Poweruser
         this.isImportantEntity = true;
+        this.allowedToTeleport = false;
     }
 
     protected void a() {}
@@ -44,6 +45,7 @@ public abstract class EntityProjectile extends Entity implements IProjectile {
 
         // Poweruser
         this.isImportantEntity = true;
+        this.allowedToTeleport = false;
     }
 
     public EntityProjectile(World world, double d0, double d1, double d2) {
@@ -55,6 +57,7 @@ public abstract class EntityProjectile extends Entity implements IProjectile {
 
         // Poweruser
         this.isImportantEntity = true;
+        this.allowedToTeleport = false;
     }
 
     protected float c() {

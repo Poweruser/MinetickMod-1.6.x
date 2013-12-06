@@ -30,6 +30,7 @@ public class EntityArrow extends Entity implements IProjectile {
 
         // Poweruser
         this.isImportantEntity = true;
+        this.allowedToTeleport = false;
     }
 
     public EntityArrow(World world, double d0, double d1, double d2) {
@@ -41,6 +42,7 @@ public class EntityArrow extends Entity implements IProjectile {
 
         // Poweruser
         this.isImportantEntity = true;
+        this.allowedToTeleport = false;
     }
 
     public EntityArrow(World world, EntityLiving entityliving, EntityLiving entityliving1, float f, float f1) {
@@ -72,6 +74,7 @@ public class EntityArrow extends Entity implements IProjectile {
 
         // Poweruser
         this.isImportantEntity = true;
+        this.allowedToTeleport = false;
     }
 
     public EntityArrow(World world, EntityLiving entityliving, float f) {
@@ -96,6 +99,7 @@ public class EntityArrow extends Entity implements IProjectile {
 
         // Poweruser
         this.isImportantEntity = true;
+        this.allowedToTeleport = false;
     }
 
     protected void a() {

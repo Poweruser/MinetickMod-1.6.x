@@ -115,6 +115,11 @@ public abstract class Entity {
     public boolean isImportantEntity() {
         return this.isImportantEntity;
     }
+
+    protected boolean allowedToTeleport = true;
+    public boolean allowedToTeleport() {
+        return this.allowedToTeleport;
+    }
     // Poweruser end
 
     public Entity(World world) {
@@ -251,7 +256,8 @@ public abstract class Entity {
         this.lastYaw = this.yaw;
         int i;
 
-        if (!this.world.isStatic && this.world instanceof WorldServer) {
+        //if (!this.world.isStatic && this.world instanceof WorldServer) {
+        if (!this.world.isStatic && this.world instanceof WorldServer && this.allowedToTeleport()) { // Poweruser
             this.world.methodProfiler.a("portal");
             MinecraftServer minecraftserver = ((WorldServer) this.world).getMinecraftServer();
 
