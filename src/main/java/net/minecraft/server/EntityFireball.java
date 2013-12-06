@@ -24,6 +24,7 @@ public abstract class EntityFireball extends Entity {
 
         // Poweruser
         this.isImportantEntity = true;
+        this.allowedToTeleport = false;
     }
 
     protected void a() {}
@@ -41,6 +42,7 @@ public abstract class EntityFireball extends Entity {
 
         // Poweruser
         this.isImportantEntity = true;
+        this.allowedToTeleport = false;
     }
 
     public EntityFireball(World world, EntityLiving entityliving, double d0, double d1, double d2) {
@@ -56,6 +58,7 @@ public abstract class EntityFireball extends Entity {
 
         // Poweruser
         this.isImportantEntity = true;
+        this.allowedToTeleport = false;
     }
 
     public void setDirection(double d0, double d1, double d2) {
