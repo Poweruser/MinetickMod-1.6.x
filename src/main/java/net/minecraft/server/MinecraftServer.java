@@ -717,8 +717,12 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
          }
          this.threadPool.waitUntilDone();
          this.timer.stop();
-         // Poweruser end
 
+         for(i = 0; i < worldCount; i++) {
+             WorldServer worldserver = this.sortedWorldsArray[i];
+             worldserver.processDimensionChangeQueue();
+         }
+         // Poweruser end
 
         this.methodProfiler.c("connection");
         this.ag().b();
