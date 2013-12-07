@@ -59,7 +59,7 @@ public class PlayerChunkManager {
         String mapkey = this.getMapKey(entityplayer);
         PlayerChunkBuffer buff = this.playerBuff.get(mapkey);
         if(buff == null) {
-            buff = new PlayerChunkBuffer(entityplayer);
+            buff = new PlayerChunkBuffer(this, entityplayer);
             this.playerBuff.put(mapkey, buff);
         } else {
             buff.clear();
@@ -108,22 +108,31 @@ public class PlayerChunkManager {
             }
             buff.resetCounters();
             buff.updatePos(entityplayer);
+            int playerChunkPosX = (int) entityplayer.locX >> 4;
+            int playerChunkPosZ = (int) entityplayer.locZ >> 4;
+            buff.checkBorderChunks(playerChunkPosX, playerChunkPosZ, this.pcm.getViewDistance());
             PriorityQueue<ChunkCoordIntPair> queue = buff.getCurrentQueue();
             while(queue.size() > 0 && buff.loadedChunks < 40 && buff.skippedChunks < 1) {
                 ChunkCoordIntPair p = queue.poll();
+                playerChunkPosX = (int) entityplayer.locX >> 4;
+                playerChunkPosZ = (int) entityplayer.locZ >> 4;
+                ChunkPosEnum chunkPos = this.isWithinRadius(p.x, p.z, playerChunkPosX, playerChunkPosZ, this.pcm.getViewDistance());
+                if(chunkPos.equals(ChunkPosEnum.OUTSIDE)) {
+                    buff.remove(p);
+                    continue;
+                } else if(chunkPos.equals(ChunkPosEnum.BORDER)) {
+                    buff.remove(p);
+                    buff.addBorderChunk(p);
+                    continue;
+                }
                 boolean exists = this.world.chunkExists(p.x, p.z);
                 if(!exists && (!allowGeneration || this.skipChunkGeneration || allGenerated > (this.world.getWorldData().getType().equals(WorldType.FLAT) ? 1 : 0))) {
                     buff.skippedChunks++;
                 } else {
-                    int playerChunkPosX, playerChunkPosZ;
                     PlayerChunk c = this.pcm.a(p.x, p.z, false);
                     if(c == null) {
                         c = this.pcm.a(p.x, p.z, true);
-                        playerChunkPosX = (int) entityplayer.locX >> 4;
-                        playerChunkPosZ = (int) entityplayer.locZ >> 4;
-                        if(this.isWithinRadius(p.x, p.z, playerChunkPosX, playerChunkPosZ, this.pcm.getViewDistance())) {
-                            c.a(entityplayer);
-                        }
+                        c.a(entityplayer);
                         if(c.isNewChunk()) {
                             buff.generatedChunks++;
                             allGenerated++;
@@ -131,11 +140,7 @@ public class PlayerChunkManager {
                             buff.loadedChunks++;
                         }
                     } else {
-                        playerChunkPosX = (int) entityplayer.locX >> 4;
-                        playerChunkPosZ = (int) entityplayer.locZ >> 4;
-                        if(this.isWithinRadius(p.x, p.z, playerChunkPosX, playerChunkPosZ, this.pcm.getViewDistance())) {
-                            c.a(entityplayer);
-                        }
+                        c.a(entityplayer);
                         buff.enlistedChunks++;
                     }
                     buff.remove(p);
@@ -152,10 +157,27 @@ public class PlayerChunkManager {
         return allGenerated;
     }
 
-    private boolean isWithinRadius(int positionx, int positionz, int centerx, int centerz, int radius) {
+    public ChunkPosEnum isWithinRadius(int positionx, int positionz, int centerx, int centerz, int radius) {
         int distancex = positionx - centerx;
         int distancez = positionz - centerz;
 
-        return distancex >= -radius && distancex <= radius ? distancez >= -radius && distancez <= radius : false;
+        int greaterRadius = radius + 2;
+        boolean within = distancex >= -radius && distancex <= radius ? distancez >= -radius && distancez <= radius : false;
+        if(within) {
+            return ChunkPosEnum.INSIDE;
+        } else {
+            boolean boardering = distancex >= -greaterRadius && distancex <= greaterRadius ? distancez >= -greaterRadius && distancez <= greaterRadius : false;
+            if(boardering) {
+                return ChunkPosEnum.BORDER;
+            } else {
+                return ChunkPosEnum.OUTSIDE;
+            }
+        }
+    }
+
+    public enum ChunkPosEnum {
+        INSIDE,
+        BORDER,
+        OUTSIDE;
     }
 }
