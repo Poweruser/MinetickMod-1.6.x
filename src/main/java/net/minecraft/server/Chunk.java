@@ -36,10 +36,15 @@ public class Chunk {
 
     // Poweruser start
     public boolean newChunk = false;
+    public boolean isCorrupt = false;
     public boolean isNew() {
         boolean out = newChunk;
         this.newChunk = false;
         return out;
+    }
+
+    public void initCorruptChunk() {
+        this.isCorrupt = true;
     }
     // Poweruser end
 

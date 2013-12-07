@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,6 +27,7 @@ import javax.swing.Timer;
 import jline.console.ConsoleReader;
 import joptsimple.OptionSet;
 
+import org.bukkit.entity.Player;
 import org.bukkit.World.Environment;
 import org.bukkit.craftbukkit.util.Waitable;
 import org.bukkit.event.server.RemoteServerCommandEvent;
@@ -136,6 +138,23 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
     private int ticksCounter = 0;
     public Integer[] getTicksPerSecond() {
         return this.ticksPerSecond.toArray(new Integer[0]);
+    }
+
+    public void broadcastToOnlineOperators(String[] msg) {
+        Set ops = this.getPlayerList().getOPs();
+        for(Object o: ops) {
+            if(o instanceof String) {
+                String s = (String) o;
+                Player p = this.server.getPlayerExact(s);
+                if(p != null) {
+                    if(p.isValid() && p.isOnline() && p.isOp()) {
+                        for(int i = 0; i < msg.length; i++) {
+                            p.sendMessage(msg[i]);
+                        }
+                    }
+                }
+            }
+        }
     }
     // Poweruser end
 
