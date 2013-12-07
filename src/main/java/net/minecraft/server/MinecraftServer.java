@@ -8,6 +8,7 @@ import java.net.Proxy;
 import java.security.KeyPair;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -119,6 +120,23 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
             }
         }
     });
+
+    private Timer tpsTimer = new Timer(1000, new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            ticksPerSecond.add(ticksCounter);
+            ticksCounter = 0;
+            if(ticksPerSecond.size() > 30) {
+                ticksPerSecond.remove(0);
+            }
+        }
+    });
+
+    private List<Integer> ticksPerSecond = Collections.synchronizedList(new LinkedList<Integer>());
+    private int ticksCounter = 0;
+    public Integer[] getTicksPerSecond() {
+        return this.ticksPerSecond.toArray(new Integer[0]);
+    }
     // Poweruser end
 
     public MinecraftServer(OptionSet options) { // CraftBukkit - signature file -> OptionSet
@@ -448,6 +466,8 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
             if (this.init()) {
                 long i = aq();
 
+                this.tpsTimer.start(); // Poweruser
+
                 for (long j = 0L; this.isRunning; this.R = true) {
                     long k = aq();
                     long l = k - i;
@@ -541,6 +561,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
         long i = System.nanoTime();
 
         // Poweruser start
+        this.ticksCounter++;
         this.cancelHeavyCalculations = false;
         this.timer.setDelay(this.timerDelay);
         this.timer.restart();
