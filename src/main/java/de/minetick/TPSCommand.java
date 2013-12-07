@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 
 public class TPSCommand extends Command {
 
-    private int[] steps = new int[] {18, 15, 10, 5, 0};
+    private int[] steps = new int[] {18, 16, 14, 10, 0};
     private ChatColor[] colors = new ChatColor[] {ChatColor.GREEN, ChatColor.YELLOW, ChatColor.YELLOW, ChatColor.GOLD, ChatColor.RED };
     private StringBuilder[] builders = new StringBuilder[5];
 
