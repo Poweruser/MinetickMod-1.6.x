@@ -17,6 +17,8 @@ import org.bukkit.craftbukkit.LoggerOutputStream;
 import org.bukkit.event.server.ServerCommandEvent;
 // CraftBukkit end
 
+import de.minetick.TPSCommand;
+
 public class DedicatedServer extends MinecraftServer implements IMinecraftServer {
 
     private final List l = Collections.synchronizedList(new ArrayList());
@@ -104,6 +106,10 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
         }
 
         this.a((PlayerList) (new DedicatedPlayerList(this))); // CraftBukkit
+
+        // Poweruser start
+        getServer().server.getCommandMap().register("tps", "MinetickMod", new TPSCommand("tps"));
+        // Poweruser end
 
         if (!this.getOnlineMode()) {
             this.getLogger().warning("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");
