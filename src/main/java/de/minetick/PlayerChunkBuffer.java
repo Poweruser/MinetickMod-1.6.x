@@ -1,23 +1,31 @@
 package de.minetick;
 
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.PriorityQueue;
+
+import de.minetick.PlayerChunkManager.ChunkPosEnum;
 
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.ChunkCoordIntPair;
 
 public class PlayerChunkBuffer {
     private LinkedHashSet<ChunkCoordIntPair> playerChunkBuffer;
+    private LinkedHashSet<ChunkCoordIntPair> uncertainBorderChunks;
     public PriorityQueue<ChunkCoordIntPair> pq;
     public ChunkCoordComparator comp;
     public int generatedChunks = 0;
     public int loadedChunks = 0;
     public int skippedChunks = 0;
     public int enlistedChunks = 0;
+    private PlayerChunkManager playerChunkManager;
 
-    public PlayerChunkBuffer(EntityPlayer ent) {
+    public PlayerChunkBuffer(PlayerChunkManager playerChunkManager, EntityPlayer ent) {
+        this.playerChunkManager = playerChunkManager;
         this.playerChunkBuffer = new LinkedHashSet<ChunkCoordIntPair>();
+        this.uncertainBorderChunks = new LinkedHashSet<ChunkCoordIntPair>();
         this.comp = new ChunkCoordComparator(ent);
         this.pq = new PriorityQueue<ChunkCoordIntPair>(750, this.comp);
     }
@@ -44,6 +52,10 @@ public class PlayerChunkBuffer {
         this.playerChunkBuffer.add(ccip);
     }
 
+    public void addBorderChunk(ChunkCoordIntPair ccip) {
+        this.uncertainBorderChunks.add(ccip);
+    }
+
     public void remove(ChunkCoordIntPair ccip) {
         this.playerChunkBuffer.remove(ccip);
     }
@@ -63,5 +75,19 @@ public class PlayerChunkBuffer {
         this.enlistedChunks = 0;
         this.skippedChunks = 0;
         this.loadedChunks = 0;
+    }
+
+    public void checkBorderChunks(int x, int z, int radius) {
+        Iterator<ChunkCoordIntPair> iter = this.uncertainBorderChunks.iterator();
+        while(iter.hasNext()) {
+            ChunkCoordIntPair ccip = iter.next();
+            ChunkPosEnum pos = this.playerChunkManager.isWithinRadius(ccip.x, ccip.z, x, z, radius);
+            if(pos.equals(ChunkPosEnum.OUTSIDE)) {
+                iter.remove();
+            } else if(pos.equals(ChunkPosEnum.INSIDE)) {
+                this.playerChunkBuffer.add(ccip);
+                iter.remove();
+            }
+        }
     }
 }

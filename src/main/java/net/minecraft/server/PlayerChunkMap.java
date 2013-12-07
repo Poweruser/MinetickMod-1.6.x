@@ -284,7 +284,6 @@ public class PlayerChunkMap {
                             } else {
                                 ccip = new ChunkCoordIntPair(l1 - j1, i2 - k1);
                             }
-                            buffer.remove(ccip);
                             // Poweruser end
                         }
                     }
