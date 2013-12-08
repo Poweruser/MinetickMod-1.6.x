@@ -125,6 +125,11 @@ public abstract class Entity {
     public int getTargetDimension() {
         return this.targetDimension;
     }
+
+    protected boolean isPlayer = false;
+    public boolean isPlayer() {
+        return this.isPlayer;
+    }
     // Poweruser end
 
     public Entity(World world) {
