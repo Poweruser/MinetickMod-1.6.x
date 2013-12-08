@@ -92,6 +92,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
 
         // Poweruser
         this.isImportantEntity = true;
+        this.isPlayer = true;
     }
 
     public void a(NBTTagCompound nbttagcompound) {

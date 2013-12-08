@@ -28,6 +28,8 @@ import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.weather.ThunderChangeEvent;
 // CraftBukkit end
 
+import de.minetick.LockObject;
+
 public abstract class World implements IBlockAccess {
 
     public boolean d;
@@ -1340,7 +1342,13 @@ public abstract class World implements IBlockAccess {
                         playerIsPassenger = entity.passenger.isImportantEntity();
                     }
                     if(entity.isImportantEntity() || playerIsPassenger || !this.cancelHeavyCalculations) {
-                        this.playerJoinedWorld(entity);
+                        if(entity.isPlayer() || playerIsPassenger) {
+                            synchronized(LockObject.playerTickLock) {
+                                this.playerJoinedWorld(entity);
+                            }
+                        } else {
+                            this.playerJoinedWorld(entity);
+                        }
                     }
                     // Poweruser end
                 } catch (Throwable throwable1) {
