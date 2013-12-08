@@ -8,13 +8,26 @@ public class Profiler {
 
 	private Map<String, Profile> map;
 	private boolean worldAvgsHaveChanged;
-	private int interval = 30;
-	private int avgsTickInterval = 5 * 20;
+    private int logInterval = 10; // seconds
+    private int avgsTickInterval = 5; // seconds
 	private int index = 0, avgIndex = 0;
 	private int counter = 0;
+    private boolean writeToFile;
+    private int writeInterval; // minutes
 
-	public Profiler() {
-		this.worldAvgsHaveChanged = false;
+    public Profiler(int logInterval, boolean writeToFile, int writeInterval) {
+        this.writeToFile = writeToFile;
+        this.logInterval = logInterval;
+        if(this.logInterval < 1) {
+            this.logInterval = 10;
+        }
+        this.writeInterval = writeInterval;
+        if(this.writeInterval < 1) {
+            this.writeInterval = 1;
+            this.writeToFile = false;
+        }
+        System.out.println("MTM_PROFILER: " + logInterval + " - "+ writeToFile + " - " + writeInterval);
+        this.worldAvgsHaveChanged = false;
 		this.map = Collections.synchronizedMap(new HashMap<String, Profile>());
 	}
 
@@ -25,7 +38,8 @@ public class Profiler {
 	public void start(String ident) {
 		Profile p = this.map.get(ident);
 		if(p == null) {
-			p = new Profile(this.interval, ident, this.avgsTickInterval);
+		    int writeSteps = this.writeInterval * 60 / this.logInterval;
+			p = new Profile(this.logInterval, ident, this.avgsTickInterval, this.writeToFile, this.writeInterval, writeSteps);
 			this.map.put(ident, p);
 		}
 		p.start();
@@ -43,11 +57,11 @@ public class Profiler {
 	public void newTick() {
 		this.index++;
 		this.avgIndex++;
-		if(this.avgIndex >= this.avgsTickInterval) {
+		if(this.avgIndex >= this.avgsTickInterval * 20) {
 			this.avgIndex = 0;
 			this.worldAvgsHaveChanged = true;
 		}
-		if(this.index >= this.interval * 20) {
+		if(this.index >= this.logInterval * 20) {
 			this.counter++;
 			this.index = 0;
 		}

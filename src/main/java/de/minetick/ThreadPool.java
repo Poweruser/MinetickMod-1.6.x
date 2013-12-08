@@ -27,8 +27,8 @@ public class ThreadPool {
 
     public Profiler profiler;
 
-    public ThreadPool() {
-        this.profiler = new Profiler();
+    public ThreadPool(Profiler profiler) {
+        this.profiler = profiler;
         this.active = true;
         this.threadCount = 0;
         this.remainingJobs = 0;
@@ -58,7 +58,7 @@ public class ThreadPool {
                 wt = new WorkThread(this.threadCount, this.lockObj);
                 this.allThreads.addLast(wt);
                 this.threadCount++;
-                System.out.println("[INFO] Minetick Threadpool: Erstelle weiteren Thread. #Threads: " + this.threadCount + " #Welten: " + this.currentNumOfJobs);
+                System.out.println("[INFO] MinetickMod: Creating another world thread. #Threads: " + this.threadCount + " #Welten: " + this.currentNumOfJobs);
             }
             wt.startTicking(ws);
         }

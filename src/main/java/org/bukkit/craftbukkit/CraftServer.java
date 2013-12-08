@@ -1388,4 +1388,18 @@ public final class CraftServer implements Server {
         this.printSaveWarning = true;
         getLogger().log(Level.WARNING, "A manual (plugin-induced) save has been detected while server is configured to auto-save. This may affect performance.", warningState == WarningState.ON ? new Throwable() : null);
     }
+
+    // Poweruser start
+    public boolean getMinetickModProfilerWriteEnabled() {
+        return configuration.getBoolean("minetickmod.profiler-write-log");
+    }
+
+    public int getMinetickModProfilerWriteInterval() {
+        return configuration.getInt("minetickmod.profiler-write-interval");
+    }
+
+    public int getMinetickModProfilerLogInterval() {
+        return configuration.getInt("minetickmod.profiler-log-interval");
+    }
+    // Poweruser end
 }

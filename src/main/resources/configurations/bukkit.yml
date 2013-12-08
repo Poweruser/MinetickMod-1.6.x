@@ -53,3 +53,7 @@ database:
     driver: org.sqlite.JDBC
     password: walrus
     url: jdbc:sqlite:{DIR}{NAME}.db
+minetickmod:
+    profiler-log-interval: 30
+    profiler-write-log: true
+    profiler-write-interval: 10
