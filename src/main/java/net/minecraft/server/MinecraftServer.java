@@ -172,7 +172,6 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
         this.ar();
 
         // Poweruser start
-        this.threadPool = new ThreadPool();
         this.timer.setRepeats(false);
         new BiomeBaseDB().initStaticField();
         // Poweruser end

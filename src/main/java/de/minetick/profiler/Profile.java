@@ -34,34 +34,43 @@ public class Profile {
 	private boolean errorShown = false;
 
 	private int counter;
+	private boolean writeEnabled;
+	private int writeInterval;
+	private int writeStep;
+	private int logInterval;
 
-	public Profile(int size, String ident, int avgMaxCount) {
-		this.avgTickEntitiesTime = 0L;
-		this.ident = ident;
-		this.avgMaxCount = avgMaxCount;
-		this.currentTime = new SimpleDateFormat ("HH:mm:ss");
-		SimpleDateFormat df = new SimpleDateFormat ("yyyy.MM.dd_HH-mm-ss");
-		Calendar c = Calendar.getInstance();
-		int day = c.get(Calendar.DAY_OF_MONTH);
-		String d = String.valueOf(day);
-		if(d.length() < 2) {
-			d = "0" + d;
-		}
-		int month = c.get(Calendar.MONTH) + 1;
-		String m = String.valueOf(month);
-		if(m.length() < 2) {
-			m = "0" + m;
-		}
-		int year = c.get(Calendar.YEAR);
-		String path = "Profiler\\" + year + "." + m + "\\" + d;
-		this.folder = new File(path);
-		this.file = new File(path + "\\MTProfiler_" + df.format(new Date()) + "_" + ident + ".txt");
-		this.lastIndex = 0;
-		this.index = 0;
-		this.counter = 0;
-		this.records = new ProfileCall[size*20];
-		this.startTime = 0L;
-		this.endTime = 0L;
+	public Profile(int size, String ident, int avgMaxCount, boolean writeToFile, int writeInterval, int writeSteps) {
+	    this.avgTickEntitiesTime = 0L;
+	    this.ident = ident;
+	    this.avgMaxCount = avgMaxCount;
+	    this.writeEnabled = writeToFile;
+	    this.writeInterval = writeInterval;
+	    this.writeStep = writeSteps;
+	    if(writeToFile) {
+	        this.currentTime = new SimpleDateFormat ("HH:mm:ss");
+	        SimpleDateFormat df = new SimpleDateFormat ("yyyy.MM.dd_HH-mm-ss");
+	        Calendar c = Calendar.getInstance();
+	        int day = c.get(Calendar.DAY_OF_MONTH);
+	        String d = String.valueOf(day);
+	        if(d.length() < 2) {
+	            d = "0" + d;
+	        }
+	        int month = c.get(Calendar.MONTH) + 1;
+	        String m = String.valueOf(month);
+	        if(m.length() < 2) {
+	            m = "0" + m;
+	        }
+	        int year = c.get(Calendar.YEAR);
+	        String path = "Profiler\\" + year + "." + m + "\\" + d;
+	        this.folder = new File(path);
+	        this.file = new File(path + "\\MTProfiler_" + df.format(new Date()) + "_" + ident + ".txt");
+	    }
+	    this.lastIndex = 0;
+	    this.index = 0;
+	    this.counter = 0;
+	    this.records = new ProfileCall[size*20];
+	    this.startTime = 0L;
+	    this.endTime = 0L;
 	}
 	
 	public String getIdent() {
@@ -134,9 +143,12 @@ public class Profile {
 		this.index = index;
 		if(cnt > this.counter) {
 			this.counter = cnt;
+
 			this.calcRecord();
-			if(this.counter % 60 == 0) {
-				this.writeToFile();
+			if(this.writeEnabled) {
+			    if((this.counter % this.writeStep) == 0) {
+			        this.writeToFile();
+			    }
 			}
 		}
 	}
@@ -151,11 +163,13 @@ public class Profile {
 		for(i = 0; i < this.records.length && i <= this.lastIndex; i++) {
 			if(this.records[i] != null) {
 				avg += this.records[i].getTime();
-				playerAvg += this.records[i].getPlayerNumber();
-				chunks += this.records[i].getGeneratedChunks();
-				calls += this.records[i].getCount();
-				if(this.records[i].getTime() > max) {
-					max = this.records[i].getTime();
+				if(this.writeEnabled) {
+				    playerAvg += this.records[i].getPlayerNumber();
+				    chunks += this.records[i].getGeneratedChunks();
+				    calls += this.records[i].getCount();
+				    if(this.records[i].getTime() > max) {
+				        max = this.records[i].getTime();
+				    }
 				}
 				this.records[i].reset();
 			}
@@ -169,13 +183,15 @@ public class Profile {
 			calls = 0L;
 		}
 		this.avgTickEntitiesTime = avg;
-		float favg = ((float)(avg / 1000L)) / 1000.0F;
-		float fmax = ((float)(max / 1000L)) / 1000.0F;
-		String tmp = (" Avg: " + favg + "  Max: "+ fmax + " AvgCalls: " + calls + " Players: " + playerAvg);
-		if(chunks > 0) {
-			tmp += (" GeneratedChunks: " + chunks);
+		if(this.writeEnabled) {
+		    float favg = ((float)(avg / 1000L)) / 1000.0F;
+		    float fmax = ((float)(max / 1000L)) / 1000.0F;
+		    String tmp = (" Avg: " + favg + "  Max: "+ fmax + " AvgCalls: " + calls + " Players: " + playerAvg);
+		    if(chunks > 0) {
+		        tmp += (" GeneratedChunks: " + chunks);
+		    }
+		    this.output.add("" + this.counter + "  " + this.currentTime() + tmp.replace(".", ","));
 		}
-		this.output.add("" + this.counter + "  " + this.currentTime() + tmp.replace(".", ","));
 	}
 	
 	private void writeToFile() {
@@ -188,7 +204,7 @@ public class Profile {
 				if(!errorShown) {
 					errorShown = true;
 					Logger a = Logger.getLogger("Minecraft");
-					a.log(Level.WARNING, "MTProfiler: Kann Datei nicht erstellen: " + this.file.getAbsolutePath() + " Grund: "+ e.getMessage());
+					a.log(Level.WARNING, "MinetickMod-Profiler: Could not create the file: " + this.file.getAbsolutePath() + " Reason: "+ e.getMessage());
 				}
 			}
 		}
@@ -221,7 +237,7 @@ public class Profile {
 		if(failed && !errorShown) {
 			errorShown = true;
 			Logger a = Logger.getLogger("Minecraft");
-			a.log(Level.WARNING, "MTProfiler: Messungen zu " + ident + " konnten nicht geschrieben werden: Code: " + code + "! " + this.file.getAbsolutePath());
+			a.log(Level.WARNING, "MinetickMod-Profiler: Could not write the profiler records of " + ident + " to disk! Code: " + code + "! " + this.file.getAbsolutePath());
 		}
 		this.output.clear();
 	}

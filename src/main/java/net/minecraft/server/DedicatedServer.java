@@ -13,11 +13,14 @@ import java.util.concurrent.Callable;
 import java.io.PrintStream;
 import java.util.logging.Level;
 
+import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.LoggerOutputStream;
 import org.bukkit.event.server.ServerCommandEvent;
 // CraftBukkit end
 
 import de.minetick.TPSCommand;
+import de.minetick.ThreadPool;
+import de.minetick.profiler.Profiler;
 
 public class DedicatedServer extends MinecraftServer implements IMinecraftServer {
 
@@ -109,6 +112,11 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
 
         // Poweruser start
         getServer().server.getCommandMap().register("tps", "MinetickMod", new TPSCommand("tps"));
+        CraftServer cs = MinecraftServer.getServer().server;
+        Profiler prof = new Profiler(cs.getMinetickModProfilerLogInterval(),
+                                     cs.getMinetickModProfilerWriteEnabled(),
+                                     cs.getMinetickModProfilerWriteInterval());
+        this.threadPool = new ThreadPool(prof);
         // Poweruser end
 
         if (!this.getOnlineMode()) {
