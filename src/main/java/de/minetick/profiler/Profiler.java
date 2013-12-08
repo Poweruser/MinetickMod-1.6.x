@@ -26,7 +26,6 @@ public class Profiler {
             this.writeInterval = 1;
             this.writeToFile = false;
         }
-        System.out.println("MTM_PROFILER: " + logInterval + " - "+ writeToFile + " - " + writeInterval);
         this.worldAvgsHaveChanged = false;
 		this.map = Collections.synchronizedMap(new HashMap<String, Profile>());
 	}
