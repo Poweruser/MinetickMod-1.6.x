@@ -3,6 +3,9 @@ package net.minecraft.server;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.minetick.packetbuilder.PacketBuilderThreadPool;
+import de.minetick.packetbuilder.jobs.PBJob51MapChunk;
+
 public class PlayerChunk { // Poweruser - added public
 
     private final List b;
@@ -77,7 +80,8 @@ public class PlayerChunk { // Poweruser - added public
         if (this.b.contains(entityplayer)) {
             Chunk chunk = PlayerChunkMap.a(this.playerChunkMap).getChunkAt(this.location.x, this.location.z);
 
-            entityplayer.playerConnection.sendPacket(new Packet51MapChunk(chunk, true, 0));
+            //entityplayer.playerConnection.sendPacket(new Packet51MapChunk(chunk, true, 0));
+            PacketBuilderThreadPool.addJobStatic(new PBJob51MapChunk(entityplayer.playerConnection, chunk, true, 0)); // Poweruser
             this.b.remove(entityplayer);
             entityplayer.chunkCoordIntPairQueue.remove(this.location);
             if (this.b.isEmpty()) {
@@ -153,7 +157,17 @@ public class PlayerChunk { // Poweruser - added public
                 if (this.dirtyCount == 64) {
                     i = this.location.x * 16;
                     j = this.location.z * 16;
-                    this.sendAll(new Packet51MapChunk(PlayerChunkMap.a(this.playerChunkMap).getChunkAt(this.location.x, this.location.z), (this.f == 0xFFFF), this.f)); // CraftBukkit - send everything (including biome) if all sections flagged
+                    //this.sendAll(new Packet51MapChunk(PlayerChunkMap.a(this.playerChunkMap).getChunkAt(this.location.x, this.location.z), (this.f == 0xFFFF), this.f)); // CraftBukkit - send everything (including biome) if all sections flagged
+                    // Poweruser start
+                    ArrayList<PlayerConnection> players = new ArrayList<PlayerConnection>();
+                    for(int index = 0; index < this.b.size(); index++) {
+                        EntityPlayer entityplayer = (EntityPlayer) this.b.get(index);
+                        if (!entityplayer.chunkCoordIntPairQueue.contains(this.location)) {
+                            players.add(entityplayer.playerConnection);
+                        }
+                    }
+                    PacketBuilderThreadPool.addJobStatic(new PBJob51MapChunk(players, PlayerChunkMap.a(this.playerChunkMap).getChunkAt(this.location.x, this.location.z), (this.f == 0xFFFF), this.f));
+                    // Poweruser
 
                     for (k = 0; k < 16; ++k) {
                         if ((this.f & 1 << k) != 0) {

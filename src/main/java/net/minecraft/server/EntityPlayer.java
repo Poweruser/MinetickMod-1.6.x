@@ -21,6 +21,9 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 // CraftBukkit end
 
+import de.minetick.packetbuilder.PacketBuilderThreadPool;
+import de.minetick.packetbuilder.jobs.PBJob56MapChunkBulk;
+
 public class EntityPlayer extends EntityHuman implements ICrafting {
 
     private String locale = "en_US";
@@ -185,39 +188,44 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         }
 
         if (!this.chunkCoordIntPairQueue.isEmpty()) {
-            ArrayList arraylist = new ArrayList();
+            //ArrayList arraylist = new ArrayList();
             Iterator iterator1 = this.chunkCoordIntPairQueue.iterator();
-            ArrayList arraylist1 = new ArrayList();
+            //ArrayList arraylist1 = new ArrayList();
+            //while (iterator1.hasNext() && arraylist.size() < 5) {
+            while (iterator1.hasNext()) { // Poweruser
+                ArrayList arraylist = new ArrayList();
+                ArrayList arraylist1 = new ArrayList();
+                while (iterator1.hasNext() && arraylist.size() < 5) { // Poweruser
+                    ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) iterator1.next();
 
-            while (iterator1.hasNext() && arraylist.size() < 5) {
-                ChunkCoordIntPair chunkcoordintpair = (ChunkCoordIntPair) iterator1.next();
-
-                iterator1.remove();
-                if (chunkcoordintpair != null && this.world.isLoaded(chunkcoordintpair.x << 4, 0, chunkcoordintpair.z << 4)) {
-                    // CraftBukkit start - Get tile entities directly from the chunk instead of the world
-                    Chunk chunk = this.world.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
-                    arraylist.add(chunk);
-                    arraylist1.addAll(chunk.tileEntities.values());
-                    // CraftBukkit end
-                }
-            }
-
-            if (!arraylist.isEmpty()) {
-                this.playerConnection.sendPacket(new Packet56MapChunkBulk(arraylist));
-                Iterator iterator2 = arraylist1.iterator();
-
-                while (iterator2.hasNext()) {
-                    TileEntity tileentity = (TileEntity) iterator2.next();
-
-                    this.b(tileentity);
+                    iterator1.remove();
+                    if (chunkcoordintpair != null && this.world.isLoaded(chunkcoordintpair.x << 4, 0, chunkcoordintpair.z << 4)) {
+                        // CraftBukkit start - Get tile entities directly from the chunk instead of the world
+                        Chunk chunk = this.world.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
+                        arraylist.add(chunk);
+                        arraylist1.addAll(chunk.tileEntities.values());
+                        // CraftBukkit end
+                    }
                 }
 
-                iterator2 = arraylist.iterator();
+                if (!arraylist.isEmpty()) {
+                    //this.playerConnection.sendPacket(new Packet56MapChunkBulk(arraylist));
+                    PacketBuilderThreadPool.addJobStatic(new PBJob56MapChunkBulk(this.playerConnection, arraylist));
+                    Iterator iterator2 = arraylist1.iterator();
 
-                while (iterator2.hasNext()) {
-                    Chunk chunk = (Chunk) iterator2.next();
+                    while (iterator2.hasNext()) {
+                        TileEntity tileentity = (TileEntity) iterator2.next();
 
-                    this.p().getTracker().a(this, chunk);
+                        this.b(tileentity);
+                    }
+
+                    iterator2 = arraylist.iterator();
+
+                    while (iterator2.hasNext()) {
+                        Chunk chunk = (Chunk) iterator2.next();
+
+                        this.p().getTracker().a(this, chunk);
+                    }
                 }
             }
         }
