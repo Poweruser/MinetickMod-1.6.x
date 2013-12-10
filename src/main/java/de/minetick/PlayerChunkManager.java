@@ -110,28 +110,35 @@ public class PlayerChunkManager {
             buff.updatePos(entityplayer);
             int playerChunkPosX = (int) entityplayer.locX >> 4;
             int playerChunkPosZ = (int) entityplayer.locZ >> 4;
-            buff.checkBorderChunks(playerChunkPosX, playerChunkPosZ, this.pcm.getViewDistance());
-            PriorityQueue<ChunkCoordIntPair> queue = buff.getCurrentQueue();
-            while(queue.size() > 0 && buff.loadedChunks < 40 && buff.skippedChunks < 1) {
-                ChunkCoordIntPair p = queue.poll();
-                playerChunkPosX = (int) entityplayer.locX >> 4;
-                playerChunkPosZ = (int) entityplayer.locZ >> 4;
-                ChunkPosEnum chunkPos = this.isWithinRadius(p.x, p.z, playerChunkPosX, playerChunkPosZ, this.pcm.getViewDistance());
-                if(chunkPos.equals(ChunkPosEnum.OUTSIDE)) {
-                    buff.remove(p);
-                    continue;
-                } else if(chunkPos.equals(ChunkPosEnum.BORDER)) {
-                    buff.remove(p);
-                    buff.addBorderChunk(p);
+
+            // High priority chunks
+            PriorityQueue<ChunkCoordIntPair> queue = buff.getHighPriorityQueue();
+            while(queue.size() > 0) {
+                ChunkCoordIntPair ccip = queue.poll();
+                ChunkPosEnum chunkPos = this.checkChunkPosition(buff, ccip, playerChunkPosX, playerChunkPosZ);
+                if(chunkPos.equals(ChunkPosEnum.OUTSIDE) || chunkPos.equals(ChunkPosEnum.BORDER)) {
                     continue;
                 }
-                boolean exists = this.world.chunkExists(p.x, p.z);
-                if(!exists && (!allowGeneration || this.skipChunkGeneration || allGenerated > (this.world.getWorldData().getType().equals(WorldType.FLAT) ? 1 : 0))) {
-                    buff.skippedChunks++;
-                } else {
-                    PlayerChunk c = this.pcm.a(p.x, p.z, false);
+                PlayerChunk c = this.pcm.a(ccip.x, ccip.z, true);
+                c.a(entityplayer);
+                buff.loadedChunks++;
+                buff.remove(ccip);
+            }
+
+            buff.checkBorderChunks(playerChunkPosX, playerChunkPosZ, this.pcm.getViewDistance());
+
+            // Low priority chunks
+            queue = buff.getLowPriorityQueue();
+            while(queue.size() > 0 && buff.loadedChunks < 80 && buff.skippedChunks < 1) {
+                ChunkCoordIntPair ccip = queue.poll();
+                ChunkPosEnum chunkPos = this.checkChunkPosition(buff, ccip, playerChunkPosX, playerChunkPosZ);
+                if(chunkPos.equals(ChunkPosEnum.OUTSIDE) || chunkPos.equals(ChunkPosEnum.BORDER)) {
+                    continue;
+                }
+                if(allowGeneration && !this.skipChunkGeneration && allGenerated <= (this.world.getWorldData().getType().equals(WorldType.FLAT) ? 1 : 0)) {
+                    PlayerChunk c = this.pcm.a(ccip.x, ccip.z, false);
                     if(c == null) {
-                        c = this.pcm.a(p.x, p.z, true);
+                        c = this.pcm.a(ccip.x, ccip.z, true);
                         c.a(entityplayer);
                         if(c.isNewChunk()) {
                             buff.generatedChunks++;
@@ -143,7 +150,9 @@ public class PlayerChunkManager {
                         c.a(entityplayer);
                         buff.enlistedChunks++;
                     }
-                    buff.remove(p);
+                    buff.remove(ccip);
+                } else {
+                    buff.skippedChunks++;
                 }
             }
             if(buff.generatedChunks > 0 || buff.loadedChunks > 0 || buff.enlistedChunks > 0) {
@@ -179,5 +188,24 @@ public class PlayerChunkManager {
         INSIDE,
         BORDER,
         OUTSIDE;
+    }
+
+    public boolean doAllCornersOfPlayerAreaExist(int x, int z, int radius) {
+        boolean exists = this.world.chunkExists(x - radius, z - radius);
+        exists = exists && this.world.chunkExists(x + radius, z + radius);
+        if(!exists) { return false; }
+        exists = exists && this.world.chunkExists(x - radius, z + radius);
+        return exists && this.world.chunkExists(x + radius, z - radius);
+    }
+
+    public ChunkPosEnum checkChunkPosition(PlayerChunkBuffer buffer, ChunkCoordIntPair ccip, int playerX, int playerZ) {
+        ChunkPosEnum chunkPos = this.isWithinRadius(ccip.x, ccip.z, playerX, playerZ, this.pcm.getViewDistance());
+        if(chunkPos.equals(ChunkPosEnum.OUTSIDE)) {
+            buffer.remove(ccip);
+        } else if(chunkPos.equals(ChunkPosEnum.BORDER)) {
+            buffer.remove(ccip);
+            buffer.addBorderChunk(ccip);
+        }
+        return chunkPos;
     }
 }

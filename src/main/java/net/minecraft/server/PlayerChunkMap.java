@@ -141,28 +141,31 @@ public class PlayerChunkMap {
         PlayerChunkBuffer buffer = this.playerChunkManager.addPlayer(entityplayer); // Poweruser
         // CraftBukkit start - Load nearby chunks first
         //List<ChunkCoordIntPair> chunkList = new LinkedList<ChunkCoordIntPair>();
+        List<ChunkCoordIntPair> chunkList = new ArrayList<ChunkCoordIntPair>(450); // Poweruser
+        boolean areaExists = this.playerChunkManager.doAllCornersOfPlayerAreaExist(i, j, this.f);
         for (int k = i - this.f; k <= i + this.f; ++k) {
             for (int l = j - this.f; l <= j + this.f; ++l) {
-                //chunkList.add(new ChunkCoordIntPair(k, l));
                 // Poweruser start
-                if(this.playerChunkManager.skipChunkGeneration() || !this.world.chunkExists(k, l)) {
-                    buffer.add(new ChunkCoordIntPair(k, l));
+                ChunkCoordIntPair ccip = new ChunkCoordIntPair(k, l);
+                if(areaExists) {
+                    if(this.a(k, l, i, j, 5)) {
+                        chunkList.add(ccip);
+                    } else {
+                        buffer.addHighPriorityChunk(ccip);
+                    }
                 } else {
-                    PlayerChunk d = this.a(k, l, true);
-                    d.a(entityplayer);
+                    buffer.addLowPriorityChunk(ccip);
                 }
                 // Poweruser end
             }
         }
 
-        /*
         Collections.sort(chunkList, new ChunkCoordComparator(entityplayer));
         for (ChunkCoordIntPair pair : chunkList) {
             this.a(pair.x, pair.z, true).a(entityplayer);
         }
         // CraftBukkit end
 
-        */
         this.managedPlayers.add(entityplayer);
 
         //this.b(entityplayer);
@@ -264,27 +267,29 @@ public class PlayerChunkMap {
             int j1 = i - k;
             int k1 = j - l;
            // List<ChunkCoordIntPair> chunksToLoad = new LinkedList<ChunkCoordIntPair>(); // CraftBukkit
-
             if (j1 != 0 || k1 != 0) {
+                boolean areaExists = this.playerChunkManager.doAllCornersOfPlayerAreaExist(i, j, this.f); // Poweruser
                 PlayerChunkBuffer buffer = this.playerChunkManager.getChunkBuffer(entityplayer); // Poweruser
                 for (int l1 = i - i1; l1 <= i + i1; ++l1) {
                     for (int i2 = j - i1; i2 <= j + i1; ++i2) {
+                        ChunkCoordIntPair ccip; // Poweruser
                         if (!this.a(l1, i2, k, l, i1)) {
                             //chunksToLoad.add(new ChunkCoordIntPair(l1, i2)); // CraftBukkit
-                            buffer.add(new ChunkCoordIntPair(l1, i2)); // Poweruser
+                            // Poweruser start
+                            ccip = new ChunkCoordIntPair(l1, i2);
+                            if(areaExists) {
+                                buffer.addHighPriorityChunk(ccip);
+                            } else {
+                                buffer.addLowPriorityChunk(ccip);
+                            }
+                            // Poweruser end
                         }
 
                         if (!this.a(l1 - j1, i2 - k1, i, j, i1)) {
                             PlayerChunk playerchunk = this.a(l1 - j1, i2 - k1, false);
-                            ChunkCoordIntPair ccip; // Poweruser
                             if (playerchunk != null) {
                                 playerchunk.b(entityplayer);
-                            // Poweruser start
-                                ccip = PlayerChunk.a(playerchunk);
-                            } else {
-                                ccip = new ChunkCoordIntPair(l1 - j1, i2 - k1);
                             }
-                            // Poweruser end
                         }
                     }
                 }

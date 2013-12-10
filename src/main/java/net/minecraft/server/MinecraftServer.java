@@ -35,6 +35,7 @@ import org.bukkit.event.world.WorldSaveEvent;
 // CraftBukkit end
 
 import de.minetick.ThreadPool;
+import de.minetick.packetbuilder.PacketBuilderThreadPool;
 import de.minetick.profiler.ProfilingComperator;
 
 public abstract class MinecraftServer implements ICommandListener, Runnable, IMojangStatistics {
@@ -101,6 +102,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
 
     // Poweruser start
     public ThreadPool threadPool;
+    private PacketBuilderThreadPool pbt = new PacketBuilderThreadPool(8);
     private WorldServer sortedWorldsArray[] = null;
     private PriorityQueue<WorldServer> priQueue = new PriorityQueue<WorldServer>(20, new ProfilingComperator());
 
@@ -548,6 +550,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
             try {
                 // Poweruser start
                 this.threadPool.shutdown();
+                this.pbt.shutdown();
                 // Poweruser end
                 this.stop();
                 this.isStopped = true;

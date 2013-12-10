@@ -12,8 +12,9 @@ import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.ChunkCoordIntPair;
 
 public class PlayerChunkBuffer {
-    private LinkedHashSet<ChunkCoordIntPair> playerChunkBuffer;
     private LinkedHashSet<ChunkCoordIntPair> uncertainBorderChunks;
+    private LinkedHashSet<ChunkCoordIntPair> lowPriorityBuffer;
+    private LinkedHashSet<ChunkCoordIntPair> highPriorityBuffer;
     public PriorityQueue<ChunkCoordIntPair> pq;
     public ChunkCoordComparator comp;
     public int generatedChunks = 0;
@@ -24,7 +25,8 @@ public class PlayerChunkBuffer {
 
     public PlayerChunkBuffer(PlayerChunkManager playerChunkManager, EntityPlayer ent) {
         this.playerChunkManager = playerChunkManager;
-        this.playerChunkBuffer = new LinkedHashSet<ChunkCoordIntPair>();
+        this.lowPriorityBuffer = new LinkedHashSet<ChunkCoordIntPair>();
+        this.highPriorityBuffer = new LinkedHashSet<ChunkCoordIntPair>();
         this.uncertainBorderChunks = new LinkedHashSet<ChunkCoordIntPair>();
         this.comp = new ChunkCoordComparator(ent);
         this.pq = new PriorityQueue<ChunkCoordIntPair>(750, this.comp);
@@ -36,20 +38,29 @@ public class PlayerChunkBuffer {
     }
 
     public void clear() {
-        this.playerChunkBuffer.clear();
+        this.lowPriorityBuffer.clear();
+        this.highPriorityBuffer.clear();
         this.pq.clear();
     }
     
     public boolean isEmpty() {
-        return this.playerChunkBuffer.isEmpty();
+        return this.lowPriorityBuffer.isEmpty() && this.highPriorityBuffer.isEmpty();
     }
     
-    public LinkedHashSet<ChunkCoordIntPair> getPlayerChunkBuffer() {
-        return this.playerChunkBuffer;
+    public LinkedHashSet<ChunkCoordIntPair> getLowPriorityBuffer() {
+        return this.lowPriorityBuffer;
+    }
+
+    public LinkedHashSet<ChunkCoordIntPair> getHighPriorityBuffer() {
+        return this.highPriorityBuffer;
+    }
+
+    public void addLowPriorityChunk(ChunkCoordIntPair ccip) {
+        this.lowPriorityBuffer.add(ccip);
     }
     
-    public void add(ChunkCoordIntPair ccip) {
-        this.playerChunkBuffer.add(ccip);
+    public void addHighPriorityChunk(ChunkCoordIntPair ccip) {
+        this.highPriorityBuffer.add(ccip);
     }
     
     public void addBorderChunk(ChunkCoordIntPair ccip) {
@@ -57,16 +68,23 @@ public class PlayerChunkBuffer {
     }
 
     public void remove(ChunkCoordIntPair ccip) {
-        this.playerChunkBuffer.remove(ccip);
+        this.lowPriorityBuffer.remove(ccip);
+        this.highPriorityBuffer.remove(ccip);
     }
     
     public boolean contains(ChunkCoordIntPair ccip) {
-        return this.playerChunkBuffer.contains(ccip);
+        return this.lowPriorityBuffer.contains(ccip) || this.highPriorityBuffer.contains(ccip);
     }
 
-    public PriorityQueue<ChunkCoordIntPair> getCurrentQueue() {
+    public PriorityQueue<ChunkCoordIntPair> getLowPriorityQueue() {
         this.pq.clear();
-        this.pq.addAll(this.playerChunkBuffer);
+        this.pq.addAll(this.lowPriorityBuffer);
+        return this.pq;
+    }
+
+    public PriorityQueue<ChunkCoordIntPair> getHighPriorityQueue() {
+        this.pq.clear();
+        this.pq.addAll(this.highPriorityBuffer);
         return this.pq;
     }
 
@@ -85,7 +103,7 @@ public class PlayerChunkBuffer {
             if(pos.equals(ChunkPosEnum.OUTSIDE)) {
                 iter.remove();
             } else if(pos.equals(ChunkPosEnum.INSIDE)) {
-                this.playerChunkBuffer.add(ccip);
+                this.addLowPriorityChunk(ccip);
                 iter.remove();
             }
         }
