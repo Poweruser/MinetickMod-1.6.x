@@ -27,7 +27,8 @@ public class BlockDragonEgg extends Block {
         if (BlockSand.canFall(world, i, j - 1, k) && j >= 0) {
             byte b0 = 32;
 
-            if (!BlockSand.instaFall && world.e(i - b0, j - b0, k - b0, i + b0, j + b0, k + b0)) {
+            //if (!BlockSand.instaFall && world.e(i - b0, j - b0, k - b0, i + b0, j + b0, k + b0)) {
+            if (!BlockSand.isInstantFallOn(world) && world.e(i - b0, j - b0, k - b0, i + b0, j + b0, k + b0)) { // Poweruser
                 // CraftBukkit - added data
                 EntityFallingBlock entityfallingblock = new EntityFallingBlock(world, (double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), this.id, world.getData(i, j, k));
 
