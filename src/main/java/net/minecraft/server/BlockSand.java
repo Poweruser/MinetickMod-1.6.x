@@ -1,10 +1,28 @@
 package net.minecraft.server;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 public class BlockSand extends Block {
 
-    public static boolean instaFall;
+    //public static boolean instaFall;
+    // Poweruser start
+    private static Set<World> instantFall = Collections.synchronizedSet(new HashSet<World>());
+
+    public static void setInstantFall(World world) {
+        instantFall.add(world);
+    }
+
+    public static void unSetInstantFall(World world) {
+        instantFall.remove(world);
+    }
+
+    public static boolean isInstantFallOn(World world) {
+        return instantFall.contains(world);
+    }
+    // Poweruser end
 
     public BlockSand(int i) {
         super(i, Material.SAND);
@@ -33,7 +51,8 @@ public class BlockSand extends Block {
         if (canFall(world, i, j - 1, k) && j >= 0) {
             byte b0 = 32;
 
-            if (!instaFall && world.e(i - b0, j - b0, k - b0, i + b0, j + b0, k + b0)) {
+            //if (!instaFall && world.e(i - b0, j - b0, k - b0, i + b0, j + b0, k + b0)) {
+            if (!isInstantFallOn(world) && world.e(i - b0, j - b0, k - b0, i + b0, j + b0, k + b0)) { // Poweruser
                 if (!world.isStatic) {
                     EntityFallingBlock entityfallingblock = new EntityFallingBlock(world, (double) ((float) i + 0.5F), (double) ((float) j + 0.5F), (double) ((float) k + 0.5F), this.id, world.getData(i, j, k));
 
