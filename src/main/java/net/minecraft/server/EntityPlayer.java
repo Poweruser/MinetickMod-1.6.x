@@ -188,11 +188,10 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         }
 
         if (!this.chunkCoordIntPairQueue.isEmpty()) {
-            //ArrayList arraylist = new ArrayList();
             Iterator iterator1 = this.chunkCoordIntPairQueue.iterator();
-            //ArrayList arraylist1 = new ArrayList();
-            //while (iterator1.hasNext() && arraylist.size() < 5) {
-            while (iterator1.hasNext()) { // Poweruser
+            int i = 0;
+            // while (iterator1.hasNext()) {
+            while (iterator1.hasNext() && i++ < 3) { // Poweruser
                 ArrayList arraylist = new ArrayList();
                 ArrayList arraylist1 = new ArrayList();
                 while (iterator1.hasNext() && arraylist.size() < 5) { // Poweruser
