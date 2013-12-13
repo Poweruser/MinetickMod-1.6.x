@@ -102,7 +102,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
 
     // Poweruser start
     public ThreadPool threadPool;
-    private PacketBuilderThreadPool pbt = new PacketBuilderThreadPool(8);
+    private PacketBuilderThreadPool pbt = new PacketBuilderThreadPool((Runtime.getRuntime().availableProcessors() * 3) / 4);
     private WorldServer sortedWorldsArray[] = null;
     private PriorityQueue<WorldServer> priQueue = new PriorityQueue<WorldServer>(20, new ProfilingComperator());
 

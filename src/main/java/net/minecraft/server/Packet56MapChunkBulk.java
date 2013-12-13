@@ -8,6 +8,8 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import de.minetick.packetbuilder.PacketBuilderBuffer;
+
 public class Packet56MapChunkBulk extends Packet {
 
     private int[] c;
@@ -18,20 +20,34 @@ public class Packet56MapChunkBulk extends Packet {
     private byte[][] inflatedBuffers;
     private int size;
     private boolean h;
-    private byte[] buildBuffer = new byte[0]; // CraftBukkit - remove static
+    //private byte[] buildBuffer = new byte[0]; // CraftBukkit - remove static
+    // Poweruser start
+    private byte[] buildBuffer;
+    private PacketBuilderBuffer pbb;
+    // Poweruser end
+
     // CraftBukkit start
     static final ThreadLocal<Deflater> localDeflater = new ThreadLocal<Deflater>() {
         @Override
         protected Deflater initialValue() {
             // Don't use higher compression level, slows things down too much
-            return new Deflater(6);
+            /*
+             * Default was 6, but as compression is run in seperate threads now
+             * a higher compression can be afforded
+             */
+            return new Deflater(8);
         }
     };
     // CraftBukkit end
 
     public Packet56MapChunkBulk() {}
 
-    public Packet56MapChunkBulk(List list) {
+    //public Packet56MapChunkBulk(List list) {
+    // Poweruser start
+    public Packet56MapChunkBulk(PacketBuilderBuffer pbb, List list) {
+        this.pbb = pbb;
+        this.buildBuffer = this.pbb.requestBuildBuffer(196864);
+    // Poweruser end
         int i = list.size();
 
         this.c = new int[i];
@@ -44,13 +60,19 @@ public class Packet56MapChunkBulk extends Packet {
 
         for (int k = 0; k < i; ++k) {
             Chunk chunk = (Chunk) list.get(k);
-            ChunkMap chunkmap = Packet51MapChunk.a(chunk, true, '\uffff');
+            ChunkMap chunkmap = Packet51MapChunk.a(this.pbb, chunk, true, '\uffff');
 
             if (buildBuffer.length < j + chunkmap.a.length) {
+                /*
                 byte[] abyte = new byte[j + chunkmap.a.length];
 
                 System.arraycopy(buildBuffer, 0, abyte, 0, buildBuffer.length);
                 buildBuffer = abyte;
+                */
+                // Poweruser start
+                this.pbb.offerBuildBuffer(this.buildBuffer);
+                this.buildBuffer = this.pbb.requestBuildBufferAndCopy(j + chunkmap.a.length, this.buildBuffer);
+                // Poweruser end
             }
 
             System.arraycopy(chunkmap.a, 0, buildBuffer, j, chunkmap.a.length);
@@ -61,6 +83,8 @@ public class Packet56MapChunkBulk extends Packet {
             this.b[k] = chunkmap.c;
             this.inflatedBuffers[k] = chunkmap.a;
         }
+
+        this.compress(); // Poweruser
 
         /* CraftBukkit start - Moved to compress()
         Deflater deflater = new Deflater(-1);
@@ -87,8 +111,13 @@ public class Packet56MapChunkBulk extends Packet {
         deflater.setInput(this.buildBuffer);
         deflater.finish();
 
-        this.buffer = new byte[this.buildBuffer.length + 100];
+        //this.buffer = new byte[this.buildBuffer.length + 100];
+        this.buffer = this.pbb.requestSendBuffer(this.buildBuffer.length + 100); // Poweruser
         this.size = deflater.deflate(this.buffer);
+        // Poweruser start
+        this.pbb.offerBuildBuffer(this.buildBuffer);
+        this.buildBuffer = null;
+        // Poweruser end
     }
     // CraftBukkit end
 
@@ -102,12 +131,19 @@ public class Packet56MapChunkBulk extends Packet {
         this.a = new int[short1];
         this.b = new int[short1];
         this.inflatedBuffers = new byte[short1][];
-        if (buildBuffer.length < this.size) {
-            buildBuffer = new byte[this.size];
+        boolean newBuildBuffer = false; // Poweruser
+        //if (buildBuffer.length < this.size) {
+        if(buildBuffer == null || buildBuffer.length < this.size) { // Poweruser
+            //buildBuffer = new byte[this.size];
+            // Poweruser start
+            buildBuffer = this.pbb.requestBuildBuffer(this.size);
+            newBuildBuffer = true;
+            // Poweruser end
         }
 
         datainput.readFully(buildBuffer, 0, this.size);
-        byte[] abyte = new byte[196864 * short1];
+        //byte[] abyte = new byte[196864 * short1];
+        byte[] abyte = this.pbb.requestBuildBuffer(196864 * short1); // Poweruser
         Inflater inflater = new Inflater();
 
         inflater.setInput(buildBuffer, 0, this.size);
@@ -147,10 +183,17 @@ public class Packet56MapChunkBulk extends Packet {
             System.arraycopy(abyte, i, this.inflatedBuffers[j], 0, i1);
             i += i1;
         }
+        // Poweruser start
+        this.pbb.offerBuildBuffer(abyte);
+        abyte = null;
+        if(newBuildBuffer) {
+            this.pbb.offerBuildBuffer(buildBuffer);
+            buildBuffer = null;
+        }
     }
 
     public void a(DataOutput dataoutput) throws IOException { // CraftBukkit - throws IOException
-        compress(); // CraftBukkit
+        //compress(); // CraftBukkit  // Poweruser - moved back to the constructor
         dataoutput.writeShort(this.c.length);
         dataoutput.writeInt(this.size);
         dataoutput.writeBoolean(this.h);
@@ -162,6 +205,11 @@ public class Packet56MapChunkBulk extends Packet {
             dataoutput.writeShort((short) (this.a[i] & '\uffff'));
             dataoutput.writeShort((short) (this.b[i] & '\uffff'));
         }
+
+        // Poweruser start
+        this.pbb.offerSendBuffer(this.buffer);
+        this.pbb = null;
+        // Poweruser end
     }
 
     public void handle(Connection connection) {

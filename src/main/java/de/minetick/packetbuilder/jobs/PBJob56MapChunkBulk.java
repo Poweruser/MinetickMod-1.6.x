@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.server.Chunk;
 import net.minecraft.server.Packet56MapChunkBulk;
 import net.minecraft.server.PlayerConnection;
+import de.minetick.packetbuilder.PacketBuilderBuffer;
 import de.minetick.packetbuilder.PacketBuilderJobInterface;
 
 public class PBJob56MapChunkBulk implements PacketBuilderJobInterface {
@@ -18,8 +19,8 @@ public class PBJob56MapChunkBulk implements PacketBuilderJobInterface {
     }
     
     @Override
-    public void buildAndSendPacket() {
-        this.connection.sendPacket(new Packet56MapChunkBulk(this.chunks));
+    public void buildAndSendPacket(PacketBuilderBuffer pbb) {
+        this.connection.sendPacket(new Packet56MapChunkBulk(pbb, this.chunks));
         this.chunks = null;
         this.connection = null;
     }
