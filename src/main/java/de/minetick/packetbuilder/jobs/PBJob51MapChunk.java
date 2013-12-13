@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.minecraft.server.Chunk;
 import net.minecraft.server.Packet51MapChunk;
 import net.minecraft.server.PlayerConnection;
+import de.minetick.packetbuilder.PacketBuilderBuffer;
 import de.minetick.packetbuilder.PacketBuilderJobInterface;
 
 public class PBJob51MapChunk implements PacketBuilderJobInterface {
@@ -34,8 +35,8 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
     }
     
     @Override
-    public void buildAndSendPacket() {
-        Packet51MapChunk packet = new Packet51MapChunk(chunk, flag, i);
+    public void buildAndSendPacket(PacketBuilderBuffer pbb) {
+        Packet51MapChunk packet = new Packet51MapChunk(pbb, chunk, flag, i);
         if(this.multipleConnections) {
             for(int a = 0; a < this.connections.size(); a++) {
                 this.connections.get(a).sendPacket(packet);

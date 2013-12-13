@@ -7,6 +7,8 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import de.minetick.packetbuilder.PacketBuilderBuffer;
+
 public class Packet51MapChunk extends Packet {
 
     public int a;
@@ -24,26 +26,45 @@ public class Packet51MapChunk extends Packet {
         this.lowPriority = true;
     }
 
-    public Packet51MapChunk(Chunk chunk, boolean flag, int i) {
+    //public Packet51MapChunk(Chunk chunk, boolean flag, int i) {
+    // Poweruser start
+    private PacketBuilderBuffer pbb;
+
+    static final ThreadLocal<Deflater> localDef = new ThreadLocal<Deflater>() {
+        @Override
+        protected Deflater initialValue() {
+            /*
+             * Default was 6, but as compression is run in seperate threads now
+             * a higher compression can be afforded
+             */
+            return new Deflater(8);
+        }
+    };
+
+    public Packet51MapChunk(PacketBuilderBuffer pbb, Chunk chunk, boolean flag, int i) {
+        this.pbb = pbb;
+    // Poweruser end
         this.lowPriority = true;
         this.a = chunk.x;
         this.b = chunk.z;
         this.e = flag;
-        ChunkMap chunkmap = a(chunk, flag, i);
-        Deflater deflater = new Deflater(-1);
-        this.buildBuffer = chunkmap.getBuildBuffer(); // Poweruser
+        ChunkMap chunkmap = a(pbb, chunk, flag, i);
+        //Deflater deflater = new Deflater(-1);
+        Deflater deflater = localDef.get(); // Poweruser
 
         this.d = chunkmap.c;
         this.c = chunkmap.b;
 
         try {
             this.inflatedBuffer = chunkmap.a;
+            deflater.reset(); // Poweruser
             deflater.setInput(chunkmap.a, 0, chunkmap.a.length);
             deflater.finish();
-            this.buffer = new byte[chunkmap.a.length];
+            //this.buffer = new byte[chunkmap.a.length];
+            this.buffer = this.pbb.requestSendBuffer(chunkmap.a.length); // Poweruser
             this.size = deflater.deflate(this.buffer);
         } finally {
-            deflater.end();
+            //deflater.end();  // Poweruser - this deflater is going to be recycled
         }
     }
 
@@ -55,7 +76,8 @@ public class Packet51MapChunk extends Packet {
         this.d = datainput.readShort();
         this.size = datainput.readInt();
         if (buildBuffer.length < this.size) {
-            buildBuffer = new byte[this.size];
+            //buildBuffer = new byte[this.size];
+            buildBuffer = this.pbb.requestBuildBuffer(this.size); // Poweruser
         }
 
         datainput.readFully(buildBuffer, 0, this.size);
@@ -76,7 +98,10 @@ public class Packet51MapChunk extends Packet {
         Inflater inflater = new Inflater();
 
         inflater.setInput(buildBuffer, 0, this.size);
-
+        // Poweruser start
+        this.pbb.offerBuildBuffer(this.buildBuffer);
+        this.buildBuffer = null;
+        // Poweruser end
         try {
             inflater.inflate(this.inflatedBuffer);
         } catch (DataFormatException dataformatexception) {
@@ -94,6 +119,12 @@ public class Packet51MapChunk extends Packet {
         dataoutput.writeShort((short) (this.d & '\uffff'));
         dataoutput.writeInt(this.size);
         dataoutput.write(this.buffer, 0, this.size);
+
+        // Poweruser start
+        this.pbb.offerSendBuffer(this.buffer);
+        this.buffer = null;
+        this.pbb = null;
+        // Poweruser end
     }
 
     public void handle(Connection connection) {
@@ -104,13 +135,13 @@ public class Packet51MapChunk extends Packet {
         return 17 + this.size;
     }
 
-    public static ChunkMap a(Chunk chunk, boolean flag, int i) {
+    public static ChunkMap a(PacketBuilderBuffer pbb, Chunk chunk, boolean flag, int i) {
         int j = 0;
         ChunkSection[] achunksection = chunk.i();
         int k = 0;
         ChunkMap chunkmap = new ChunkMap();
         //byte[] abyte = buildBuffer;
-        byte[] abyte = chunkmap.getBuildBuffer(); // Poweruser
+        byte[] abyte = pbb.requestBuildBuffer(196864); // Poweruser
 
         if (flag) {
             chunk.seenByPlayer = true;
@@ -184,6 +215,10 @@ public class Packet51MapChunk extends Packet {
 
         chunkmap.a = new byte[j];
         System.arraycopy(abyte, 0, chunkmap.a, 0, j);
+        // Poweruser start
+        pbb.offerBuildBuffer(abyte);
+        abyte = null;
+        // Poweruser end
         return chunkmap;
     }
 }

@@ -8,11 +8,17 @@ public class PacketBuilderThread extends Observable implements Runnable {
     private boolean active;
     private Object waitObject;
     private Thread thread;
+    private PacketBuilderBuffer buildBuffer;
 
     public PacketBuilderThread() {
         this.active = true;
+        this.buildBuffer = new PacketBuilderBuffer();
         this.waitObject = new Object();
         this.thread = new Thread(this);
+        /*
+         *  These threads create so much cpu load, that they have an impact on the main thread
+         */
+        this.thread.setPriority(Thread.MIN_PRIORITY);
         this.thread.start();
     }
 
@@ -26,7 +32,7 @@ public class PacketBuilderThread extends Observable implements Runnable {
                     } catch (InterruptedException e) {}
                 }
             } else {
-                this.job.buildAndSendPacket();
+                this.job.buildAndSendPacket(this.buildBuffer);
                 this.job = null;
                 this.setChanged();
                 this.notifyObservers();
