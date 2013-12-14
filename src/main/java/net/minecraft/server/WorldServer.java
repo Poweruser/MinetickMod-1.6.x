@@ -63,7 +63,7 @@ public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
     }
 
     public int loadAndGenerateChunks() {
-        if(this.manager.hasChunksWaiting() && this.players.size() > 0) {
+        if(this.players.size() > 0) {
             return this.manager.updatePlayers(this.isChunkGenerationAllowed());
         } else {
             return 0;

@@ -21,6 +21,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 // CraftBukkit end
 
+import de.minetick.PlayerChunkSendQueue;
 import de.minetick.packetbuilder.PacketBuilderThreadPool;
 import de.minetick.packetbuilder.jobs.PBJob56MapChunkBulk;
 
@@ -32,7 +33,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public PlayerInteractManager playerInteractManager;
     public double d;
     public double e;
-    public final List chunkCoordIntPairQueue = new LinkedList();
+    //public final List chunkCoordIntPairQueue = new LinkedList();
     public final List removeQueue = new LinkedList();
     private float bO = Float.MIN_VALUE;
     private float bP = -1.0E8F;
@@ -58,6 +59,17 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public boolean keepLevel = false;
     public double maxHealthCache;
     // CraftBukkit end
+
+    // Poweruser start
+    public PlayerChunkSendQueue chunkQueue;
+
+    public void setPlayerChunkSendQueue(PlayerChunkSendQueue pcsq) {
+        if(this.chunkQueue != null) {
+            this.chunkQueue.clear();
+        }
+        this.chunkQueue = pcsq;
+    }
+    // Poweruser end
 
     public EntityPlayer(MinecraftServer minecraftserver, World world, String s, PlayerInteractManager playerinteractmanager) {
         super(world, s);
@@ -187,6 +199,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
             this.playerConnection.sendPacket(new Packet29DestroyEntity(aint));
         }
 
+        /*
         if (!this.chunkCoordIntPairQueue.isEmpty()) {
             Iterator iterator1 = this.chunkCoordIntPairQueue.iterator();
             int i = 0;
@@ -394,6 +407,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
                 return super.damageEntity(damagesource, f);
             }
         }
+        */
     }
 
     public boolean a(EntityHuman entityhuman) {
@@ -435,7 +449,8 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         }
     }
 
-    private void b(TileEntity tileentity) {
+    //private void b(TileEntity tileentity) {
+    public void b(TileEntity tileentity) { // Poweruser
         if (tileentity != null) {
             Packet packet = tileentity.getUpdatePacket();
 
