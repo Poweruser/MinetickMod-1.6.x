@@ -3,6 +3,7 @@ package net.minecraft.server;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.minetick.PlayerChunkSendQueue;
 import de.minetick.packetbuilder.PacketBuilderThreadPool;
 import de.minetick.packetbuilder.jobs.PBJob51MapChunk;
 
@@ -24,6 +25,10 @@ public class PlayerChunk { // Poweruser - added public
         boolean out = this.newChunk;
         this.newChunk = false;
         return out;
+    }
+
+    public boolean isLoaded() {
+        return this.loaded;
     }
     // Poweruser end
 
@@ -61,6 +66,7 @@ public class PlayerChunk { // Poweruser - added public
 
             this.b.add(entityplayer);
 
+/* Poweruser
             // CraftBukkit start
             if (this.loaded) {
                 entityplayer.chunkCoordIntPairQueue.add(this.location);
@@ -73,17 +79,19 @@ public class PlayerChunk { // Poweruser - added public
                 });
             }
             // CraftBukkit end
+*/
         }
     }
 
     public void b(EntityPlayer entityplayer) {
         if (this.b.contains(entityplayer)) {
+            this.b.remove(entityplayer); // Poweruser
             Chunk chunk = PlayerChunkMap.a(this.playerChunkMap).getChunkAt(this.location.x, this.location.z);
 
             //entityplayer.playerConnection.sendPacket(new Packet51MapChunk(chunk, true, 0));
             PacketBuilderThreadPool.addJobStatic(new PBJob51MapChunk(entityplayer.playerConnection, chunk, true, 0)); // Poweruser
-            this.b.remove(entityplayer);
-            entityplayer.chunkCoordIntPairQueue.remove(this.location);
+            //this.b.remove(entityplayer);
+            //entityplayer.chunkCoordIntPairQueue.remove(this.location); // Poweruser
             if (this.b.isEmpty()) {
                 long i = (long) this.location.x + 2147483647L | (long) this.location.z + 2147483647L << 32;
 
@@ -131,8 +139,13 @@ public class PlayerChunk { // Poweruser - added public
         for (int i = 0; i < this.b.size(); ++i) {
             EntityPlayer entityplayer = (EntityPlayer) this.b.get(i);
 
-            if (!entityplayer.chunkCoordIntPairQueue.contains(this.location)) {
-                entityplayer.playerConnection.sendPacket(packet);
+            // Poweruser
+            PlayerChunkSendQueue sq = entityplayer.chunkQueue;
+            if(sq != null) {
+                //if (!entityplayer.chunkCoordIntPairQueue.contains(this.location)) {
+                if(!sq.isAboutToSend(this.location)) { // Poweruser
+                    entityplayer.playerConnection.sendPacket(packet);
+                }
             }
         }
     }
@@ -162,8 +175,11 @@ public class PlayerChunk { // Poweruser - added public
                     ArrayList<PlayerConnection> players = new ArrayList<PlayerConnection>();
                     for(int index = 0; index < this.b.size(); index++) {
                         EntityPlayer entityplayer = (EntityPlayer) this.b.get(index);
-                        if (!entityplayer.chunkCoordIntPairQueue.contains(this.location)) {
-                            players.add(entityplayer.playerConnection);
+                        PlayerChunkSendQueue sq = entityplayer.chunkQueue;
+                        if(sq != null) {
+                            if (!sq.isAboutToSend(this.location)) {
+                                players.add(entityplayer.playerConnection);
+                            }
                         }
                     }
                     PacketBuilderThreadPool.addJobStatic(new PBJob51MapChunk(players, PlayerChunkMap.a(this.playerChunkMap).getChunkAt(this.location.x, this.location.z), (this.f == 0xFFFF), this.f));
@@ -208,7 +224,7 @@ public class PlayerChunk { // Poweruser - added public
         }
     }
 
-    static ChunkCoordIntPair a(PlayerChunk playerchunk) {
+    public static ChunkCoordIntPair a(PlayerChunk playerchunk) {
         return playerchunk.location;
     }
 

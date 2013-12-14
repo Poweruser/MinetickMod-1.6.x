@@ -1,16 +1,23 @@
 package de.minetick;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
+import de.minetick.packetbuilder.PacketBuilderThreadPool;
+import de.minetick.packetbuilder.jobs.PBJob56MapChunkBulk;
+
+import net.minecraft.server.Chunk;
 import net.minecraft.server.ChunkCoordIntPair;
 import net.minecraft.server.PlayerChunk;
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.PlayerChunkMap;
+import net.minecraft.server.TileEntity;
 import net.minecraft.server.WorldData;
 import net.minecraft.server.WorldServer;
 import net.minecraft.server.WorldType;
@@ -20,15 +27,18 @@ public class PlayerChunkManager {
     private List<EntityPlayer> shuffleList = Collections.synchronizedList(new LinkedList<EntityPlayer>());
     private boolean skipChunkGeneration = false;
     private int chunkCreated = 0;
-    private boolean dirtyFlag = false;
     private WorldServer world;
     private PlayerChunkMap pcm;
-    
+
     private Map<String, PlayerChunkBuffer> playerBuff = new HashMap<String, PlayerChunkBuffer>();
 
     public PlayerChunkManager(WorldServer world, PlayerChunkMap pcm) {
         this.world = world;
         this.pcm = pcm;
+    }
+
+    public PlayerChunkMap getPlayerChunkMap() {
+        return this.pcm;
     }
 
     private String getMapKey(EntityPlayer entity) {
@@ -37,22 +47,6 @@ public class PlayerChunkManager {
     
     public PlayerChunkBuffer getChunkBuffer(EntityPlayer entityplayer) {
         return this.playerBuff.get(this.getMapKey(entityplayer));
-    }
-
-    public boolean hasChunksWaiting() {
-        if(this.dirtyFlag) {
-            this.dirtyFlag = false;
-            return true;
-        }
-        if(this.shuffleList.size() == 0) {
-            return false;
-        }
-        for(PlayerChunkBuffer pcb : this.playerBuff.values()) {
-            if(!pcb.isEmpty()) {
-                return true;
-            }
-        }
-        return false;
     }
     
     public PlayerChunkBuffer addPlayer(EntityPlayer entityplayer) {
@@ -110,83 +104,122 @@ public class PlayerChunkManager {
             buff.updatePos(entityplayer);
             int playerChunkPosX = (int) entityplayer.locX >> 4;
             int playerChunkPosZ = (int) entityplayer.locZ >> 4;
+            buff.getPlayerChunkSendQueue().checkServerDataSize(playerChunkPosX, playerChunkPosZ, this.getPlayerChunkMap().getViewDistance(), entityplayer);
 
             // High priority chunks
             PriorityQueue<ChunkCoordIntPair> queue = buff.getHighPriorityQueue();
             while(queue.size() > 0) {
                 ChunkCoordIntPair ccip = queue.poll();
-                ChunkPosEnum chunkPos = this.checkChunkPosition(buff, ccip, playerChunkPosX, playerChunkPosZ);
-                if(chunkPos.equals(ChunkPosEnum.OUTSIDE) || chunkPos.equals(ChunkPosEnum.BORDER)) {
-                    continue;
+                if(buff.getPlayerChunkSendQueue().isOnServer(ccip) && !buff.getPlayerChunkSendQueue().alreadyLoaded(ccip)) {
+                    PlayerChunk c = this.pcm.a(ccip.x, ccip.z, true);
+                    c.a(entityplayer);
+                    if(buff.getPlayerChunkSendQueue().queueForSend(c, entityplayer)) {
+                        buff.loadedChunks++;
+                    }
                 }
-                PlayerChunk c = this.pcm.a(ccip.x, ccip.z, true);
-                c.a(entityplayer);
-                buff.loadedChunks++;
                 buff.remove(ccip);
             }
-
-            buff.checkBorderChunks(playerChunkPosX, playerChunkPosZ, this.pcm.getViewDistance());
 
             // Low priority chunks
             queue = buff.getLowPriorityQueue();
             while(queue.size() > 0 && buff.loadedChunks < 80 && buff.skippedChunks < 1) {
                 ChunkCoordIntPair ccip = queue.poll();
-                ChunkPosEnum chunkPos = this.checkChunkPosition(buff, ccip, playerChunkPosX, playerChunkPosZ);
-                if(chunkPos.equals(ChunkPosEnum.OUTSIDE) || chunkPos.equals(ChunkPosEnum.BORDER)) {
-                    continue;
-                }
-                if(allowGeneration && !this.skipChunkGeneration && allGenerated <= (this.world.getWorldData().getType().equals(WorldType.FLAT) ? 1 : 0)) {
-                    PlayerChunk c = this.pcm.a(ccip.x, ccip.z, false);
-                    if(c == null) {
-                        c = this.pcm.a(ccip.x, ccip.z, true);
-                        c.a(entityplayer);
-                        if(c.isNewChunk()) {
-                            buff.generatedChunks++;
-                            allGenerated++;
+                if(buff.getPlayerChunkSendQueue().isOnServer(ccip) && !buff.getPlayerChunkSendQueue().alreadyLoaded(ccip)) {
+                    if(allowGeneration && !this.skipChunkGeneration && allGenerated <= (this.world.getWorldData().getType().equals(WorldType.FLAT) ? 1 : 0)) {
+                        PlayerChunk c = this.pcm.a(ccip.x, ccip.z, false);
+                        if(c == null) {
+                            c = this.pcm.a(ccip.x, ccip.z, true);
+                            c.a(entityplayer);
+                            if(c.isNewChunk()) {
+                                buff.generatedChunks++;
+                                allGenerated++;
+                            } else {
+                                buff.loadedChunks++;
+                            }
                         } else {
-                            buff.loadedChunks++;
+                            c = this.pcm.a(ccip.x, ccip.z, false);
+                            c.a(entityplayer);
+                            buff.enlistedChunks++;
                         }
+                        buff.getPlayerChunkSendQueue().queueForSend(c, entityplayer);
+                        buff.remove(ccip);
                     } else {
-                        c.a(entityplayer);
-                        buff.enlistedChunks++;
+                        buff.skippedChunks++;
                     }
-                    buff.remove(ccip);
                 } else {
-                    buff.skippedChunks++;
+                    buff.remove(ccip);
                 }
             }
             if(buff.generatedChunks > 0 || buff.loadedChunks > 0 || buff.enlistedChunks > 0) {
-                Collections.sort(entityplayer.chunkCoordIntPairQueue, buff.comp);
+                buff.getPlayerChunkSendQueue().sort(entityplayer);
             }
             if(buff.generatedChunks > 0) {
                 this.shuffleList.remove(entityplayer);
                 this.shuffleList.add(entityplayer);
             }
+            PlayerChunkSendQueue chunkQueue = buff.getPlayerChunkSendQueue();
+
+            // Poweruser start - moved here from EntityPlayer.l_()
+            for(int w = 0; w < 2; w++) { // 2 packets/tick a 4 chunks each
+            ArrayList arraylist = new ArrayList();
+            ArrayList arraylist1 = new ArrayList();
+            int skipped = 0;
+            while(chunkQueue.hasChunksQueued() && arraylist.size() < 4 && skipped < 4) {
+                ChunkCoordIntPair chunkcoordintpair = chunkQueue.peekFirst(); // Poweruser
+                if (chunkcoordintpair != null) {
+                    if(this.world.isLoaded(chunkcoordintpair.x << 4, 0, chunkcoordintpair.z << 4)) {
+                        // CraftBukkit start - Get tile entities directly from the chunk instead of the world
+                        Chunk chunk = this.world.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
+                        arraylist.add(chunk);
+                        arraylist1.addAll(chunk.tileEntities.values());
+                        // CraftBukkit end
+                        chunkQueue.removeFirst(); // Poweruser
+                    } else {
+                        chunkQueue.skipFirst(); // Poweruser
+                        skipped++;
+                        //break;
+                    }
+                }
+            }
+            if (!arraylist.isEmpty()) {
+                //this.playerConnection.sendPacket(new Packet56MapChunkBulk(arraylist));
+                PacketBuilderThreadPool.addJobStatic(new PBJob56MapChunkBulk(entityplayer.playerConnection, arraylist)); // Poweruser
+                Iterator iterator2 = arraylist1.iterator();
+
+                while (iterator2.hasNext()) {
+                    TileEntity tileentity = (TileEntity) iterator2.next();
+
+                    entityplayer.b(tileentity);
+                }
+
+                iterator2 = arraylist.iterator();
+
+                while (iterator2.hasNext()) {
+                    Chunk chunk = (Chunk) iterator2.next();
+
+                    entityplayer.p().getTracker().a(entityplayer, chunk);
+                }
+            }
+            }
+            // Poweruser end
         }
         return allGenerated;
     }
 
-    public ChunkPosEnum isWithinRadius(int positionx, int positionz, int centerx, int centerz, int radius) {
+    public static ChunkPosEnum isWithinRadius(int positionx, int positionz, int centerx, int centerz, int radius) {
         int distancex = positionx - centerx;
         int distancez = positionz - centerz;
 
-        int greaterRadius = radius + 2;
         boolean within = distancex >= -radius && distancex <= radius ? distancez >= -radius && distancez <= radius : false;
         if(within) {
             return ChunkPosEnum.INSIDE;
         } else {
-            boolean boardering = distancex >= -greaterRadius && distancex <= greaterRadius ? distancez >= -greaterRadius && distancez <= greaterRadius : false;
-            if(boardering) {
-                return ChunkPosEnum.BORDER;
-            } else {
-                return ChunkPosEnum.OUTSIDE;
-            }
+            return ChunkPosEnum.OUTSIDE;
         }
     }
 
     public enum ChunkPosEnum {
         INSIDE,
-        BORDER,
         OUTSIDE;
     }
 
@@ -196,16 +229,5 @@ public class PlayerChunkManager {
         if(!exists) { return false; }
         exists = exists && this.world.chunkExists(x - radius, z + radius);
         return exists && this.world.chunkExists(x + radius, z - radius);
-    }
-
-    public ChunkPosEnum checkChunkPosition(PlayerChunkBuffer buffer, ChunkCoordIntPair ccip, int playerX, int playerZ) {
-        ChunkPosEnum chunkPos = this.isWithinRadius(ccip.x, ccip.z, playerX, playerZ, this.pcm.getViewDistance());
-        if(chunkPos.equals(ChunkPosEnum.OUTSIDE)) {
-            buffer.remove(ccip);
-        } else if(chunkPos.equals(ChunkPosEnum.BORDER)) {
-            buffer.remove(ccip);
-            buffer.addBorderChunk(ccip);
-        }
-        return chunkPos;
     }
 }
