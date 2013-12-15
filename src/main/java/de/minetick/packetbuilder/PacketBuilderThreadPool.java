@@ -15,6 +15,7 @@ public class PacketBuilderThreadPool implements Observer {
     private static PacketBuilderThreadPool pool;
     
     public PacketBuilderThreadPool(int poolsize) {
+        poolsize = Math.max(1, poolsize);
         this.availableThreads = new ArrayDeque<PacketBuilderThread>();
         this.allThreads = new ArrayDeque<PacketBuilderThread>();
         this.waitingJobs = new ArrayDeque<PacketBuilderJobInterface>();
