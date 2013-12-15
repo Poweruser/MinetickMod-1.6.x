@@ -17,8 +17,11 @@ public class PacketBuilderThread extends Observable implements Runnable {
         this.thread = new Thread(this);
         /*
          *  These threads create so much cpu load, that they have an impact on the main thread
+         *  Thread.MIN_PRIORITY = 1
+         *  Thread.NORMAL_PRIORITY = 5
+         *  Thread.MAX_PRIORITY = 10
          */
-        this.thread.setPriority(Thread.MIN_PRIORITY);
+        this.thread.setPriority(Thread.NORM_PRIORITY - 2);
         this.thread.start();
     }
 
