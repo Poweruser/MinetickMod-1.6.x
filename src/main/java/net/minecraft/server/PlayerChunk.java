@@ -3,6 +3,8 @@ package net.minecraft.server;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.minetick.PlayerChunkManager;
+import de.minetick.PlayerChunkManager.ChunkPosEnum;
 import de.minetick.PlayerChunkSendQueue;
 import de.minetick.packetbuilder.PacketBuilderThreadPool;
 import de.minetick.packetbuilder.jobs.PBJob51MapChunk;
@@ -65,6 +67,16 @@ public class PlayerChunk { // Poweruser - added public
             }
 
             this.b.add(entityplayer);
+            // Poweruser start - if the chunks, close around the player, are to not yet loaded, do it now
+            if(!this.loaded) {
+                int x = (int) entityplayer.locX >> 4;
+                int z = (int) entityplayer.locZ >> 4;
+                ChunkPosEnum pos = PlayerChunkManager.isWithinRadius(this.location.x, this.location.z, x, z, 1);
+                if(pos.equals(ChunkPosEnum.INSIDE)) {
+                    this.playerChunkMap.a().chunkProviderServer.getChunkAt(this.location.x, this.location.z);
+                }
+            }
+            // Poweruser end
 
 /* Poweruser
             // CraftBukkit start
