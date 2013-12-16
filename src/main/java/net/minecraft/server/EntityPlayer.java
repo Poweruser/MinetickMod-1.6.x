@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -62,6 +63,13 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
 
     // Poweruser start
     public PlayerChunkSendQueue chunkQueue;
+    private List<Chunk> chunksToTrackPlayerIn = new LinkedList<Chunk>();
+
+    public void addChunksToTrackPlayerIn(List<Chunk> chunks) {
+        synchronized(this.chunksToTrackPlayerIn) {
+            this.chunksToTrackPlayerIn.addAll(chunks);
+        }
+    }
 
     public void setPlayerChunkSendQueue(PlayerChunkSendQueue pcsq) {
         if(this.chunkQueue != null) {
@@ -199,6 +207,16 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
             this.playerConnection.sendPacket(new Packet29DestroyEntity(aint));
         }
 
+        // Poweruser start
+        synchronized(this.chunksToTrackPlayerIn) {
+            Iterator<Chunk> iterator2 = this.chunksToTrackPlayerIn.iterator();
+
+            while (iterator2.hasNext()) {
+                Chunk chunk = (Chunk) iterator2.next();
+                iterator2.remove();
+                this.p().getTracker().a(this, chunk);
+            }
+        }
         /*
         if (!this.chunkCoordIntPairQueue.isEmpty()) {
             Iterator iterator1 = this.chunkCoordIntPairQueue.iterator();
@@ -408,6 +426,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
             }
         }
         */
+        // Poweruser end
     }
 
     public boolean a(EntityHuman entityhuman) {
