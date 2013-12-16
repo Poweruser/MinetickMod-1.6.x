@@ -102,7 +102,13 @@ public class PlayerChunkSendQueue {
             this.queue.remove(ccip);
         }
     }
-    
+
+    public void removeFromQueue(ChunkCoordIntPair ccip) {
+        synchronized(this.lock) {
+            this.queue.remove(ccip);
+        }
+    }
+
     public ChunkCoordIntPair peekFirst() {
         ChunkCoordIntPair cc = null;
         synchronized(this.lock) {
@@ -156,5 +162,9 @@ public class PlayerChunkSendQueue {
     
     public boolean isOnServer(ChunkCoordIntPair ccip) {
             return this.serverData.contains(LongHash.toLong(ccip.x, ccip.z));
+    }
+
+    public boolean isOnServer(int x, int z) {
+        return this.serverData.contains(LongHash.toLong(x, z));
     }
 }

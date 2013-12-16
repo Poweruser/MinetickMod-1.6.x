@@ -4,6 +4,7 @@ import java.util.Observable;
 
 public class PacketBuilderThread extends Observable implements Runnable {
 
+    private static final Object checkAndSendLock = new Object();
     private PacketBuilderJobInterface job;
     private boolean active;
     private Object waitObject;
@@ -35,7 +36,7 @@ public class PacketBuilderThread extends Observable implements Runnable {
                     } catch (InterruptedException e) {}
                 }
             } else {
-                this.job.buildAndSendPacket(this.buildBuffer);
+                this.job.buildAndSendPacket(this.buildBuffer, checkAndSendLock);
                 this.job = null;
                 this.setChanged();
                 this.notifyObservers();

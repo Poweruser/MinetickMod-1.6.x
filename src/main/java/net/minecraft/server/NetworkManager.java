@@ -374,4 +374,41 @@ public class NetworkManager implements INetworkManager {
     static Thread h(NetworkManager networkmanager) {
         return networkmanager.u;
     }
+
+    // Poweruser start
+    public SendQueueFillLevel getSendQueueFillLevel() {
+        if(this.z < 131072) { // 128 KB
+            return SendQueueFillLevel.VERYLOW;
+        } else if(this.z < 262144) { // 256 KB
+            return SendQueueFillLevel.LOW;
+        } else if(this.z < 524288) { // 512 KB
+            return SendQueueFillLevel.MEDIUM;
+        } else if(this.z < 1048576) { // 1 MB
+            return SendQueueFillLevel.HIGH;
+        } else { // up to 2 MB, then the client is disconnected with reason: overflow
+            return SendQueueFillLevel.FULL;
+        }
+    }
+
+    public enum SendQueueFillLevel {
+        VERYLOW(0),
+        LOW(1),
+        MEDIUM(2),
+        HIGH(3),
+        FULL(4);
+
+        private int value;
+        private SendQueueFillLevel(int value) {
+            this.value = value;
+        }
+
+        public boolean isLowerThan(SendQueueFillLevel sqfl) {
+            return this.value < sqfl.value;
+        }
+
+        public boolean isEqualOrLowerThan(SendQueueFillLevel sqfl) {
+            return this.value <= sqfl.value;
+        }
+    }
+    // Poweruser end
 }
