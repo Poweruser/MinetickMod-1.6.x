@@ -176,7 +176,7 @@ public class PlayerChunkManager {
             // Poweruser start - moved here from EntityPlayer.l_()
             for(int w = 0; w < packetCount; w++) {
             ArrayList<Chunk> arraylist = new ArrayList<Chunk>();
-            ArrayList arraylist1 = new ArrayList();
+            //ArrayList arraylist1 = new ArrayList();
             int skipped = 0;
             while(chunkQueue.hasChunksQueued() && arraylist.size() < chunksPerPacket && skipped < 4) {
                 ChunkCoordIntPair chunkcoordintpair = chunkQueue.peekFirst(); // Poweruser
@@ -185,7 +185,7 @@ public class PlayerChunkManager {
                         // CraftBukkit start - Get tile entities directly from the chunk instead of the world
                         Chunk chunk = this.world.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
                         arraylist.add(chunk);
-                        arraylist1.addAll(chunk.tileEntities.values());
+                        //arraylist1.addAll(chunk.tileEntities.values());
                         // CraftBukkit end
                         chunkQueue.removeFirst(); // Poweruser
                     } else {
@@ -198,6 +198,7 @@ public class PlayerChunkManager {
             if (!arraylist.isEmpty()) {
                 //this.playerConnection.sendPacket(new Packet56MapChunkBulk(arraylist));
                 PacketBuilderThreadPool.addJobStatic(new PBJob56MapChunkBulk(entityplayer.playerConnection, arraylist, chunkQueue)); // Poweruser
+                /*
                 Iterator iterator2 = arraylist1.iterator();
 
                 while (iterator2.hasNext()) {
@@ -213,6 +214,7 @@ public class PlayerChunkManager {
 
                     entityplayer.p().getTracker().a(entityplayer, chunk);
                 }
+                */
             }
             }
             // Poweruser end

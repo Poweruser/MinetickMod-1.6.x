@@ -1,11 +1,14 @@
 package de.minetick.packetbuilder.jobs;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.server.Chunk;
+import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.Packet56MapChunkBulk;
 import net.minecraft.server.PlayerConnection;
+import net.minecraft.server.TileEntity;
 import de.minetick.PlayerChunkSendQueue;
 import de.minetick.packetbuilder.PacketBuilderBuffer;
 import de.minetick.packetbuilder.PacketBuilderJobInterface;
@@ -40,6 +43,18 @@ public class PBJob56MapChunkBulk implements PacketBuilderJobInterface {
             }
             if(allStillListed) {
                 this.connection.sendPacket(packet);
+                ArrayList arraylist1 = new ArrayList();
+                for(Chunk c : this.chunks) {
+                    arraylist1.addAll(c.tileEntities.values());
+                }
+                Iterator iterator2 = arraylist1.iterator();
+                EntityPlayer entityplayer = this.connection.player;
+                while (iterator2.hasNext()) {
+                    TileEntity tileentity = (TileEntity) iterator2.next();
+
+                    entityplayer.b(tileentity);
+                }
+                entityplayer.addChunksToTrackPlayerIn(this.chunks);
             }
         }
         if(!allStillListed && !this.chunks.isEmpty()) {

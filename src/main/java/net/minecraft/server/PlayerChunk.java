@@ -196,9 +196,9 @@ public class PlayerChunk { // Poweruser - added public
                             }
                         }
                     }
-                    PacketBuilderThreadPool.addJobStatic(new PBJob51MapChunk(players, queues, PlayerChunkMap.a(this.playerChunkMap).getChunkAt(this.location.x, this.location.z), (this.f == 0xFFFF), this.f));
-                    // Poweruser
+                    PacketBuilderThreadPool.addJobStatic(new PBJob51MapChunk(players, queues, PlayerChunkMap.a(this.playerChunkMap).getChunkAt(this.location.x, this.location.z), (this.f == 0xFFFF), this.f, true));
 
+                    /* moved to de.minetick.packetbuilder.jobs.PBJob51MapChunk
                     for (k = 0; k < 16; ++k) {
                         if ((this.f & 1 << k) != 0) {
                             l = k << 4;
@@ -209,6 +209,8 @@ public class PlayerChunk { // Poweruser - added public
                             }
                         }
                     }
+                    */
+                    // Poweruser end
                 } else {
                     this.sendAll(new Packet52MultiBlockChange(this.location.x, this.location.z, this.dirtyBlocks, this.dirtyCount, PlayerChunkMap.a(this.playerChunkMap)));
 
