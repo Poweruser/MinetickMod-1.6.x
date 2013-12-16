@@ -14,8 +14,10 @@ import de.minetick.packetbuilder.jobs.PBJob56MapChunkBulk;
 
 import net.minecraft.server.Chunk;
 import net.minecraft.server.ChunkCoordIntPair;
+import net.minecraft.server.NetworkManager.SendQueueFillLevel;
 import net.minecraft.server.PlayerChunk;
 import net.minecraft.server.EntityPlayer;
+import net.minecraft.server.INetworkManager;
 import net.minecraft.server.PlayerChunkMap;
 import net.minecraft.server.TileEntity;
 import net.minecraft.server.WorldData;
@@ -159,12 +161,24 @@ public class PlayerChunkManager {
             }
             PlayerChunkSendQueue chunkQueue = buff.getPlayerChunkSendQueue();
 
+            int packetCount = 1, chunksPerPacket = 4;
+            SendQueueFillLevel level = entityplayer.playerConnection.getSendQueueFillLevel();
+            if(level.equals(SendQueueFillLevel.VERYLOW)) {
+                packetCount = 4;
+            } else if(level.equals(SendQueueFillLevel.LOW)) {
+                packetCount = 2;
+            } else if(level.equals(SendQueueFillLevel.HIGH)) {
+                chunksPerPacket = 2;
+            } else if(level.equals(SendQueueFillLevel.FULL)) {
+                packetCount = 0;
+            }
+
             // Poweruser start - moved here from EntityPlayer.l_()
-            for(int w = 0; w < 2; w++) { // 2 packets/tick a 4 chunks each
-            ArrayList arraylist = new ArrayList();
+            for(int w = 0; w < packetCount; w++) {
+            ArrayList<Chunk> arraylist = new ArrayList<Chunk>();
             ArrayList arraylist1 = new ArrayList();
             int skipped = 0;
-            while(chunkQueue.hasChunksQueued() && arraylist.size() < 4 && skipped < 4) {
+            while(chunkQueue.hasChunksQueued() && arraylist.size() < chunksPerPacket && skipped < 4) {
                 ChunkCoordIntPair chunkcoordintpair = chunkQueue.peekFirst(); // Poweruser
                 if (chunkcoordintpair != null) {
                     if(this.world.isLoaded(chunkcoordintpair.x << 4, 0, chunkcoordintpair.z << 4)) {
@@ -183,7 +197,7 @@ public class PlayerChunkManager {
             }
             if (!arraylist.isEmpty()) {
                 //this.playerConnection.sendPacket(new Packet56MapChunkBulk(arraylist));
-                PacketBuilderThreadPool.addJobStatic(new PBJob56MapChunkBulk(entityplayer.playerConnection, arraylist)); // Poweruser
+                PacketBuilderThreadPool.addJobStatic(new PBJob56MapChunkBulk(entityplayer.playerConnection, arraylist, chunkQueue)); // Poweruser
                 Iterator iterator2 = arraylist1.iterator();
 
                 while (iterator2.hasNext()) {

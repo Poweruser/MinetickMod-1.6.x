@@ -9,6 +9,8 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
+import net.minecraft.server.NetworkManager.SendQueueFillLevel;
+
 import org.apache.commons.lang3.StringUtils;
 
 // CraftBukkit start
@@ -1828,4 +1830,14 @@ public class PlayerConnection extends Connection {
     public boolean c() {
         return this.disconnected;
     }
+
+    // Poweruser start
+    public SendQueueFillLevel getSendQueueFillLevel() {
+        if(this.networkManager instanceof NetworkManager) {
+            return ((NetworkManager) this.networkManager).getSendQueueFillLevel();
+        } else {
+            return SendQueueFillLevel.MEDIUM;
+        }
+    }
+    // Poweruser end
 }
