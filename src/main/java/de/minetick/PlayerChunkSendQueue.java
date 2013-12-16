@@ -20,17 +20,21 @@ public class PlayerChunkSendQueue {
     private LinkedList<ChunkCoordIntPair> queue; // waiting to be sent
     private Object lock = new Object();
     private PlayerChunkManager pcm;
+    private EntityPlayer player;
 
-    public PlayerChunkSendQueue(PlayerChunkManager pcm) {
+    public PlayerChunkSendQueue(PlayerChunkManager pcm, EntityPlayer entityplayer) {
         this.pcm = pcm;
         this.serverData = new LinkedHashSet<Long>();
         this.clientData = new LinkedHashSet<ChunkCoordIntPair>();
         this.queue = new LinkedList<ChunkCoordIntPair>();
+        this.player = entityplayer;
     }
     
     public void sort(EntityPlayer entityplayer) {
         synchronized(this.lock) {
-            Collections.sort(this.queue, new ChunkCoordComparator(entityplayer));
+            ChunkCoordComparator comp = new ChunkCoordComparator(entityplayer);
+            Collections.sort(this.queue, comp);
+            Collections.sort(this.player.chunkCoordIntPairQueue, comp);
         }
     }
     
@@ -47,6 +51,7 @@ public class PlayerChunkSendQueue {
             c = this.queue.contains(ccip);
             if(!a && b && !c) {
                 this.queue.add(ccip);
+                this.player.chunkCoordIntPairQueue.add(ccip);
                 return true;
             }
         }
@@ -100,12 +105,14 @@ public class PlayerChunkSendQueue {
         synchronized(this.lock) {
             this.clientData.remove(ccip);
             this.queue.remove(ccip);
+            this.player.chunkCoordIntPairQueue.remove(ccip);
         }
     }
 
     public void removeFromQueue(ChunkCoordIntPair ccip) {
         synchronized(this.lock) {
             this.queue.remove(ccip);
+            this.player.chunkCoordIntPairQueue.remove(ccip);
         }
     }
 
@@ -117,6 +124,7 @@ public class PlayerChunkSendQueue {
                 cc = this.queue.peekFirst();
                 if(!this.serverData.contains(LongHash.toLong(cc.x, cc.z)) || this.clientData.contains(cc)) {
                     this.queue.removeFirst();
+                    this.player.chunkCoordIntPairQueue.remove(cc);
                     cc = null;
                 } else {
                     foundOne = true;
@@ -128,15 +136,19 @@ public class PlayerChunkSendQueue {
     
     public void removeFirst() {
         synchronized(this.lock) {
-            this.clientData.add(this.queue.removeFirst());
+            ChunkCoordIntPair ccip = this.queue.removeFirst();
+            this.clientData.add(ccip);
+            this.player.chunkCoordIntPairQueue.remove(ccip);
         }
     }
     
     public void skipFirst() {
         synchronized(this.lock) {
             ChunkCoordIntPair ccip = this.queue.removeFirst();
+            this.player.chunkCoordIntPairQueue.remove(ccip);
             if(this.isOnServer(ccip) && !this.isChunkSent(ccip)) {
                 this.queue.addLast(ccip);
+                this.player.chunkCoordIntPairQueue.add(ccip);
             }
         }
     }
@@ -145,6 +157,7 @@ public class PlayerChunkSendQueue {
         synchronized(this.lock) {
             this.clientData.clear();
             this.queue.clear();
+            this.player.chunkCoordIntPairQueue.clear();
         }
     }
 

@@ -31,7 +31,7 @@ public class PlayerChunkBuffer {
         this.playerChunkManager = playerChunkManager;
         this.lowPriorityBuffer = new LinkedHashSet<ChunkCoordIntPair>();
         this.highPriorityBuffer = new LinkedHashSet<ChunkCoordIntPair>();
-        this.sendQueue = new PlayerChunkSendQueue(this.playerChunkManager);
+        this.sendQueue = new PlayerChunkSendQueue(this.playerChunkManager, ent);
         this.comp = new ChunkCoordComparator(ent);
         this.pq = new PriorityQueue<ChunkCoordIntPair>(750, this.comp);
     }
