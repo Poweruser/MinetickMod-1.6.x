@@ -33,7 +33,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
     public PlayerInteractManager playerInteractManager;
     public double d;
     public double e;
-    //public final List chunkCoordIntPairQueue = new LinkedList();
+    public final List chunkCoordIntPairQueue = new LinkedList();
     public final List removeQueue = new LinkedList();
     private float bO = Float.MIN_VALUE;
     private float bP = -1.0E8F;
