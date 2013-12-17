@@ -259,6 +259,8 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
                 }
             }
         }
+        */
+        // Poweruser end
 
         if (this.bX > 0L && this.server.ar() > 0 && MinecraftServer.aq() - this.bX > (long) (this.server.ar() * 1000 * 60)) {
             this.playerConnection.disconnect("You have been idle for too long!");
@@ -425,8 +427,6 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
                 return super.damageEntity(damagesource, f);
             }
         }
-        */
-        // Poweruser end
     }
 
     public boolean a(EntityHuman entityhuman) {
