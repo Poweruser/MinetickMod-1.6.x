@@ -21,6 +21,8 @@ import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.event.weather.ThunderChangeEvent;
 import org.bukkit.event.weather.WeatherChangeEvent;
 
+import de.minetick.antixray.AntiXRay;
+
 public class WorldServer extends World implements org.bukkit.BlockChangeDelegate {
     // CraftBukkit end
 
@@ -79,6 +81,12 @@ public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
         }
         return this.allowChunkGeneration;
     }
+
+    public void activateAntiXRay() {
+        if(this.antiXRay == null) {
+            this.antiXRay = new AntiXRay(this);
+        }
+    }
     // Poweruser end
 
     // CraftBukkit start
@@ -113,6 +121,7 @@ public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
         if (this.priorityQueue == null) {
             this.priorityQueue = new PriorityQueue<NextTickListEntry>(1500);
         }
+        this.activateAntiXRay(); // Poweruser
         // Poweruser end
         this.P = new org.bukkit.craftbukkit.CraftTravelAgent(this); // CraftBukkit
         this.scoreboard = new ScoreboardServer(minecraftserver);

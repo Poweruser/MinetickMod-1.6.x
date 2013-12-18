@@ -29,6 +29,7 @@ import org.bukkit.event.weather.ThunderChangeEvent;
 // CraftBukkit end
 
 import de.minetick.LockObject;
+import de.minetick.antixray.AntiXRay;
 
 
 
@@ -99,6 +100,7 @@ public abstract class World implements IBlockAccess {
 
     // Poweruser start
     private HashSet<Long> alreadyCheckedChunks = new HashSet<Long>();
+    public AntiXRay antiXRay = null;
     protected boolean cancelHeavyCalculations = false;
     private int nextTickEntityIndex = 0;
 
@@ -528,6 +530,12 @@ public abstract class World implements IBlockAccess {
         this.g(i, j + 1, k, l);
         this.g(i, j, k - 1, l);
         this.g(i, j, k + 1, l);
+
+        // Poweruser start
+        if(this.antiXRay != null) {
+            this.antiXRay.issueBlockUpdates(i, j, k);
+        }
+        // Poweruser end
     }
 
     public void c(int i, int j, int k, int l, int i1) {

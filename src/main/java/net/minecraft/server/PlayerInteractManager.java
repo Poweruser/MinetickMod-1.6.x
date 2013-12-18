@@ -156,6 +156,11 @@ public class PlayerInteractManager {
                     if (f > 1.0f) {
                         ((EntityPlayer) this.player).playerConnection.sendPacket(new Packet53BlockChange(i, j, k, this.world));
                     }
+                    // Poweruser start
+                    if(this.world.antiXRay != null) {
+                        this.world.antiXRay.issueBlockUpdates(i, j, k);
+                    }
+                    // Poweruser end
                     return;
                 }
                 org.bukkit.event.block.BlockDamageEvent blockEvent = CraftEventFactory.callBlockDamageEvent(this.player, i, j, k, this.player.inventory.getItemInHand(), f >= 1.0f);
@@ -163,6 +168,11 @@ public class PlayerInteractManager {
                 if (blockEvent.isCancelled()) {
                     // Let the client know the block still exists
                     ((EntityPlayer) this.player).playerConnection.sendPacket(new Packet53BlockChange(i, j, k, this.world));
+                    // Poweruser start
+                    if(this.world.antiXRay != null) {
+                        this.world.antiXRay.issueBlockUpdates(i, j, k);
+                    }
+                    // Poweruser end
                     return;
                 }
 
@@ -184,6 +194,12 @@ public class PlayerInteractManager {
                     this.o = j1;
                 }
             }
+
+            // Poweruser start
+            if(this.world.antiXRay != null) {
+                this.world.antiXRay.issueBlockUpdates(i, j, k);
+            }
+            // Poweruser end
         }
     }
 
@@ -277,7 +293,11 @@ public class PlayerInteractManager {
             }
 
             this.world.getServer().getPluginManager().callEvent(event);
-
+            // Poweruser start
+            if(this.world.antiXRay != null) {
+                this.world.antiXRay.issueBlockUpdates(i, j, k);
+            }
+            // Poweruser end
             if (event.isCancelled()) {
                 // Let the client know the block still exists
                 ((EntityPlayer) this.player).playerConnection.sendPacket(new Packet53BlockChange(i, j, k, this.world));
@@ -331,7 +351,11 @@ public class PlayerInteractManager {
                 Block.byId[l].j(this.world, i, j, k, event.getExpToDrop());
             }
             // CraftBukkit end
-
+            // Poweruser start
+            if(this.world.antiXRay != null) {
+                this.world.antiXRay.issueBlockUpdates(i, j, k);
+            }
+            // Poweruser end
             return flag;
         }
     }
