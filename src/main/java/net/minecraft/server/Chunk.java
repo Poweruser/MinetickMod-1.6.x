@@ -46,6 +46,10 @@ public class Chunk {
     public void initCorruptChunk() {
         this.isCorrupt = true;
     }
+
+    public int getTypeIdWithinSection(int section, int x, int y, int z) {
+        return this.sections[section].getTypeId(x, y, z);
+    }
     // Poweruser end
 
     public Chunk(World world, int i, int j) {

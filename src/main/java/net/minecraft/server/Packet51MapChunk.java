@@ -216,6 +216,7 @@ public class Packet51MapChunk extends Packet {
         chunkmap.a = new byte[j];
         System.arraycopy(abyte, 0, chunkmap.a, 0, j);
         // Poweruser start
+        chunk.world.antiXRay.orebfuscate(chunkmap.a, chunk, chunkmap.b);
         pbb.offerBuildBuffer(abyte);
         abyte = null;
         // Poweruser end
