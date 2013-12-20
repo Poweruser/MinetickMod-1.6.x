@@ -3,6 +3,7 @@ package net.minecraft.server;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -28,6 +29,12 @@ public class Packet51MapChunk extends Packet {
 
     //public Packet51MapChunk(Chunk chunk, boolean flag, int i) {
     // Poweruser start
+    private AtomicInteger pendingUses;
+
+    public void setPendingUses(int uses) {
+        this.pendingUses = new AtomicInteger(uses);
+    }
+
     private PacketBuilderBuffer pbb;
 
     static final ThreadLocal<Deflater> localDef = new ThreadLocal<Deflater>() {
@@ -58,14 +65,19 @@ public class Packet51MapChunk extends Packet {
         try {
             this.inflatedBuffer = chunkmap.a;
             deflater.reset(); // Poweruser
-            deflater.setInput(chunkmap.a, 0, chunkmap.a.length);
+            //deflater.setInput(chunkmap.a, 0, chunkmap.a.length);
+            deflater.setInput(chunkmap.a, 0, chunkmap.dataSize); // Poweruser - the array chunkmap.a might be larger, than the data it holds
             deflater.finish();
             //this.buffer = new byte[chunkmap.a.length];
-            this.buffer = this.pbb.requestSendBuffer(chunkmap.a.length); // Poweruser
+            this.buffer = this.pbb.requestSendBuffer(chunkmap.dataSize); // Poweruser
             this.size = deflater.deflate(this.buffer);
         } finally {
             //deflater.end();  // Poweruser - this deflater is going to be recycled
         }
+        // Poweruser start
+        pbb.offerBuildBuffer(chunkmap.a);
+        chunkmap.a = null;
+        // Poweruser end
     }
 
     public void a(DataInput datainput) throws IOException {
@@ -121,9 +133,11 @@ public class Packet51MapChunk extends Packet {
         dataoutput.write(this.buffer, 0, this.size);
 
         // Poweruser start
-        this.pbb.offerSendBuffer(this.buffer);
-        this.buffer = null;
-        this.pbb = null;
+        if(this.pendingUses.decrementAndGet() == 0) {
+            this.pbb.offerSendBuffer(this.buffer);
+            this.buffer = null;
+            this.pbb = null;
+        }
         // Poweruser end
     }
 
@@ -213,10 +227,14 @@ public class Packet51MapChunk extends Packet {
             j += abyte2.length;
         }
 
-        chunkmap.a = new byte[j];
-        System.arraycopy(abyte, 0, chunkmap.a, 0, j);
+        //chunkmap.a = new byte[j];
+        //System.arraycopy(abyte, 0, chunkmap.a, 0, j);
         // Poweruser start
-        chunk.world.antiXRay.orebfuscate(chunkmap.a, chunk, chunkmap.b);
+        chunkmap.dataSize = j;
+        chunkmap.a = pbb.requestBuildBufferAndCopy(j, j, abyte);
+        if(chunk.world.antiXRay != null) {
+            chunk.world.antiXRay.orebfuscate(chunkmap.a, chunkmap.dataSize, chunk, chunkmap.b);
+        }
         pbb.offerBuildBuffer(abyte);
         abyte = null;
         // Poweruser end

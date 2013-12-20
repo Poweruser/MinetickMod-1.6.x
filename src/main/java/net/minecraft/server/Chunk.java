@@ -2,6 +2,7 @@ package net.minecraft.server;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -59,7 +60,8 @@ public class Chunk {
         this.s = new byte[256];
         this.b = new int[256];
         this.c = new boolean[256];
-        this.tileEntities = new HashMap();
+        //this.tileEntities = new HashMap();
+        this.tileEntities = Collections.synchronizedMap(new HashMap()); // Poweruser
         this.u = 4096;
         this.entitySlices = new List[16];
         this.world = world;

@@ -18,9 +18,9 @@ public class PacketBuilderBuffer {
         return new byte[length];
     }
     
-    public byte[] requestBuildBufferAndCopy(int length, byte[] source) {
-        byte[] target = this.requestBuildBuffer(length);
-        System.arraycopy(source, 0, target, 0, source.length);
+    public byte[] requestBuildBufferAndCopy(int requestLength, int copyLength, byte[] source) {
+        byte[] target = this.requestBuildBuffer(requestLength);
+        System.arraycopy(source, 0, target, 0, copyLength);
         return target;
     }
     
@@ -44,6 +44,18 @@ public class PacketBuilderBuffer {
         }
         return new byte[length];
     }
-    
+
+    public void clear() {
+        synchronized(this.sendBufferCache) {
+            while(this.sendBufferCache.size() > 3) {
+                this.sendBufferCache.remove(this.sendBufferCache.size() - 1);
+            }
+        }
+        synchronized(this.buildBufferCache) {
+            while(this.buildBufferCache.size() > 3) {
+                this.buildBufferCache.remove(this.buildBufferCache.size() - 1);
+            }
+        }
+    }
     
 }

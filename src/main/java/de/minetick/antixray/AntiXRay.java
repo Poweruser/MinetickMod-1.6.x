@@ -51,7 +51,7 @@ public class AntiXRay {
         }
     }
     
-    public void orebfuscate(byte[] buildBuffer, Chunk chunk, int chunkSectionsBitMask) {
+    public void orebfuscate(byte[] buildBuffer, int dataLength, Chunk chunk, int chunkSectionsBitMask) {
         int index = 0;
         // just the lower 4 sections should be enough, thats up to height 64
         for(int sectionID = 0; sectionID < 4; sectionID++) {
@@ -65,8 +65,7 @@ public class AntiXRay {
                         for(int x = 0; x < 16; x++) {
                             // work within the chunk only, not on its borders
                             if(x != 0 && x != 15) {
-                                if(index >= buildBuffer.length) {
-                                    System.out.println("index too large: " + index + " > " + buildBuffer.length);
+                                if(index >= dataLength) {
                                     return;
                                 }
                                 int blockID = buildBuffer[index] & 255;

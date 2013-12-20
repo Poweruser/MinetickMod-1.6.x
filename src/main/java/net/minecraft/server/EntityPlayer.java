@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 // CraftBukkit start
 import org.bukkit.Bukkit;
@@ -61,13 +62,7 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
 
     // Poweruser start
     public PlayerChunkSendQueue chunkQueue;
-    private List<Chunk> chunksToTrackPlayerIn = new LinkedList<Chunk>();
-
-    public void addChunksToTrackPlayerIn(List<Chunk> chunks) {
-        synchronized(this.chunksToTrackPlayerIn) {
-            this.chunksToTrackPlayerIn.addAll(chunks);
-        }
-    }
+    public ConcurrentLinkedQueue<Chunk> chunksForTracking = new ConcurrentLinkedQueue<Chunk>();
 
     public void setPlayerChunkSendQueue(PlayerChunkSendQueue pcsq) {
         if(this.chunkQueue != null) {
@@ -207,15 +202,11 @@ public class EntityPlayer extends EntityHuman implements ICrafting {
         }
 
         // Poweruser start
-        synchronized(this.chunksToTrackPlayerIn) {
-            Iterator<Chunk> iterator2 = this.chunksToTrackPlayerIn.iterator();
-
-            while (iterator2.hasNext()) {
-                Chunk chunk = (Chunk) iterator2.next();
-                iterator2.remove();
-                this.p().getTracker().a(this, chunk);
-            }
+        while(!this.chunksForTracking.isEmpty()) {
+            Chunk c = this.chunksForTracking.poll();
+            this.p().getTracker().a(this, c);
         }
+
         /*
         if (!this.chunkCoordIntPairQueue.isEmpty()) {
             Iterator iterator1 = this.chunkCoordIntPairQueue.iterator();

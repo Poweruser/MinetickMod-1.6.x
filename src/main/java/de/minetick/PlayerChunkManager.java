@@ -56,7 +56,9 @@ public class PlayerChunkManager {
         PlayerChunkBuffer buff = this.playerBuff.get(mapkey);
         if(buff == null) {
             buff = new PlayerChunkBuffer(this, entityplayer);
-            this.playerBuff.put(mapkey, buff);
+            synchronized(this.playerBuff) {
+                this.playerBuff.put(mapkey, buff);
+            }
         } else {
             buff.clear();
         }
@@ -71,7 +73,9 @@ public class PlayerChunkManager {
         if(buff != null) {
             buff.clear();
         }
-        this.playerBuff.remove(mapkey);
+        synchronized(this.playerBuff) {
+            this.playerBuff.remove(mapkey);
+        }
     }
 
     public boolean skipChunkGeneration() {
@@ -124,7 +128,7 @@ public class PlayerChunkManager {
 
             // Low priority chunks
             queue = buff.getLowPriorityQueue();
-            while(queue.size() > 0 && buff.loadedChunks < 80 && buff.skippedChunks < 1) {
+            while(queue.size() > 0 && buff.loadedChunks < 40 && buff.skippedChunks < 1) {
                 ChunkCoordIntPair ccip = queue.poll();
                 if(buff.getPlayerChunkSendQueue().isOnServer(ccip) && !buff.getPlayerChunkSendQueue().alreadyLoaded(ccip)) {
                     if(allowGeneration && !this.skipChunkGeneration && allGenerated <= (this.world.getWorldData().getType().equals(WorldType.FLAT) ? 1 : 0)) {
@@ -159,17 +163,10 @@ public class PlayerChunkManager {
                 this.shuffleList.remove(entityplayer);
                 this.shuffleList.add(entityplayer);
             }
-            PlayerChunkSendQueue chunkQueue = buff.getPlayerChunkSendQueue();
 
-            int packetCount = 1, chunksPerPacket = 4;
-            SendQueueFillLevel level = entityplayer.playerConnection.getSendQueueFillLevel();
-            if(level.equals(SendQueueFillLevel.VERYLOW)) {
-                packetCount = 4;
-            } else if(level.equals(SendQueueFillLevel.LOW)) {
-                packetCount = 2;
-            } else if(level.equals(SendQueueFillLevel.HIGH)) {
-                chunksPerPacket = 2;
-            } else if(level.equals(SendQueueFillLevel.FULL)) {
+            int packetCount = 2, chunksPerPacket = 2;
+            PlayerChunkSendQueue chunkQueue = buff.getPlayerChunkSendQueue();
+            if(entityplayer.playerConnection.getSendQueueFillLevel().equals(SendQueueFillLevel.FULL)) {
                 packetCount = 0;
             }
 
@@ -245,5 +242,28 @@ public class PlayerChunkManager {
         if(!exists) { return false; }
         exists = exists && this.world.chunkExists(x - radius, z + radius);
         return exists && this.world.chunkExists(x + radius, z - radius);
+    }
+
+    public static int[] get2DDirectionVector(EntityPlayer entityplayer) {
+        double rotation = entityplayer.yaw;
+        if (157.5 <= rotation && rotation < -157.5) {
+            return new int[]{0,-1}; // north
+        } else if (-157.5 <= rotation && rotation < -112.5) {
+            return new int[]{1,-1};
+        } else if (-112.5 <= rotation && rotation < -67.5) {
+            return new int[]{1, 0};
+        } else if (-67.5 <= rotation && rotation < -22.5) {
+            return new int[]{1, 1};
+        } else if (-22.5 <= rotation && rotation < 22.5) {
+            return new int[]{0, 1};
+        } else if (22.5 <= rotation && rotation < 67.5) {
+            return new int[]{-1, 1};
+        } else if (67.5 <= rotation && rotation < 112.5) {
+            return new int[]{-1,0};
+        } else if (112.5 <= rotation && rotation < 157.5) {
+            return new int[]{-1,-1};
+        } else {
+            return new int[]{0,0};
+        }
     }
 }
