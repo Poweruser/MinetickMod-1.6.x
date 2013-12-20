@@ -4,6 +4,7 @@ import java.util.Observable;
 
 public class PacketBuilderThread extends Observable implements Runnable {
 
+    private static int threadCounter = 0;
     private static final Object checkAndSendLock = new Object();
     private PacketBuilderJobInterface job;
     private boolean active;
@@ -16,6 +17,8 @@ public class PacketBuilderThread extends Observable implements Runnable {
         this.buildBuffer = new PacketBuilderBuffer();
         this.waitObject = new Object();
         this.thread = new Thread(this);
+        this.thread.setName("PacketBuilderThread-" + threadCounter);
+        threadCounter++;
         /*
          *  These threads create so much cpu load, that they have an impact on the main thread
          *  Thread.MIN_PRIORITY = 1
@@ -24,6 +27,10 @@ public class PacketBuilderThread extends Observable implements Runnable {
          */
         this.thread.setPriority(Thread.NORM_PRIORITY - 2);
         this.thread.start();
+    }
+
+    public String getName() {
+        return this.thread.getName();
     }
 
     @Override
@@ -60,5 +67,9 @@ public class PacketBuilderThread extends Observable implements Runnable {
         synchronized(this.waitObject) {
             this.waitObject.notifyAll();
         }        
+    }
+
+    public void clearCache() {
+        this.buildBuffer.clear();
     }
 }

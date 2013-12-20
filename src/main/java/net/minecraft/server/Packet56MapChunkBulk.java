@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
@@ -24,6 +25,11 @@ public class Packet56MapChunkBulk extends Packet {
     // Poweruser start
     private byte[] buildBuffer;
     private PacketBuilderBuffer pbb;
+    private AtomicInteger pendingUses;
+
+    public void setPendingUses(int uses) {
+        this.pendingUses = new AtomicInteger(uses);
+    }
     // Poweruser end
 
     // CraftBukkit start
@@ -62,7 +68,8 @@ public class Packet56MapChunkBulk extends Packet {
             Chunk chunk = (Chunk) list.get(k);
             ChunkMap chunkmap = Packet51MapChunk.a(this.pbb, chunk, true, '\uffff');
 
-            if (buildBuffer.length < j + chunkmap.a.length) {
+            //if (buildBuffer.length < j + chunkmap.a.length) {
+            if (buildBuffer.length < j + chunkmap.dataSize) { // Poweruser - the array chunkmap.a might be larger, than the data it holds
                 /*
                 byte[] abyte = new byte[j + chunkmap.a.length];
 
@@ -70,18 +77,28 @@ public class Packet56MapChunkBulk extends Packet {
                 buildBuffer = abyte;
                 */
                 // Poweruser start
-                this.pbb.offerBuildBuffer(this.buildBuffer);
-                this.buildBuffer = this.pbb.requestBuildBufferAndCopy(j + chunkmap.a.length, this.buildBuffer);
+                byte[] tmp = this.buildBuffer;
+                this.buildBuffer = this.pbb.requestBuildBufferAndCopy(j + chunkmap.dataSize, tmp.length, tmp);
+                this.pbb.offerBuildBuffer(tmp);
+                tmp = null;
                 // Poweruser end
             }
 
-            System.arraycopy(chunkmap.a, 0, buildBuffer, j, chunkmap.a.length);
-            j += chunkmap.a.length;
+            //System.arraycopy(chunkmap.a, 0, buildBuffer, j, chunkmap.a.length);
+            //j += chunkmap.a.length;
+            // Poweruser start - the array chunkmap.a might be larger, than the data it holds
+            System.arraycopy(chunkmap.a, 0, buildBuffer, j, chunkmap.dataSize);
+            j += chunkmap.dataSize;
+            // Poweruser end
             this.c[k] = chunk.x;
             this.d[k] = chunk.z;
             this.a[k] = chunkmap.b;
             this.b[k] = chunkmap.c;
-            this.inflatedBuffers[k] = chunkmap.a;
+            //this.inflatedBuffers[k] = chunkmap.a;
+            // Poweruser start - not required on server side anymore at this point
+            pbb.offerBuildBuffer(chunkmap.a);
+            chunkmap.a = null;
+            // Poweruser end
         }
 
         this.compress(); // Poweruser
@@ -207,8 +224,11 @@ public class Packet56MapChunkBulk extends Packet {
         }
 
         // Poweruser start
-        this.pbb.offerSendBuffer(this.buffer);
-        this.pbb = null;
+        if(this.pendingUses.decrementAndGet() == 0) {
+            this.pbb.offerSendBuffer(this.buffer);
+            this.buffer = null;
+            this.pbb = null;
+        }
         // Poweruser end
     }
 

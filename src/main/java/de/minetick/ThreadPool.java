@@ -106,6 +106,7 @@ public class ThreadPool {
             this.wt = new WorldTicker(profiler, lockObj);
             this.wt.addObserver(this);
             this.t = new Thread(this.wt);
+            this.t.setPriority(Thread.NORM_PRIORITY + 1);
             this.t.start();
         }
 

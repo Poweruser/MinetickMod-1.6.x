@@ -35,11 +35,13 @@ public class PacketBuilderThreadPool implements Observer {
     
     public void addJob(PacketBuilderJobInterface job) {
         if(this.active) {
-            if(this.availableThreads.isEmpty()) {
-                this.waitingJobs.add(job);
-            } else {
-                PacketBuilderThread thread = this.availableThreads.poll();
-                thread.addJob(job);
+            synchronized(this.jobLock) {
+                if(this.availableThreads.isEmpty()) {
+                    this.waitingJobs.add(job);
+                } else {
+                    PacketBuilderThread thread = this.availableThreads.poll();
+                    thread.addJob(job);
+                }
             }
         }
     }
@@ -54,6 +56,11 @@ public class PacketBuilderThreadPool implements Observer {
                         thread.fastAddJob(this.waitingJobs.poll());
                     } else {
                         this.availableThreads.add(thread);
+                        if(this.availableThreads.size() == this.allThreads.size()) {
+                            for(PacketBuilderThread pbt: this.allThreads) {
+                                pbt.clearCache();
+                            }
+                        }
                     }
                 }
             } else {

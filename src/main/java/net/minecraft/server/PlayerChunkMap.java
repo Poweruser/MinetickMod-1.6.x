@@ -150,7 +150,8 @@ public class PlayerChunkMap {
                 ChunkCoordIntPair ccip = new ChunkCoordIntPair(k, l);
                 sendQueue.addToServer(k, l);
                 if(areaExists) {
-                    if(this.a(k, l, i, j, 3)) {
+                    // only load the one chunk, the player is in, right away
+                    if(this.a(k, l, i, j, 0)) {
                         chunkList.add(ccip);
                     } else {
                         buffer.addHighPriorityChunk(ccip);
@@ -162,7 +163,7 @@ public class PlayerChunkMap {
             }
         }
 
-        Collections.sort(chunkList, new ChunkCoordComparator(entityplayer));
+        //Collections.sort(chunkList, new ChunkCoordComparator(entityplayer));
         for (ChunkCoordIntPair pair : chunkList) {
             PlayerChunk c = this.a(pair.x, pair.z, true);
             c.a(entityplayer);

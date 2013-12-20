@@ -42,7 +42,8 @@ public class NetworkManager implements INetworkManager {
     private String w = "";
     private Object[] x;
     private int y;
-    private int z;
+    //private int z;
+    private AtomicInteger z = new AtomicInteger(0); // Poweruser
     public static int[] c = new int[256];
     public static int[] d = new int[256];
     public int e;
@@ -80,14 +81,29 @@ public class NetworkManager implements INetworkManager {
 
     public void queue(Packet packet) {
         if (!this.t) {
-            Object object = this.h;
+            //Object object = this.h;
 
-            synchronized (this.h) {
-                this.z += packet.a() + 1;
+            //synchronized (this.h) {
+            // Poweruser start
+            synchronized (this.highPriorityQueue) {
+                //this.z += packet.a() + 1;
+                this.z.addAndGet(packet.a() + 1);
+            // Poweruser end
                 this.highPriorityQueue.add(packet);
             }
         }
     }
+
+    // Poweruser start
+    public void queueChunks(Packet packet) {
+        if (!this.t) {
+            synchronized (this.lowPriorityQueue) {
+                this.z.addAndGet(packet.a() + 1);
+                this.lowPriorityQueue.add(packet);
+            }
+        }
+    }
+    // Poweruser end
 
     private boolean h() {
         boolean flag = false;
@@ -144,10 +160,12 @@ public class NetworkManager implements INetworkManager {
         List list = flag ? this.lowPriorityQueue : this.highPriorityQueue;
         Object object = this.h;
 
-        synchronized (this.h) {
+        //synchronized (this.h) {
+        synchronized (list) { // Poweruser
             while (!list.isEmpty() && packet == null) {
                 packet = (Packet) list.remove(0);
-                this.z -= packet.a() + 1;
+                //this.z -= packet.a() + 1;
+                this.z.addAndGet((packet.a() + 1) * -1); // Poweruser
                 if (this.a(packet, flag)) {
                     packet = null;
                 }
@@ -269,7 +287,8 @@ public class NetworkManager implements INetworkManager {
     }
 
     public void b() {
-        if (this.z > 2097152) {
+        //if (this.z > 2097152) {
+        if (this.z.get() > 2097152) { // Poweruser
             this.a("disconnect.overflow", new Object[0]);
         }
 
@@ -377,13 +396,13 @@ public class NetworkManager implements INetworkManager {
 
     // Poweruser start
     public SendQueueFillLevel getSendQueueFillLevel() {
-        if(this.z < 131072) { // 128 KB
+        if(this.z.get() < 131072) { // 128 KB
             return SendQueueFillLevel.VERYLOW;
-        } else if(this.z < 262144) { // 256 KB
+        } else if(this.z.get() < 262144) { // 256 KB
             return SendQueueFillLevel.LOW;
-        } else if(this.z < 524288) { // 512 KB
+        } else if(this.z.get() < 524288) { // 512 KB
             return SendQueueFillLevel.MEDIUM;
-        } else if(this.z < 1048576) { // 1 MB
+        } else if(this.z.get() < 1048576) { // 1 MB
             return SendQueueFillLevel.HIGH;
         } else { // up to 2 MB, then the client is disconnected with reason: overflow
             return SendQueueFillLevel.FULL;
