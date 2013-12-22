@@ -16,6 +16,10 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -103,7 +107,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
 
     // Poweruser start
     public ThreadPool threadPool;
-    private PacketBuilderThreadPool pbt = new PacketBuilderThreadPool((Runtime.getRuntime().availableProcessors() * 3) / 4);
+    private PacketBuilderThreadPool pbt = new PacketBuilderThreadPool(((Runtime.getRuntime().availableProcessors() * 3) / 2));
     private WorldServer sortedWorldsArray[] = null;
     private PriorityQueue<WorldServer> priQueue = new PriorityQueue<WorldServer>(20, new ProfilingComperator());
 
@@ -115,26 +119,29 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
     private long tickTime = 0L;
     private int timerDelay = 45;
 
-    private Timer timer = new Timer(this.timerDelay, new ActionListener() {
+    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
+    private class TickCounter implements Runnable {
         @Override
-        public void actionPerformed(ActionEvent arg0) {
-            cancelHeavyCalculations = true;
-            for(WorldServer ws: worlds) {
-                ws.cancelHeavyCalculations(cancelHeavyCalculations);
-            }
-        }
-    });
-
-    private Timer tpsTimer = new Timer(1000, new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent arg0) {
+        public void run() {
             ticksPerSecond.add(ticksCounter);
             ticksCounter = 0;
             if(ticksPerSecond.size() > 30) {
                 ticksPerSecond.remove(0);
             }
         }
-    });
+    }
+    private ScheduledFuture tickTimerTask;
+    private class TickTimer implements Callable {
+        public Object call() {
+            cancelHeavyCalculations = true;
+            for(WorldServer ws: worlds) {
+                ws.cancelHeavyCalculations(cancelHeavyCalculations);
+            }
+            return null;
+        }
+    }
+    private TickTimer tickTimerObject = new TickTimer();
+    private TickCounter tickCounterObject = new TickCounter();
 
     private List<Integer> ticksPerSecond = Collections.synchronizedList(new LinkedList<Integer>());
     private int ticksCounter = 0;
@@ -176,8 +183,8 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
         this.as();
 
         // Poweruser start
-        this.timer.setRepeats(false);
         new BiomeBaseDB().initStaticField();
+        this.scheduledExecutorService.scheduleAtFixedRate(this.tickCounterObject, 1, 1, TimeUnit.SECONDS);
         // Poweruser end
 
         // CraftBukkit start
@@ -486,8 +493,6 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
             if (this.init()) {
                 long i = aq();
 
-                this.tpsTimer.start(); // Poweruser
-
                 for (long j = 0L; this.isRunning; this.R = true) {
                     long k = aq();
                     long l = k - i;
@@ -553,6 +558,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                 // Poweruser start
                 this.threadPool.shutdown();
                 this.pbt.shutdown();
+                this.scheduledExecutorService.shutdown();
                 // Poweruser end
                 this.stop();
                 this.isStopped = true;
@@ -584,8 +590,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
         // Poweruser start
         this.ticksCounter++;
         this.cancelHeavyCalculations = false;
-        this.timer.setDelay(this.timerDelay);
-        this.timer.restart();
+        this.tickTimerTask = this.scheduledExecutorService.schedule(this.tickTimerObject, this.timerDelay, TimeUnit.MILLISECONDS);
         // Poweruser end
 
         AxisAlignedBB.a().a();
@@ -758,7 +763,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
              this.threadPool.tickWorld(worldserver);
          }
          this.threadPool.waitUntilDone();
-         this.timer.stop();
+         this.tickTimerTask.cancel(false);
 
          for(i = 0; i < worldCount; i++) {
              WorldServer worldserver = this.sortedWorldsArray[i];

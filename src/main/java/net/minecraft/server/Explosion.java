@@ -241,11 +241,7 @@ public class Explosion {
                 k = chunkposition.z;
                 l = this.world.getTypeId(i, j, k);
 
-                // Poweruser start
-                if(this.world.antiXRay != null) {
-                    this.world.antiXRay.issueBlockUpdates(i, j, k);
-                }
-                // Poweruser end
+                this.world.antiXRay.issueBlockUpdates(i, j, k); // Poweruser
 
                 if (flag) {
                     double d0 = (double) ((float) i + this.world.random.nextFloat());

@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
@@ -41,7 +42,7 @@ public class Packet56MapChunkBulk extends Packet {
              * Default was 6, but as compression is run in seperate threads now
              * a higher compression can be afforded
              */
-            return new Deflater(8);
+            return new Deflater(9);
         }
     };
     // CraftBukkit end

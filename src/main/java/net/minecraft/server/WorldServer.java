@@ -83,9 +83,15 @@ public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
     }
 
     public void activateAntiXRay() {
-        if(this.antiXRay == null) {
-            this.antiXRay = new AntiXRay(this);
-        }
+        this.antiXRay.enable();
+    }
+
+    public void deactivateAntiXRay() {
+        this.antiXRay.disable();
+    }
+
+    public void shutdownThisWorld() {
+        this.antiXRay.shutdown();
     }
     // Poweruser end
 
@@ -121,7 +127,8 @@ public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
         if (this.priorityQueue == null) {
             this.priorityQueue = new PriorityQueue<NextTickListEntry>(1500);
         }
-        this.activateAntiXRay(); // Poweruser
+        this.antiXRay = new AntiXRay(this);
+        this.activateAntiXRay();
         // Poweruser end
         this.P = new org.bukkit.craftbukkit.CraftTravelAgent(this); // CraftBukkit
         this.scoreboard = new ScoreboardServer(minecraftserver);

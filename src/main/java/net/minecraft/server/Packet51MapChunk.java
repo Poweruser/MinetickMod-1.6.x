@@ -44,7 +44,7 @@ public class Packet51MapChunk extends Packet {
              * Default was 6, but as compression is run in seperate threads now
              * a higher compression can be afforded
              */
-            return new Deflater(8);
+            return new Deflater(9);
         }
     };
 
@@ -232,9 +232,7 @@ public class Packet51MapChunk extends Packet {
         // Poweruser start
         chunkmap.dataSize = j;
         chunkmap.a = pbb.requestBuildBufferAndCopy(j, j, abyte);
-        if(chunk.world.antiXRay != null) {
-            chunk.world.antiXRay.orebfuscate(chunkmap.a, chunkmap.dataSize, chunk, chunkmap.b);
-        }
+        chunk.world.antiXRay.orebfuscate(chunkmap.a, chunkmap.dataSize, chunk, chunkmap.b);
         pbb.offerBuildBuffer(abyte);
         abyte = null;
         // Poweruser end

@@ -89,11 +89,7 @@ public class EntityFallingBlock extends Entity {
 
                     this.world.setAir(i, j, k);
 
-                    // Poweruser start
-                    if(this.world.antiXRay != null) {
-                        this.world.antiXRay.issueBlockUpdates(i, j, k);
-                    }
-                    // Poweruser end
+                    this.world.antiXRay.issueBlockUpdates(i, j, k); // Poweruser
                 }
 
                 if (this.onGround) {
@@ -110,11 +106,7 @@ public class EntityFallingBlock extends Entity {
                             this.world.setTypeIdAndData(i, j, k, this.id, this.data, 3);
                             // CraftBukkit end
 
-                            // Poweruser start
-                            if(this.world.antiXRay != null) {
-                                this.world.antiXRay.issueBlockUpdates(i, j, k);
-                            }
-                            // Poweruser end
+                            this.world.antiXRay.issueBlockUpdates(i, j, k); // Poweruser
 
                             if (Block.byId[this.id] instanceof BlockSand) {
                                 ((BlockSand) Block.byId[this.id]).a_(this.world, i, j, k, this.data);
