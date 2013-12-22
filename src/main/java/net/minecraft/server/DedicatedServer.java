@@ -18,6 +18,7 @@ import org.bukkit.craftbukkit.LoggerOutputStream;
 import org.bukkit.event.server.ServerCommandEvent;
 // CraftBukkit end
 
+import de.minetick.AntiXRayCommand;
 import de.minetick.TPSCommand;
 import de.minetick.ThreadPool;
 import de.minetick.profiler.Profiler;
@@ -112,6 +113,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
 
         // Poweruser start
         getServer().server.getCommandMap().register("tps", "MinetickMod", new TPSCommand("tps"));
+        getServer().server.getCommandMap().register("antixray", "MinetickMod", new AntiXRayCommand("antixray"));
         CraftServer cs = MinecraftServer.getServer().server;
         Profiler prof = new Profiler(cs.getMinetickModProfilerLogInterval(),
                                      cs.getMinetickModProfilerWriteEnabled(),

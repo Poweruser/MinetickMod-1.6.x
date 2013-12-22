@@ -164,7 +164,7 @@ public class PlayerChunkManager {
                 this.shuffleList.add(entityplayer);
             }
 
-            int packetCount = 2, chunksPerPacket = 2;
+            int packetCount = 1, chunksPerPacket = 4;
             PlayerChunkSendQueue chunkQueue = buff.getPlayerChunkSendQueue();
             if(entityplayer.playerConnection.getSendQueueFillLevel().equals(SendQueueFillLevel.FULL)) {
                 packetCount = 0;

@@ -1,6 +1,15 @@
 package de.minetick.antixray;
 
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+
+import org.bukkit.World.Environment;
 
 import net.minecraft.server.Block;
 import net.minecraft.server.Chunk;
@@ -8,6 +17,7 @@ import net.minecraft.server.WorldServer;
 
 public class AntiXRay {
     
+    private boolean enabled = false;
     private WorldServer worldServer;
     private static boolean blocksToHide[] = new boolean[65536];
     private static int[][] additionalUpdatePositions = new int[][]{ { 2,0, 0},{ 2,0, 1},{ 2,0,-1},
@@ -16,17 +26,32 @@ public class AntiXRay {
                                                                   { 0,0, 2},{ 1,0, 2},{-1,0, 2},
                                                                   { 0,-2,0},{ 0,2, 0}};
     private Random random = new Random();
-    
+    private ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor (
+                                                         Runtime.getRuntime().availableProcessors(),
+                                                         new AntiXRayThreadFactory());
+
+    public boolean isNether() {
+        return this.worldServer.getWorld().getEnvironment().equals(Environment.NETHER);
+    }
+
+    public boolean isOverworld() {
+        return this.worldServer.getWorld().getEnvironment().equals(Environment.NORMAL);
+    }
+
     public AntiXRay(WorldServer world) {
         this.worldServer = world;
-        if(this.worldServer.dimension == 0) {
+        if(this.isOverworld()) {
+            blocksToHide[7] = true;
+            blocksToHide[13] = true;
             blocksToHide[14] = true;
             blocksToHide[15] = true;
-            //blocksToHide[16] = true;
-            //blocksToHide[21] = true;
+            blocksToHide[16] = true;
+            blocksToHide[21] = true;
             blocksToHide[56] = true;
-            //blocksToHide[73] = true;
+            blocksToHide[73] = true;
             blocksToHide[129] = true;
+        } else if(this.isNether()) {
+            blocksToHide[153] = true;
         }
     }
 
@@ -52,68 +77,59 @@ public class AntiXRay {
     }
     
     public void orebfuscate(byte[] buildBuffer, int dataLength, Chunk chunk, int chunkSectionsBitMask) {
-        int index = 0;
+
         // just the lower 4 sections should be enough, thats up to height 64
-        for(int sectionID = 0; sectionID < 4; sectionID++) {
+        int sectionsCount = 4;
+        Future<Boolean>[] tasks = new Future[sectionsCount];
+        int sectionStart = 0;
+        for(int sectionID = 0; sectionID < sectionsCount; sectionID++) {
             if((chunkSectionsBitMask & (1 << sectionID)) != 0) {
-                for(int y = 0; y < 16; y++) { 
-                    for(int z = 0; z < 16; z++) {
-                        if(z == 0 || z == 15) {
-                            index += 16;
-                            continue;
-                        }
-                        for(int x = 0; x < 16; x++) {
-                            // work within the chunk only, not on its borders
-                            if(x != 0 && x != 15) {
-                                if(index >= dataLength) {
-                                    return;
-                                }
-                                int blockID = buildBuffer[index] & 255;
-                                if(blocksToHide[blockID]) {
-                                    if(this.hasOnlySolidBlockNeighbours(chunk, sectionID, x, y, z)) {
-                                        buildBuffer[index] = 1;
-                                    }
-                                } else if(blockID == Block.STONE.id || blockID == Block.DIRT.id) {
-                                    double r = this.random.nextDouble();
-                                    if(r < 0.10D) {
-                                        if(this.hasOnlySolidBlockNeighbours(chunk, sectionID, x, y, z)) {
-                                            if(r < 0.02D) {
-                                                buildBuffer[index] = 56;
-                                            } else if(r < 0.04D) {
-                                                buildBuffer[index] = 15;
-                                            } else if(r < 0.06D) {
-                                                buildBuffer[index] = 14;
-                                            } else if(r < 0.08D) {
-                                                buildBuffer[index] = 74;
-                                            } else if(r < 0.1D) {
-                                                buildBuffer[index] = 16;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            index++;
-                        }
-                    }
+                tasks[sectionID] = this.scheduledExecutorService.submit(new SectionChecker(sectionID, buildBuffer, dataLength, chunk, sectionStart));
+                sectionStart += 4096;
+            }
+        }
+        for(int i = 0; i < tasks.length; i++) {
+            if(tasks[i] != null) {
+                try {
+                    tasks[i].get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
                 }
             }
         }
     }
 
+    private boolean handleLavaAsSolidBlock(int blockID) {
+        return blockID == 11 || Block.l(blockID);
+    }
+
     private boolean hasOnlySolidBlockNeighbours(Chunk chunk, int section, int x, int y, int z) {
         return this.checkForSolidBlocks(chunk, section, x, y, z, 1);
     }
-    
+
     private boolean checkForSolidBlocks(Chunk chunk, int section, int x, int y, int z, int distance) {
         boolean allSolid = true;
-        int blockID = chunk.getTypeIdWithinSection(section, x + distance, y, z);
-        allSolid = allSolid && Block.l(blockID);
-        blockID = chunk.getTypeIdWithinSection(section, x - distance, y, z);
-        allSolid = allSolid && Block.l(blockID);        
-        blockID = chunk.getTypeIdWithinSection(section, x, y, z + distance);
-        allSolid = allSolid && Block.l(blockID);
-        blockID = chunk.getTypeIdWithinSection(section, x, y, z - distance);
-        allSolid = allSolid && Block.l(blockID);
+        int blockID;
+
+        boolean within = (z != 0 && z != 15 && x != 0 && x != 15);
+        if(!within) {
+            allSolid = allSolid && this.checkBlockOfOtherPosition(chunk, section, x, y, z, distance, 0);
+            allSolid = allSolid && this.checkBlockOfOtherPosition(chunk, section, x, y, z, -distance, 0);
+            allSolid = allSolid && this.checkBlockOfOtherPosition(chunk, section, x, y, z, 0, distance);
+            allSolid = allSolid && this.checkBlockOfOtherPosition(chunk, section, x, y, z, 0, -distance);
+        } else {
+            blockID = chunk.getTypeIdWithinSection(section, x + distance, y, z);
+            allSolid = allSolid && this.handleLavaAsSolidBlock(blockID);
+            blockID = chunk.getTypeIdWithinSection(section, x - distance, y, z);
+            allSolid = allSolid && this.handleLavaAsSolidBlock(blockID);
+            blockID = chunk.getTypeIdWithinSection(section, x, y, z + distance);
+            allSolid = allSolid && this.handleLavaAsSolidBlock(blockID);
+            blockID = chunk.getTypeIdWithinSection(section, x, y, z - distance);
+            allSolid = allSolid && this.handleLavaAsSolidBlock(blockID);
+        }
+
         if(!allSolid) { return allSolid; }
 
         int below = y - distance;
@@ -124,7 +140,7 @@ public class AntiXRay {
         }
         if(belowSection >= 0) {
             blockID = chunk.getTypeIdWithinSection(belowSection, x, below, z);
-            allSolid = allSolid && Block.l(blockID);
+            allSolid = allSolid && this.handleLavaAsSolidBlock(blockID);
         }
 
         int above = y + distance;
@@ -135,8 +151,124 @@ public class AntiXRay {
         }
         if(aboveSection < 16) {
             blockID = chunk.getTypeIdWithinSection(aboveSection, x, above, z);
-            allSolid = allSolid && Block.l(blockID);
+            allSolid = allSolid && this.handleLavaAsSolidBlock(blockID);
         }
         return allSolid;
+    }
+
+    private boolean checkBlockOfOtherPosition(Chunk c, int section, int x, int y, int z, int diffX, int diffZ) {
+        int newX = x + diffX;
+        int newZ = z + diffZ;
+        int absX = (c.x << 4) + newX;
+        int absZ = (c.z << 4) + newZ;
+        int ox = absX >> 4;
+        int oz = absZ >> 4;
+        int blockID = 0;
+        if(ox == c.x && oz == c.z) {
+            blockID = c.getTypeIdWithinSection(section, newX, y, newZ);
+        } else {
+            if(this.worldServer.isLoaded(absX, y, absZ)) {
+                blockID = this.worldServer.getTypeId(absX, section*16 + y, absZ);
+            } else {
+                return false;
+            }
+        }
+        return this.handleLavaAsSolidBlock(blockID);
+    }
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public void enable() {
+        this.enabled = true;
+    }
+
+    public void disable() {
+        this.enabled = false;
+    }
+
+    private class SectionChecker implements Callable<Boolean> {
+
+        private int sectionID;
+        private int sectionStart;
+        private byte[] buildBuffer;
+        private int dataLength;
+        private Chunk chunk;
+
+        public SectionChecker(int sectionID, byte[] buildBuffer, int dataLength, Chunk chunk, int sectionStart) {
+            this.sectionID = sectionID;
+            this.buildBuffer = buildBuffer;
+            this.sectionStart = sectionStart;
+            this.dataLength = dataLength;
+            this.chunk = chunk;
+        }
+
+        private Boolean cleanup() {
+            this.chunk = null;
+            this.buildBuffer = null;
+            return true;
+        }
+
+        @Override
+        public Boolean call() throws Exception {
+            int index = this.sectionStart;
+            for(int y = 0; y < 16; y++) {
+                for(int z = 0; z < 16; z++) {
+                    for(int x = 0; x < 16; x++) {
+                        if(index >= dataLength) {
+                            System.out.println("out of range: " + index + " > " + dataLength);
+                            return this.cleanup();
+                        }
+                        int blockID = buildBuffer[index] & 255;
+                        if(isOverworld()) {
+                            if(blocksToHide[blockID]) {
+                                if(hasOnlySolidBlockNeighbours(chunk, sectionID, x, y, z)) {
+                                    buildBuffer[index] = 1; // stone
+                                }
+                            } else if(isEnabled()) {
+                                if(isOverworld() && (blockID == Block.STONE.id || blockID == Block.DIRT.id)) {
+                                    double r = random.nextDouble();
+                                    if(r < 0.15D) {
+                                        if(hasOnlySolidBlockNeighbours(chunk, sectionID, x, y, z)) {
+                                            if(r < 0.03D) {
+                                                buildBuffer[index] = 56; // diamond ore
+                                            } else if(r < 0.06D) {
+                                                buildBuffer[index] = 15; // iron ore
+                                            } else if(r < 0.09D) {
+                                                buildBuffer[index] = 14; // gold ore
+                                            } else if(r < 0.12D) {
+                                                buildBuffer[index] = 74; // redstone or
+                                            } else if(r < 0.15D) {
+                                                buildBuffer[index] = 48; // mossy cobble
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        } else if(isNether()) {
+                            if(blocksToHide[blockID]) {
+                                buildBuffer[index] = 87; // nether rack
+                            }
+                        }
+                        index++;
+                    }
+                }
+            }
+            return this.cleanup();
+        }
+    }
+
+    public void shutdown() {
+        this.scheduledExecutorService.shutdown();
+    }
+
+    private class AntiXRayThreadFactory implements ThreadFactory {
+        @Override
+        public Thread newThread(Runnable arg0) {
+            Thread t = Executors.defaultThreadFactory().newThread(arg0);
+            t.setPriority(Thread.MIN_PRIORITY);
+            return t;
+        }
     }
 }

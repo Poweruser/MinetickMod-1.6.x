@@ -530,12 +530,6 @@ public abstract class World implements IBlockAccess {
         this.g(i, j + 1, k, l);
         this.g(i, j, k - 1, l);
         this.g(i, j, k + 1, l);
-
-        // Poweruser start
-        if(this.antiXRay != null) {
-            this.antiXRay.issueBlockUpdates(i, j, k);
-        }
-        // Poweruser end
     }
 
     public void c(int i, int j, int k, int l, int i1) {

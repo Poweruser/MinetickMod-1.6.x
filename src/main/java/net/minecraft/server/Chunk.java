@@ -51,6 +51,9 @@ public class Chunk {
     }
 
     public int getTypeIdWithinSection(int section, int x, int y, int z) {
+        if(this.sections[section] == null) {
+            return 0;
+        }
         return this.sections[section].getTypeId(x, y, z);
     }
     // Poweruser end

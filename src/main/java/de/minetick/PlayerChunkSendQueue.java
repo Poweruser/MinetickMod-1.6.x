@@ -180,4 +180,8 @@ public class PlayerChunkSendQueue {
     public boolean isOnServer(int x, int z) {
         return this.serverData.contains(LongHash.toLong(x, z));
     }
+
+    public int size() {
+        return this.queue.size();
+    }
 }
