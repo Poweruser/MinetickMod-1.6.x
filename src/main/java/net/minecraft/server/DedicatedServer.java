@@ -18,9 +18,11 @@ import org.bukkit.craftbukkit.LoggerOutputStream;
 import org.bukkit.event.server.ServerCommandEvent;
 // CraftBukkit end
 
-import de.minetick.AntiXRayCommand;
-import de.minetick.TPSCommand;
+import de.minetick.MinetickMod;
 import de.minetick.ThreadPool;
+import de.minetick.antixray.AntiXRay;
+import de.minetick.modcommands.AntiXRayCommand;
+import de.minetick.modcommands.TPSCommand;
 import de.minetick.profiler.Profiler;
 
 public class DedicatedServer extends MinecraftServer implements IMinecraftServer {
@@ -111,15 +113,7 @@ public class DedicatedServer extends MinecraftServer implements IMinecraftServer
 
         this.a((PlayerList) (new DedicatedPlayerList(this))); // CraftBukkit
 
-        // Poweruser start
-        getServer().server.getCommandMap().register("tps", "MinetickMod", new TPSCommand("tps"));
-        getServer().server.getCommandMap().register("antixray", "MinetickMod", new AntiXRayCommand("antixray"));
-        CraftServer cs = MinecraftServer.getServer().server;
-        Profiler prof = new Profiler(cs.getMinetickModProfilerLogInterval(),
-                                     cs.getMinetickModProfilerWriteEnabled(),
-                                     cs.getMinetickModProfilerWriteInterval());
-        this.threadPool = new ThreadPool(prof);
-        // Poweruser end
+        this.minetickMod.init(); // Poweruser
 
         if (!this.getOnlineMode()) {
             this.getLogger().warning("**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!");

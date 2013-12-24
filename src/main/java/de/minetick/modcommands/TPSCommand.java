@@ -1,4 +1,4 @@
-package de.minetick;
+package de.minetick.modcommands;
 
 import net.minecraft.server.MinecraftServer;
 
@@ -6,6 +6,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import de.minetick.MinetickMod;
 
 public class TPSCommand extends Command {
 
@@ -24,7 +26,7 @@ public class TPSCommand extends Command {
 
     public boolean execute(CommandSender sender, String currentAlias, String[] args) {
         if(!(sender instanceof Player)) { return true; }
-        Integer[] array = MinecraftServer.getServer().getTicksPerSecond();
+        Integer[] array = MinetickMod.getTicksPerSecond();
         if(array.length == 0) {
             sender.sendMessage(ChatColor.GOLD + "TPS statistic: " + ChatColor.RESET + "No data available yet. Try again later");
             return true;

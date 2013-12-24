@@ -13,9 +13,11 @@ public class PacketBuilderThreadPool implements Observer {
     private ArrayDeque<PacketBuilderJobInterface> waitingJobs;
     private Object jobLock = new Object();
     private static PacketBuilderThreadPool pool;
+    private static int targetPoolSize;
     
     public PacketBuilderThreadPool(int poolsize) {
         poolsize = Math.max(1, poolsize);
+        targetPoolSize = poolsize;
         this.availableThreads = new ArrayDeque<PacketBuilderThread>();
         this.allThreads = new ArrayDeque<PacketBuilderThread>();
         this.waitingJobs = new ArrayDeque<PacketBuilderJobInterface>();
@@ -30,9 +32,11 @@ public class PacketBuilderThreadPool implements Observer {
     }
 
     public static void addJobStatic(PacketBuilderJobInterface job) {
-        pool.addJob(job);
+        if(pool != null) {
+            pool.addJob(job);
+        }
     }
-    
+
     public void addJob(PacketBuilderJobInterface job) {
         if(this.active) {
             synchronized(this.jobLock) {
@@ -45,13 +49,13 @@ public class PacketBuilderThreadPool implements Observer {
             }
         }
     }
-    
+
     @Override
     public void update(Observable observable, Object obj) {
         if(observable instanceof PacketBuilderThread) {
             PacketBuilderThread thread = (PacketBuilderThread)observable;
-            if(this.active) {
-                synchronized(this.jobLock) {
+            synchronized(this.jobLock) {
+                if(this.active && targetPoolSize >= this.allThreads.size()) {
                     if(!this.waitingJobs.isEmpty()) { 
                         thread.fastAddJob(this.waitingJobs.poll());
                     } else {
@@ -62,22 +66,44 @@ public class PacketBuilderThreadPool implements Observer {
                             }
                         }
                     }
+                } else {
+                    thread.deleteObserver(this);
+                    thread.shutdown();
+                    this.allThreads.remove(thread);
                 }
-            } else {
-                thread.deleteObserver(this);
-                thread.shutdown();
-                this.allThreads.remove(thread);
             }
         }
     }
 
-    public void shutdown() {
+    public static void shutdownStatic() {
+        pool.shutdown();
+    }
+
+    private void shutdown() {
         this.active = false;
-        for(PacketBuilderThread thread : this.allThreads) {
-            thread.deleteObserver(this);
-            thread.shutdown();
+        synchronized(this.jobLock) {
+            for(PacketBuilderThread thread : this.allThreads) {
+                thread.deleteObserver(this);
+                thread.shutdown();
+            }
+            this.allThreads.clear();
+            this.availableThreads.clear();
         }
-        this.allThreads.clear();
-        this.availableThreads.clear();
+    }
+
+    public static void adjustPoolSize(int size) {
+        if(size >= 1 && pool != null) {
+            targetPoolSize = size;
+            if(pool.allThreads.size() < targetPoolSize) {
+                synchronized(pool.jobLock) {
+                    while(pool.allThreads.size() < targetPoolSize) {
+                        PacketBuilderThread thread = new PacketBuilderThread();
+                        thread.addObserver(pool);
+                        pool.availableThreads.add(thread);
+                        pool.allThreads.add(thread);
+                    }
+                }
+            }
+        }
     }
 }

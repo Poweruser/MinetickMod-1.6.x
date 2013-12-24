@@ -1,4 +1,4 @@
-package de.minetick;
+package de.minetick.modcommands;
 
 import java.util.List;
 

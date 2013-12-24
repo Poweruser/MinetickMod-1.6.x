@@ -31,6 +31,7 @@ public class PlayerChunkManager {
     private int chunkCreated = 0;
     private WorldServer world;
     private PlayerChunkMap pcm;
+    public static int packetsPerTick = 1;
 
     private Map<String, PlayerChunkBuffer> playerBuff = new HashMap<String, PlayerChunkBuffer>();
 
@@ -164,9 +165,12 @@ public class PlayerChunkManager {
                 this.shuffleList.add(entityplayer);
             }
 
-            int packetCount = 1, chunksPerPacket = 4;
+            int packetCount = packetsPerTick, chunksPerPacket = 4;
             PlayerChunkSendQueue chunkQueue = buff.getPlayerChunkSendQueue();
-            if(entityplayer.playerConnection.getSendQueueFillLevel().equals(SendQueueFillLevel.FULL)) {
+            SendQueueFillLevel level = entityplayer.playerConnection.getSendQueueFillLevel();
+            if(level.isEqualOrLowerThan(SendQueueFillLevel.LOW)) {
+                packetCount++;
+            } else if(level.equals(SendQueueFillLevel.FULL)) {
                 packetCount = 0;
             }
 

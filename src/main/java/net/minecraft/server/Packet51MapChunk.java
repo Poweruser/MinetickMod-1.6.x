@@ -30,14 +30,21 @@ public class Packet51MapChunk extends Packet {
     //public Packet51MapChunk(Chunk chunk, boolean flag, int i) {
     // Poweruser start
     private AtomicInteger pendingUses;
+    public static int targetCompressionLevel = 9;
 
     public void setPendingUses(int uses) {
         this.pendingUses = new AtomicInteger(uses);
     }
 
     private PacketBuilderBuffer pbb;
+    private static final ThreadLocal<Integer> currentCompressionLevel = new ThreadLocal<Integer>() {
+        @Override
+        protected Integer initialValue() {
+            return new Integer(targetCompressionLevel);
+        }
+    };
 
-    static final ThreadLocal<Deflater> localDef = new ThreadLocal<Deflater>() {
+    private static final ThreadLocal<Deflater> localDef = new ThreadLocal<Deflater>() {
         @Override
         protected Deflater initialValue() {
             /*
@@ -57,7 +64,16 @@ public class Packet51MapChunk extends Packet {
         this.e = flag;
         ChunkMap chunkmap = a(pbb, chunk, flag, i);
         //Deflater deflater = new Deflater(-1);
-        Deflater deflater = localDef.get(); // Poweruser
+        // Poweruser start
+        Integer currComp = currentCompressionLevel.get();
+        Deflater deflater = localDef.get();
+        if(!currComp.equals(targetCompressionLevel)) {
+            deflater.end();
+            deflater = new Deflater(targetCompressionLevel);
+            localDef.set(deflater);
+            currentCompressionLevel.set(new Integer(targetCompressionLevel));
+        }
+        // Poweruser end
 
         this.d = chunkmap.c;
         this.c = chunkmap.b;

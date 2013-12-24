@@ -82,14 +82,6 @@ public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
         return this.allowChunkGeneration;
     }
 
-    public void activateAntiXRay() {
-        this.antiXRay.enable();
-    }
-
-    public void deactivateAntiXRay() {
-        this.antiXRay.disable();
-    }
-
     public void shutdownThisWorld() {
         this.antiXRay.shutdown();
     }
@@ -128,7 +120,6 @@ public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
             this.priorityQueue = new PriorityQueue<NextTickListEntry>(1500);
         }
         this.antiXRay = new AntiXRay(this);
-        this.activateAntiXRay();
         // Poweruser end
         this.P = new org.bukkit.craftbukkit.CraftTravelAgent(this); // CraftBukkit
         this.scoreboard = new ScoreboardServer(minecraftserver);
