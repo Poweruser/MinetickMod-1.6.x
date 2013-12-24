@@ -27,10 +27,18 @@ public class Packet56MapChunkBulk extends Packet {
     private byte[] buildBuffer;
     private PacketBuilderBuffer pbb;
     private AtomicInteger pendingUses;
+    public static int targetCompressionLevel = 9;
 
     public void setPendingUses(int uses) {
         this.pendingUses = new AtomicInteger(uses);
     }
+
+    private static final ThreadLocal<Integer> currentCompressionLevel = new ThreadLocal<Integer>() {
+        @Override
+        protected Integer initialValue() {
+            return new Integer(targetCompressionLevel);
+        }
+    };
     // Poweruser end
 
     // CraftBukkit start
@@ -124,7 +132,17 @@ public class Packet56MapChunkBulk extends Packet {
             return;
         }
 
+        //Deflater deflater = localDeflater.get();
+        // Poweruser start
+        Integer currComp = currentCompressionLevel.get();
         Deflater deflater = localDeflater.get();
+        if(!currComp.equals(targetCompressionLevel)) {
+            deflater.end();
+            deflater = new Deflater(targetCompressionLevel);
+            localDeflater.set(deflater);
+            currentCompressionLevel.set(new Integer(targetCompressionLevel));
+        }
+        // Poweruser end
         deflater.reset();
         deflater.setInput(this.buildBuffer);
         deflater.finish();

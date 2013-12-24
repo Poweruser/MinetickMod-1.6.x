@@ -38,6 +38,7 @@ import org.bukkit.event.server.RemoteServerCommandEvent;
 import org.bukkit.event.world.WorldSaveEvent;
 // CraftBukkit end
 
+import de.minetick.MinetickMod;
 import de.minetick.ThreadPool;
 import de.minetick.packetbuilder.PacketBuilderThreadPool;
 import de.minetick.profiler.ProfilingComperator;
@@ -106,48 +107,13 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
     // CraftBukkit end
 
     // Poweruser start
-    public ThreadPool threadPool;
-    private PacketBuilderThreadPool pbt = new PacketBuilderThreadPool(((Runtime.getRuntime().availableProcessors() * 3) / 2));
+    protected MinetickMod minetickMod = new MinetickMod();
     private WorldServer sortedWorldsArray[] = null;
     private PriorityQueue<WorldServer> priQueue = new PriorityQueue<WorldServer>(20, new ProfilingComperator());
 
     private LinkedList<WorldServer> autoSaveWorlds = new LinkedList<WorldServer>();
     private int autoSaveDelay = 0;
     private boolean autoSaveOrdered = false;
-
-    private boolean cancelHeavyCalculations = false;
-    private long tickTime = 0L;
-    private int timerDelay = 45;
-
-    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2);
-    private class TickCounter implements Runnable {
-        @Override
-        public void run() {
-            ticksPerSecond.add(ticksCounter);
-            ticksCounter = 0;
-            if(ticksPerSecond.size() > 30) {
-                ticksPerSecond.remove(0);
-            }
-        }
-    }
-    private ScheduledFuture tickTimerTask;
-    private class TickTimer implements Callable {
-        public Object call() {
-            cancelHeavyCalculations = true;
-            for(WorldServer ws: worlds) {
-                ws.cancelHeavyCalculations(cancelHeavyCalculations);
-            }
-            return null;
-        }
-    }
-    private TickTimer tickTimerObject = new TickTimer();
-    private TickCounter tickCounterObject = new TickCounter();
-
-    private List<Integer> ticksPerSecond = Collections.synchronizedList(new LinkedList<Integer>());
-    private int ticksCounter = 0;
-    public Integer[] getTicksPerSecond() {
-        return this.ticksPerSecond.toArray(new Integer[0]);
-    }
 
     public void broadcastToOnlineOperators(String[] msg) {
         Set ops = this.getPlayerList().getOPs();
@@ -163,6 +129,12 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                     }
                 }
             }
+        }
+    }
+
+    public void cancelHeavyCalculationsForAllWorlds(boolean cancel) {
+        for(WorldServer ws: this.worlds) {
+            ws.cancelHeavyCalculations(cancel);
         }
     }
     // Poweruser end
@@ -181,11 +153,6 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
         this.q = new CommandDispatcher();
         // this.convertable = new WorldLoaderServer(server.getWorldContainer()); // CraftBukkit - moved to DedicatedServer.init
         this.as();
-
-        // Poweruser start
-        new BiomeBaseDB().initStaticField();
-        this.scheduledExecutorService.scheduleAtFixedRate(this.tickCounterObject, 1, 1, TimeUnit.SECONDS);
-        // Poweruser end
 
         // CraftBukkit start
         this.options = options;
@@ -512,19 +479,19 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                     j += l;
                     i = k;
                     if (this.worlds.get(0).everyoneDeeplySleeping()) { // CraftBukkit
-                        this.threadPool.profiler.start("GameLogicLoop");
+                        this.minetickMod.getProfiler().start("GameLogicLoop");
                         this.s();
-                        this.threadPool.profiler.stop("GameLogicLoop");
-                        this.threadPool.profiler.newTick();
+                        this.minetickMod.getProfiler().stop("GameLogicLoop");
+                        this.minetickMod.getProfiler().newTick();
                         j = 0L;
                     } else {
                         while (j > 50L) {
                             MinecraftServer.currentTick = (int) (System.currentTimeMillis() / 50); // CraftBukkit
                             j -= 50L;
-                            this.threadPool.profiler.start("GameLogicLoop");
+                            this.minetickMod.getProfiler().start("GameLogicLoop");
                             this.s();
-                            this.threadPool.profiler.stop("GameLogicLoop");
-                            this.threadPool.profiler.newTick();
+                            this.minetickMod.getProfiler().stop("GameLogicLoop");
+                            this.minetickMod.getProfiler().newTick();
                         }
                     }
 
@@ -555,11 +522,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
             this.a(crashreport);
         } finally {
             try {
-                // Poweruser start
-                this.threadPool.shutdown();
-                this.pbt.shutdown();
-                this.scheduledExecutorService.shutdown();
-                // Poweruser end
+                this.minetickMod.shutdown(); // Poweruser
                 this.stop();
                 this.isStopped = true;
             } catch (Throwable throwable1) {
@@ -588,9 +551,8 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
         long i = System.nanoTime();
 
         // Poweruser start
-        this.ticksCounter++;
-        this.cancelHeavyCalculations = false;
-        this.tickTimerTask = this.scheduledExecutorService.schedule(this.tickTimerObject, this.timerDelay, TimeUnit.MILLISECONDS);
+        this.minetickMod.increaseTickCounter();
+        this.minetickMod.startTickTimerTask();
         // Poweruser end
 
         AxisAlignedBB.a().a();
@@ -627,19 +589,15 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                 this.server.getPluginManager().callEvent(event);
             }
         }
-        // Poweruser end
 
-        this.tickTime = System.nanoTime() - i;
+        long tickTime = System.nanoTime() - i;
 
-        if(this.tickTime > 45000000L && this.timerDelay > 20) {
-            this.timerDelay--;
-        } else if(this.tickTime < 35000000L && this.timerDelay < 45) {
-            this.timerDelay++;
-        }
+        this.minetickMod.checkTickTime(tickTime);
         // Poweruser end
 
         this.methodProfiler.a("tallying");
-        this.j[this.ticks % 100] = this.tickTime; // Poweruser - just measured the time, a few lines up
+        //this.j[this.ticks & 100] = System.nanoTime() - i;
+        this.j[this.ticks % 100] = tickTime; // Poweruser - just measured the time, a few lines up
         this.f[this.ticks % 100] = Packet.q - this.F;
         this.F = Packet.q;
         this.g[this.ticks % 100] = Packet.r - this.G;
@@ -736,7 +694,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
         */
         // Poweruser start
         int worldCount = this.worlds.size();
-        if(this.sortedWorldsArray == null || this.threadPool.profiler.checkAvgs() ||
+        if(this.sortedWorldsArray == null || this.minetickMod.getProfiler().checkAvgs() ||
                 this.sortedWorldsArray.length != worldCount) {
              this.priQueue.clear();
              this.priQueue.addAll(this.worlds);
@@ -748,7 +706,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
              }
          }
 
-         this.threadPool.prepareTick(worldCount);
+         this.minetickMod.getThreadPool().prepareTick(worldCount);
          for(i = 0; i < worldCount; i++) {
              WorldServer worldserver = this.sortedWorldsArray[i];
              worldserver.cancelHeavyCalculations(false);
@@ -760,10 +718,10 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
                  worldserver.a(crashreport);
                  throw new ReportedException(crashreport);
              }
-             this.threadPool.tickWorld(worldserver);
+             this.minetickMod.getThreadPool().tickWorld(worldserver);
          }
-         this.threadPool.waitUntilDone();
-         this.tickTimerTask.cancel(false);
+         this.minetickMod.getThreadPool().waitUntilDone();
+         this.minetickMod.cancelTimerTask(false);
 
          for(i = 0; i < worldCount; i++) {
              WorldServer worldserver = this.sortedWorldsArray[i];

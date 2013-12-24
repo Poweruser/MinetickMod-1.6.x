@@ -1,15 +1,18 @@
 package de.minetick.antixray;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 
 import org.bukkit.World.Environment;
+
+import de.minetick.MinetickMod;
+import de.minetick.MinetickThreadFactory;
 
 import net.minecraft.server.Block;
 import net.minecraft.server.Chunk;
@@ -25,10 +28,24 @@ public class AntiXRay {
                                                                   { 0,0,-2},{ 1,0,-2},{-1,0,-2},
                                                                   { 0,0, 2},{ 1,0, 2},{-1,0, 2},
                                                                   { 0,-2,0},{ 0,2, 0}};
+    private static List<String> configWorlds = new LinkedList<String>();
     private Random random = new Random();
-    private ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor (
-                                                         Runtime.getRuntime().availableProcessors(),
-                                                         new AntiXRayThreadFactory());
+    private static ScheduledExecutorService scheduledExecutorService;
+
+    public static void setWorldsFromConfig(List<String> list) {
+        configWorlds.clear();
+        configWorlds.addAll(list);
+    }
+
+    public static void adjustThreadPoolSize(int size) {
+        ScheduledExecutorService service = new ScheduledThreadPoolExecutor (
+                size, new MinetickThreadFactory(Thread.MIN_PRIORITY));
+        ScheduledExecutorService oldOne = scheduledExecutorService;
+        scheduledExecutorService = service;
+        if(oldOne != null) {
+            oldOne.shutdown();
+        }
+    }
 
     public boolean isNether() {
         return this.worldServer.getWorld().getEnvironment().equals(Environment.NETHER);
@@ -40,6 +57,12 @@ public class AntiXRay {
 
     public AntiXRay(WorldServer world) {
         this.worldServer = world;
+        this.enabled = false;
+        for(String w: configWorlds) {
+            if(w.equalsIgnoreCase(this.worldServer.getWorld().getName())) {
+                this.enabled = true;
+            }
+        }
         if(this.isOverworld()) {
             blocksToHide[7] = true;
             blocksToHide[13] = true;
@@ -259,16 +282,7 @@ public class AntiXRay {
         }
     }
 
-    public void shutdown() {
-        this.scheduledExecutorService.shutdown();
-    }
-
-    private class AntiXRayThreadFactory implements ThreadFactory {
-        @Override
-        public Thread newThread(Runnable arg0) {
-            Thread t = Executors.defaultThreadFactory().newThread(arg0);
-            t.setPriority(Thread.MIN_PRIORITY);
-            return t;
-        }
+    public static void shutdown() {
+        scheduledExecutorService.shutdown();
     }
 }

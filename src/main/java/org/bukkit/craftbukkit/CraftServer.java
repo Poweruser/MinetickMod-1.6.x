@@ -1403,5 +1403,25 @@ public final class CraftServer implements Server {
     public int getMinetickModProfilerLogInterval() {
         return configuration.getInt("minetickmod.profiler-log-interval");
     }
+
+    public List<String> getMinetickModOrebfuscatedWorlds() {
+        return configuration.getStringList("minetickmod.orebfuscatedWorlds");
+    }
+
+    public int getMinetickModAntiXRayPoolSize() {
+        return configuration.getInt("minetickmod.antixrayThreadPoolSize");
+    }
+
+    public int getMinetickModPacketBuilderPoolSize() {
+        return configuration.getInt("minetickmod.packetBuilderThreadPoolSize");
+    }
+
+    public int getMinetickModCompressionLevel() {
+        return configuration.getInt("minetickmod.packetCompressionLevel");
+    }
+
+    public int getMinetickModPacketsPerTick() {
+        return configuration.getInt("minetickmod.packetsPerTick");
+    }
     // Poweruser end
 }
