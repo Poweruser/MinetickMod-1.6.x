@@ -168,9 +168,7 @@ public class PlayerChunkManager {
             int packetCount = packetsPerTick, chunksPerPacket = 4;
             PlayerChunkSendQueue chunkQueue = buff.getPlayerChunkSendQueue();
             SendQueueFillLevel level = entityplayer.playerConnection.getSendQueueFillLevel();
-            if(level.isEqualOrLowerThan(SendQueueFillLevel.LOW)) {
-                packetCount++;
-            } else if(level.equals(SendQueueFillLevel.FULL)) {
+            if(level.isEqualOrHigherThan(SendQueueFillLevel.HIGH)) {
                 packetCount = 0;
             }
 
