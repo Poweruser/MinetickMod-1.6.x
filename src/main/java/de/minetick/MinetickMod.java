@@ -43,6 +43,7 @@ public class MinetickMod {
 
     private static boolean initDone = false;
     private static MinetickMod instance;
+    public static final int defaultPacketCompression = 7;
 
     public MinetickMod() {
         new BiomeBaseDB().initStaticField();

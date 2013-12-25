@@ -8,6 +8,7 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import de.minetick.MinetickMod;
 import de.minetick.packetbuilder.PacketBuilderBuffer;
 
 public class Packet51MapChunk extends Packet {
@@ -30,7 +31,7 @@ public class Packet51MapChunk extends Packet {
     //public Packet51MapChunk(Chunk chunk, boolean flag, int i) {
     // Poweruser start
     private AtomicInteger pendingUses;
-    public static int targetCompressionLevel = 9;
+    public static int targetCompressionLevel = MinetickMod.defaultPacketCompression;
 
     public void setPendingUses(int uses) {
         this.pendingUses = new AtomicInteger(uses);
