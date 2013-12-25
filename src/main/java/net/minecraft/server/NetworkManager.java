@@ -441,6 +441,10 @@ public class NetworkManager implements INetworkManager {
         public boolean isEqualOrLowerThan(SendQueueFillLevel sqfl) {
             return this.value <= sqfl.value;
         }
+
+        public boolean isEqualOrHigherThan(SendQueueFillLevel sqfl) {
+            return this.value >= sqfl.value;
+        }
     }
     // Poweruser end
 }
