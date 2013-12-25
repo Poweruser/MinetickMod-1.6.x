@@ -55,6 +55,14 @@ public class Packet51MapChunk extends Packet {
         }
     };
 
+    public void discard() {
+        if(this.pbb != null && this.buffer != null) {
+            this.pbb.offerSendBuffer(this.buffer);
+            this.buffer = null;
+            this.pbb = null;
+        }
+    }
+
     public Packet51MapChunk(PacketBuilderBuffer pbb, Chunk chunk, boolean flag, int i) {
         this.pbb = pbb;
     // Poweruser end
@@ -150,9 +158,7 @@ public class Packet51MapChunk extends Packet {
 
         // Poweruser start
         if(this.pendingUses.decrementAndGet() == 0) {
-            this.pbb.offerSendBuffer(this.buffer);
-            this.buffer = null;
-            this.pbb = null;
+            this.discard();
         }
         // Poweruser end
     }

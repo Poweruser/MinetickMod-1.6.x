@@ -58,7 +58,7 @@ public class ThreadPool {
                 wt = new WorkThread(this.threadCount, this.lockObj);
                 this.allThreads.addLast(wt);
                 this.threadCount++;
-                System.out.println("[INFO] MinetickMod: Creating another world thread. #Threads: " + this.threadCount + " #Welten: " + this.currentNumOfJobs);
+                //System.out.println("[INFO] MinetickMod: Creating another world thread. #Threads: " + this.threadCount + " #Worlds: " + this.currentNumOfJobs);
             }
             wt.startTicking(ws);
         }

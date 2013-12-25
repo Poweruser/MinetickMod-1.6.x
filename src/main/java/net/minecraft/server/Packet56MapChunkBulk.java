@@ -39,6 +39,14 @@ public class Packet56MapChunkBulk extends Packet {
             return new Integer(targetCompressionLevel);
         }
     };
+
+    public void discard() {
+        if(this.pbb != null && this.buffer != null) {
+            this.pbb.offerSendBuffer(this.buffer);
+            this.buffer = null;
+            this.pbb = null;
+        }
+    }
     // Poweruser end
 
     // CraftBukkit start
@@ -244,9 +252,7 @@ public class Packet56MapChunkBulk extends Packet {
 
         // Poweruser start
         if(this.pendingUses.decrementAndGet() == 0) {
-            this.pbb.offerSendBuffer(this.buffer);
-            this.buffer = null;
-            this.pbb = null;
+            this.discard();
         }
         // Poweruser end
     }
