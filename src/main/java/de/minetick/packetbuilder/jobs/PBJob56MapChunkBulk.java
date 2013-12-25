@@ -45,6 +45,7 @@ public class PBJob56MapChunkBulk implements PacketBuilderJobInterface {
         Packet56MapChunkBulk packet = new Packet56MapChunkBulk(pbb, this.chunks);
         boolean allStillListed = true;
         int[] vec = PlayerChunkManager.get2DDirectionVector(this.connection.player);
+        // TODO: Im currently not sure if synchronizing is still required here, needs to be checked
         synchronized(checkAndSendLock) {
             Iterator<Chunk> iter = this.chunks.iterator();
             while(iter.hasNext()) {
@@ -82,13 +83,21 @@ public class PBJob56MapChunkBulk implements PacketBuilderJobInterface {
                     }
                 }
                 entityplayer.chunksForTracking.addAll(this.chunks);
+                this.chunks.clear();
+            } else {
+                packet.discard();
             }
         }
         if(!allStillListed && !this.chunks.isEmpty()) {
             PacketBuilderThreadPool.addJobStatic(new PBJob56MapChunkBulk(this.connection, this.chunks, this.chunkQueue));
         }
+        this.clear();
+    }
+
+    public void clear() {
         this.chunks = null;
         this.connection = null;
         this.chunkQueue = null;
+        this.networkManager = null;
     }
 }

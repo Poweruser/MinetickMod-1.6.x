@@ -129,7 +129,13 @@ public class AntiXRay {
     }
 
     private boolean hasOnlySolidBlockNeighbours(Chunk chunk, int section, int x, int y, int z) {
-        return this.checkForSolidBlocks(chunk, section, x, y, z, 1);
+        boolean result = false;
+        try {
+            result = this.checkForSolidBlocks(chunk, section, x, y, z, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     private boolean checkForSolidBlocks(Chunk chunk, int section, int x, int y, int z, int distance) {
@@ -240,7 +246,7 @@ public class AntiXRay {
                 for(int z = 0; z < 16; z++) {
                     for(int x = 0; x < 16; x++) {
                         if(index >= dataLength) {
-                            System.out.println("out of range: " + index + " > " + dataLength);
+                            //System.out.println("out of range: " + index + " > " + dataLength);
                             return this.cleanup();
                         }
                         int blockID = buildBuffer[index] & 255;

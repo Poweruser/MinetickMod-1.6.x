@@ -60,10 +60,12 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
     
     @Override
     public void buildAndSendPacket(PacketBuilderBuffer pbb, Object checkAndSendLock) {
+        boolean packetSent = false;
         Packet51MapChunk packet = new Packet51MapChunk(pbb, chunk, flag, i);
         if(this.multipleConnections) {
+            ArrayList tileentities = null;
+            // TODO: Im currently not sure if synchronizing is still required here, needs to be checked
             synchronized(checkAndSendLock) {
-                ArrayList tileentities = null;
                 if(this.sendTileEntities) {
                     tileentities = new ArrayList();
                     tileentities.addAll(chunk.tileEntities.values());
@@ -78,7 +80,10 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
                         }
                     }
                 }
+            }
+            if(this.validOnes.size() > 0) {
                 packet.setPendingUses(this.validOnes.size());
+                packetSent = true;
                 for(NetworkManager n: this.validOnes) {
                     n.queueChunks(packet);
                     if(this.sendTileEntities) {
@@ -99,6 +104,7 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
             if(this.chunkQueue != null &&  this.connection != null && this.networkManager != null) {
                 synchronized(checkAndSendLock) {
                     if(!this.chunkQueue.isOnServer(chunk.x, chunk.z)) {
+                        packetSent = true;
                         packet.setPendingUses(1);
                         this.networkManager.queueChunks(packet);
                     }
@@ -107,8 +113,30 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
             this.connection = null;
             this.chunkQueue = null;
         }
+        if(!packetSent) {
+            packet.discard();
+        }
+        this.clear();
+    }
+
+    public void clear() {
         this.validOnes.clear();
         this.validOnes = null;
         chunk = null;
+        if(this.connections != null) {
+            for(int i = 0; i < this.connections.length; i++) {
+                this.connections[i] = null;
+            }
+            this.connections = null;
+        }
+        if(this.chunkQueues != null) {
+            for(int i = 0; i < this.chunkQueues.length; i++) {
+                this.chunkQueues[i] = null;
+            }
+            this.chunkQueues = null;
+        }
+        this.connection = null;
+        this.chunkQueue = null;
+        this.networkManager = null;
     }
 }

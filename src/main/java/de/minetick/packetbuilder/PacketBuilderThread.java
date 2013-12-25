@@ -43,7 +43,12 @@ public class PacketBuilderThread extends Observable implements Runnable {
                     } catch (InterruptedException e) {}
                 }
             } else {
-                this.job.buildAndSendPacket(this.buildBuffer, checkAndSendLock);
+                try {
+                    this.job.buildAndSendPacket(this.buildBuffer, checkAndSendLock);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    this.job.clear();
+                }
                 this.job = null;
                 this.setChanged();
                 this.notifyObservers();
