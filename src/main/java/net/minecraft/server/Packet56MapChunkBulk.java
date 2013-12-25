@@ -10,6 +10,7 @@ import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
+import de.minetick.MinetickMod;
 import de.minetick.packetbuilder.PacketBuilderBuffer;
 
 public class Packet56MapChunkBulk extends Packet {
@@ -27,7 +28,7 @@ public class Packet56MapChunkBulk extends Packet {
     private byte[] buildBuffer;
     private PacketBuilderBuffer pbb;
     private AtomicInteger pendingUses;
-    public static int targetCompressionLevel = 9;
+    public static int targetCompressionLevel = MinetickMod.defaultPacketCompression;
 
     public void setPendingUses(int uses) {
         this.pendingUses = new AtomicInteger(uses);
