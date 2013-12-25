@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.bukkit</groupId>
-  <artifactId>craftbukkit</artifactId>
+  <groupId>de.minetick</groupId>
+  <artifactId>MinetickMod</artifactId>
   <packaging>jar</packaging>
   <version>1.6.4-R2.0</version>
-  <name>CraftBukkit</name>
-  <url>http://www.bukkit.org</url>
+  <name>MinetickMod</name>
+  <url>http://www.minetick.de</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,9 +19,9 @@
   </properties>
 
   <scm>
-    <connection>scm:git:git://github.com/Bukkit/CraftBukkit.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/Bukkit/CraftBukkit.git</developerConnection>
-    <url>https://github.com/Bukkit/CraftBukkit</url>
+    <connection>scm:git:git://github.com/Poweruser/MinetickMod.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/Poweruser/MinetickMod.git</developerConnection>
+    <url>https://github.com/Poweruser/MinetickMod</url>
   </scm>
 
   <distributionManagement>
@@ -372,5 +372,8 @@
       </plugins>
     </pluginManagement>
   </build>
+  <description>This is a mod of the minecraft server implementation
+CraftBukkit ( https://github.com/Bukkit/CraftBukkit ).
+It introduces the concept of multithreading at various locations to profit from todays multicore cpus.</description>
 </project>
 
