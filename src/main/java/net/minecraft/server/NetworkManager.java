@@ -151,7 +151,7 @@ public class NetworkManager implements INetworkManager {
                     i = packet.n();
                     aint[i] += packet.a() + 1;
                     //this.lowPriorityQueueDelay = 0;
-                    this.lowPriorityQueueDelay = 2; // Poweruser
+                    this.lowPriorityQueueDelay = 4; // Poweruser
                     flag = true;
                 }
             }

@@ -71,18 +71,20 @@ public class MinetickMod {
             this.threadPool = new ThreadPool(this.profiler);
             AntiXRay.setWorldsFromConfig(craftserver.getMinetickModOrebfuscatedWorlds());
             int axrps = craftserver.getMinetickModAntiXRayPoolSize();
-            if(axrps <= 0) {
-                antixrayPoolSize = this.availableProcessors;
+            if(axrps <= 0 || axrps > 64) {
+                axrps = this.availableProcessors;
             }
+            this.antixrayPoolSize = axrps;
             AntiXRay.adjustThreadPoolSize(this.antixrayPoolSize);
             int pbps = craftserver.getMinetickModPacketBuilderPoolSize();
-            if(pbps <= 0) {
-                packetbuilderPoolSize = this.availableProcessors;
+            if(pbps <= 0 || pbps > 64) {
+                pbps = this.availableProcessors;
             }
+            this.packetbuilderPoolSize = pbps;
             this.packetBuilderPool = new PacketBuilderThreadPool(this.packetbuilderPoolSize);
             int level = craftserver.getMinetickModCompressionLevel();
             if(level < 1 || level > 9) {
-                level = 9;
+                level = defaultPacketCompression;
             }
             Packet51MapChunk.targetCompressionLevel = level;
             Packet56MapChunkBulk.targetCompressionLevel = level;
