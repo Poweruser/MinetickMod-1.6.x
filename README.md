@@ -4,13 +4,15 @@ MinetickMod
 This is my mod of the popular [Craftbukkit Minecraft server](https://github.com/Bukkit/CraftBukkit).
 Its main purpose is to increase the server's processing speed, by introducing multithreading and other optimizations. And while I'm at it, fixing bugs that I found. 
 
-Developement started privately back in April of 2013. Since May 1st (Minecraft version 1.5.1 at that time) this mod is powering the server [Minetick](www.minetick.de) every day. Which means that this mod is pretty well tested already.
+Developement started privately back in April of 2013. Since May 1st (Minecraft version 1.5.1 at that time) this mod is powering the server [Minetick](www.minetick.de) every day.
 
 The main achievements so far:
 
 - Prioritized parallel processing of the entities of different worlds
 - Queued, limited and parallel chunk generation in different worlds
 - Main thread independent creation, orebfuscation and compression of chunk packets
+
+Parts of the changes are pretty well tested already (like parallel ticking of entities), other parts that I added recently (like offloaded packet creation) still require lots of testing. 
 
 Here is a (very abstract) graphical overview on what changed:
 
