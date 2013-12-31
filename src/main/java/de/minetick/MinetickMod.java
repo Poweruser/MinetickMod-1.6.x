@@ -124,6 +124,7 @@ public class MinetickMod {
         this.threadPool.shutdown();
         this.timerService.shutdown();
         PacketBuilderThreadPool.shutdownStatic();
+        AntiXRay.shutdown();
     }
 
     public void checkTickTime(long tickTime) {         
