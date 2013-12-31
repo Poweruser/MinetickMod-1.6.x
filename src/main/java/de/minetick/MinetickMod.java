@@ -129,10 +129,10 @@ public class MinetickMod {
 
     public void checkTickTime(long tickTime) {         
         if(tickTime > 45000000L) {
-            if(this.timerDelay > 20) {
+            if(this.timerDelay > 40) {
                 this.timerDelay--;
             }
-        } else if(tickTime < 35000000L && this.timerDelay < 45) {
+        } else if(this.timerDelay < 45) {
             this.timerDelay++;
         }
     }
