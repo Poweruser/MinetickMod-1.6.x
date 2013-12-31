@@ -817,8 +817,6 @@ public final class CraftServer implements Server {
         worlds.remove(world.getName().toLowerCase());
         console.worlds.remove(console.worlds.indexOf(handle));
 
-        handle.shutdownThisWorld(); // Poweruser
-
         return true;
     }
 

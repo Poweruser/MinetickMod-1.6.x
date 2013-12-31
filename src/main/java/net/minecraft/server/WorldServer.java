@@ -81,10 +81,6 @@ public class WorldServer extends World implements org.bukkit.BlockChangeDelegate
         }
         return this.allowChunkGeneration;
     }
-
-    public void shutdownThisWorld() {
-        this.antiXRay.shutdown();
-    }
     // Poweruser end
 
     // CraftBukkit start
