@@ -9,7 +9,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import net.minecraft.server.BiomeBaseDB;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.Packet51MapChunk;
 import net.minecraft.server.Packet56MapChunkBulk;
@@ -46,7 +45,6 @@ public class MinetickMod {
     public static final int defaultPacketCompression = 7;
 
     public MinetickMod() {
-        new BiomeBaseDB().initStaticField();
         this.availableProcessors = Runtime.getRuntime().availableProcessors();
         this.tickTimerObject = new TickTimer();
         this.tickCounterObject = new TickCounter();

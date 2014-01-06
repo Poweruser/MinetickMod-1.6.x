@@ -7,6 +7,7 @@ import java.util.Random;
 public abstract class BiomeBase {
 
     public static final BiomeBase[] biomes = new BiomeBase[256];
+    // Poweruser start - moved to BiomeBaseDB
     /*
     public static final BiomeBase OCEAN = (new BiomeOcean(0)).b(112).a("Ocean").b(-1.0F, 0.4F);
     public static final BiomeBase PLAINS = (new BiomePlains(1)).b(9286496).a("Plains").a(0.8F, 0.4F);
@@ -32,6 +33,33 @@ public abstract class BiomeBase {
     public static final BiomeBase JUNGLE = (new BiomeJungle(21)).b(5470985).a("Jungle").a(5470985).a(1.2F, 0.9F).b(0.2F, 0.4F);
     public static final BiomeBase JUNGLE_HILLS = (new BiomeJungle(22)).b(2900485).a("JungleHills").a(5470985).a(1.2F, 0.9F).b(1.8F, 0.5F);
     */
+
+    private static BiomeBaseDB biomeBaseDB = new BiomeBaseDB();
+    public static final BiomeBase OCEAN = biomeBaseDB.OCEAN;
+    public static final BiomeBase PLAINS = biomeBaseDB.PLAINS;
+    public static final BiomeBase DESERT = biomeBaseDB.DESERT;
+    public static final BiomeBase EXTREME_HILLS = biomeBaseDB.EXTREME_HILLS;
+    public static final BiomeBase FOREST = biomeBaseDB.FOREST;
+    public static final BiomeBase TAIGA = biomeBaseDB.TAIGA;
+    public static final BiomeBase SWAMPLAND = biomeBaseDB.SWAMPLAND;
+    public static final BiomeBase RIVER = biomeBaseDB.RIVER;
+    public static final BiomeBase HELL = biomeBaseDB.HELL;
+    public static final BiomeBase SKY = biomeBaseDB.SKY;
+    public static final BiomeBase FROZEN_OCEAN = biomeBaseDB.FROZEN_OCEAN;
+    public static final BiomeBase FROZEN_RIVER = biomeBaseDB.FROZEN_RIVER;
+    public static final BiomeBase ICE_PLAINS = biomeBaseDB.ICE_PLAINS;
+    public static final BiomeBase ICE_MOUNTAINS = biomeBaseDB.ICE_MOUNTAINS;
+    public static final BiomeBase MUSHROOM_ISLAND = biomeBaseDB.MUSHROOM_ISLAND;
+    public static final BiomeBase MUSHROOM_SHORE = biomeBaseDB.MUSHROOM_SHORE;
+    public static final BiomeBase BEACH = biomeBaseDB.BEACH;
+    public static final BiomeBase DESERT_HILLS = biomeBaseDB.DESERT_HILLS;
+    public static final BiomeBase FOREST_HILLS = biomeBaseDB.FOREST_HILLS;
+    public static final BiomeBase TAIGA_HILLS = biomeBaseDB.TAIGA_HILLS;
+    public static final BiomeBase SMALL_MOUNTAINS = biomeBaseDB.SMALL_MOUNTAINS;
+    public static final BiomeBase JUNGLE = biomeBaseDB.JUNGLE;
+    public static final BiomeBase JUNGLE_HILLS = biomeBaseDB.JUNGLE_HILLS;
+    // Poweruser end
+
     public String y;
     public int z;
     public byte A;
@@ -194,6 +222,12 @@ public abstract class BiomeBase {
             return ((BiomeBase) o).id == this.id;
         } else {
             return false;
+        }
+    }
+
+    static {
+        for(int i = 0; i < biomeBaseDB.biomes.length; i++) {
+            BiomeBase.biomes[i] = biomeBaseDB.biomes[i];
         }
     }
     // Poweruser end

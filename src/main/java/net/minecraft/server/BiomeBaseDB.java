@@ -3,7 +3,6 @@ package net.minecraft.server;
 import net.minecraft.server.*;
 
 public class BiomeBaseDB {
-    private static boolean initDone = false;
     public final BiomeBase[] biomes = new BiomeBase[256];
 
     public final BiomeBase OCEAN = new BiomeOcean(0).b(112).a("Ocean").b(-1.0F, 0.4F);
@@ -62,14 +61,5 @@ public class BiomeBaseDB {
         this.biomes[this.SMALL_MOUNTAINS.id] = this.SMALL_MOUNTAINS;
         this.biomes[this.JUNGLE.id] = this.JUNGLE;
         this.biomes[this.JUNGLE_HILLS.id] = this.JUNGLE_HILLS;
-    }
-
-    public void initStaticField() {
-        if(!initDone) {
-            initDone = true;
-            for(int i = 0; i < this.biomes.length; i++) {
-                BiomeBase.biomes[i] = this.biomes[i];
-            }
-        }
     }
 }
