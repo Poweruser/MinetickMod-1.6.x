@@ -1407,5 +1407,9 @@ public final class CraftServer implements Server {
     public int getMinetickModPacketsPerTick() {
         return configuration.getInt("minetickmod.packetsPerTick");
     }
+
+    public List<String> getMinetickModNotGeneratingWorlds() {
+        return configuration.getStringList("minetickmod.notGeneratingWorlds");
+    }
     // Poweruser end
 }

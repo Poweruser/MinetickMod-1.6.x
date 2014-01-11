@@ -62,3 +62,4 @@ minetickmod:
     antixrayThreadPoolSize: -1
     packetBuilderThreadPoolSize: -1
     packetsPerTick: 1
+    notGeneratingWorlds: []
