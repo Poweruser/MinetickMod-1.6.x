@@ -23,7 +23,8 @@ public class Chunk {
     public int[] heightMap;
     public final int x;
     public final int z;
-    private boolean t;
+    //private boolean t;
+    protected boolean t; // Poweruser
     public Map tileEntities;
     public List[] entitySlices;
     public boolean done;
