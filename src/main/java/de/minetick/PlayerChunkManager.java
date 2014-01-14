@@ -1,5 +1,6 @@
 package de.minetick;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -174,7 +175,7 @@ public class PlayerChunkManager {
 
             // Poweruser start - moved here from EntityPlayer.l_()
             for(int w = 0; w < packetCount; w++) {
-            ArrayList<Chunk> arraylist = new ArrayList<Chunk>();
+            ArrayList<WeakReference<Chunk>> arraylist = new ArrayList<WeakReference<Chunk>>();
             //ArrayList arraylist1 = new ArrayList();
             int skipped = 0;
             while(chunkQueue.hasChunksQueued() && arraylist.size() < chunksPerPacket && skipped < 4) {
@@ -183,7 +184,7 @@ public class PlayerChunkManager {
                     if(this.world.isLoaded(chunkcoordintpair.x << 4, 0, chunkcoordintpair.z << 4)) {
                         // CraftBukkit start - Get tile entities directly from the chunk instead of the world
                         Chunk chunk = this.world.getChunkAt(chunkcoordintpair.x, chunkcoordintpair.z);
-                        arraylist.add(chunk);
+                        arraylist.add(new WeakReference<Chunk>(chunk));
                         //arraylist1.addAll(chunk.tileEntities.values());
                         // CraftBukkit end
                         chunkQueue.removeFirst(); // Poweruser

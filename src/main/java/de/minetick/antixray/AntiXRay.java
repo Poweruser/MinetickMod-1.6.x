@@ -1,5 +1,6 @@
 package de.minetick.antixray;
 
+import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -120,6 +121,7 @@ public class AntiXRay {
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 }
+                tasks[i] = null;
             }
         }
     }
@@ -227,14 +229,14 @@ public class AntiXRay {
         private int sectionStart;
         private byte[] buildBuffer;
         private int dataLength;
-        private Chunk chunk;
+        private WeakReference<Chunk> chunk;
 
         public SectionChecker(int sectionID, byte[] buildBuffer, int dataLength, Chunk chunk, int sectionStart) {
             this.sectionID = sectionID;
             this.buildBuffer = buildBuffer;
             this.sectionStart = sectionStart;
             this.dataLength = dataLength;
-            this.chunk = chunk;
+            this.chunk = new WeakReference<Chunk>(chunk);
         }
 
         private Boolean cleanup() {
@@ -256,14 +258,14 @@ public class AntiXRay {
                         int blockID = buildBuffer[index] & 255;
                         if(isOverworld()) {
                             if(blocksToHide[blockID]) {
-                                if(hasOnlySolidBlockNeighbours(chunk, sectionID, x, y, z, 1)) {
+                                if(hasOnlySolidBlockNeighbours(chunk.get(), sectionID, x, y, z, 1)) {
                                     buildBuffer[index] = 1; // stone
                                 }
                             } else if(isEnabled()) {
                                 if(isOverworld() && blockID == Block.STONE.id) {
                                     double r = random.nextDouble();
                                     if(r < 0.15D) {
-                                        if(hasOnlySolidBlockNeighbours(chunk, sectionID, x, y, z, 2)) {
+                                        if(hasOnlySolidBlockNeighbours(chunk.get(), sectionID, x, y, z, 2)) {
                                             if(r < 0.03D) {
                                                 buildBuffer[index] = 56; // diamond ore
                                             } else if(r < 0.06D) {
