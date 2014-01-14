@@ -22,6 +22,7 @@ import de.minetick.modcommands.PacketCompressionCommand;
 import de.minetick.modcommands.PacketsPerTickCommand;
 import de.minetick.modcommands.TPSCommand;
 import de.minetick.modcommands.ThreadPoolsCommand;
+import de.minetick.modcommands.WorldStatsCommand;
 import de.minetick.packetbuilder.PacketBuilderThreadPool;
 import de.minetick.profiler.Profiler;
 
@@ -65,6 +66,7 @@ public class MinetickMod {
             craftserver.getCommandMap().register("threadpools", "MinetickMod", new ThreadPoolsCommand("threadpools"));
             craftserver.getCommandMap().register("packetspertick", "MinetickMod", new PacketsPerTickCommand("packetspertick"));
             craftserver.getCommandMap().register("packetcompression", "MinetickMod", new PacketCompressionCommand("packetcompression"));
+            craftserver.getCommandMap().register("worldstats", "MinetickMod", new WorldStatsCommand("worldstats"));
     
             this.profiler = new Profiler(craftserver.getMinetickModProfilerLogInterval(),
                                          craftserver.getMinetickModProfilerWriteEnabled(),
