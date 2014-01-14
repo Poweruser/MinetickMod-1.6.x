@@ -1,5 +1,6 @@
 package de.minetick.packetbuilder.jobs;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -22,10 +23,10 @@ public class PBJob56MapChunkBulk implements PacketBuilderJobInterface {
 
     private PlayerConnection connection;
     private NetworkManager networkManager = null;
-    private List<Chunk> chunks;
+    private List<WeakReference<Chunk>> chunks;
     private PlayerChunkSendQueue chunkQueue;
     
-    public PBJob56MapChunkBulk(PlayerConnection connection, List<Chunk> chunks, PlayerChunkSendQueue chunkQueue) {
+    public PBJob56MapChunkBulk(PlayerConnection connection, List<WeakReference<Chunk>> chunks, PlayerChunkSendQueue chunkQueue) {
         this.connection = connection;
         if(this.connection != null && this.connection.networkManager instanceof NetworkManager) {
             this.networkManager = (NetworkManager) this.connection.networkManager;
@@ -47,9 +48,9 @@ public class PBJob56MapChunkBulk implements PacketBuilderJobInterface {
         int[] vec = PlayerChunkManager.get2DDirectionVector(this.connection.player);
         // TODO: Im currently not sure if synchronizing is still required here, needs to be checked
         synchronized(checkAndSendLock) {
-            Iterator<Chunk> iter = this.chunks.iterator();
+            Iterator<WeakReference<Chunk>> iter = this.chunks.iterator();
             while(iter.hasNext()) {
-                Chunk c = iter.next();
+                Chunk c = iter.next().get();
                 if(this.chunkQueue != null && this.connection != null) {
                     if(!this.chunkQueue.isOnServer(c.x, c.z)) {
                         if(!highPriority && PlayerChunkManager.isWithinRadius(c.x, c.z, playerX + vec[0], playerZ + vec[1], 1).equals(ChunkPosEnum.INSIDE)) {
@@ -68,8 +69,8 @@ public class PBJob56MapChunkBulk implements PacketBuilderJobInterface {
                     this.networkManager.queueChunks(packet);
                 }
                 ArrayList arraylist1 = new ArrayList();
-                for(Chunk c : this.chunks) {
-                    arraylist1.addAll(c.tileEntities.values());
+                for(WeakReference<Chunk> c : this.chunks) {
+                    arraylist1.addAll(c.get().tileEntities.values());
                 }
                 Iterator iterator2 = arraylist1.iterator();
                 EntityPlayer entityplayer = this.connection.player;
@@ -82,7 +83,9 @@ public class PBJob56MapChunkBulk implements PacketBuilderJobInterface {
                         }
                     }
                 }
-                entityplayer.chunksForTracking.addAll(this.chunks);
+                for(WeakReference<Chunk> wr: this.chunks) {
+                    entityplayer.chunksForTracking.add(wr.get());
+                }
                 this.chunks.clear();
             } else {
                 packet.discard();

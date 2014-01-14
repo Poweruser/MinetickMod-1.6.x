@@ -1,5 +1,6 @@
 package de.minetick.packetbuilder.jobs;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import net.minecraft.server.Chunk;
@@ -21,7 +22,7 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
     private PlayerConnection[] connections;
     private NetworkManager[] networkManagers;
     private PlayerChunkSendQueue[] chunkQueues;
-    private Chunk chunk;
+    private WeakReference<Chunk> chunk;
     private boolean flag;
     private int i;
     private boolean sendTileEntities;
@@ -36,7 +37,7 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
             this.networkManager = (NetworkManager) this.connection.networkManager;
         }
         this.chunkQueue = chunkQueue;
-        this.chunk = chunk;
+        this.chunk = new WeakReference<Chunk>(chunk);
         this.flag = flag;
         this.i = i;
         this.sendTileEntities = false;
@@ -52,7 +53,7 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
             }
         }
         this.chunkQueues = chunkQueues;
-        this.chunk = chunk;
+        this.chunk = new WeakReference<Chunk>(chunk);
         this.flag = flag;
         this.i = i;
         this.sendTileEntities = sendTileEntities;
@@ -61,18 +62,18 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
     @Override
     public void buildAndSendPacket(PacketBuilderBuffer pbb, Object checkAndSendLock) {
         boolean packetSent = false;
-        Packet51MapChunk packet = new Packet51MapChunk(pbb, chunk, flag, i);
+        Packet51MapChunk packet = new Packet51MapChunk(pbb, chunk.get(), flag, i);
         if(this.multipleConnections) {
             ArrayList tileentities = null;
             // TODO: Im currently not sure if synchronizing is still required here, needs to be checked
             synchronized(checkAndSendLock) {
                 if(this.sendTileEntities) {
                     tileentities = new ArrayList();
-                    tileentities.addAll(chunk.tileEntities.values());
+                    tileentities.addAll(chunk.get().tileEntities.values());
                 }
                 for(int a = 0; a < this.connections.length; a++) {
                     if(this.chunkQueues[a] != null && this.connections[a] != null && this.networkManagers[a] != null) {
-                        if(this.chunkQueues[a].isOnServer(chunk.x, chunk.z)) {
+                        if(this.chunkQueues[a].isOnServer(chunk.get().x, chunk.get().z)) {
                             this.validOnes.add(this.networkManagers[a]);
                             this.connections[a] = null;
                             this.chunkQueues[a] = null;
@@ -103,7 +104,7 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
         } else {
             if(this.chunkQueue != null &&  this.connection != null && this.networkManager != null) {
                 synchronized(checkAndSendLock) {
-                    if(!this.chunkQueue.isOnServer(chunk.x, chunk.z)) {
+                    if(!this.chunkQueue.isOnServer(chunk.get().x, chunk.get().z)) {
                         packetSent = true;
                         packet.setPendingUses(1);
                         this.networkManager.queueChunks(packet);
