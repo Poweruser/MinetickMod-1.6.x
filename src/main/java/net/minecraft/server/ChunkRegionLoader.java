@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -77,7 +78,15 @@ public class ChunkRegionLoader implements IAsyncChunkSaver, IChunkLoader {
                 return null;
             }
 
-            nbttagcompound = NBTCompressedStreamTools.a((DataInput) datainputstream);
+            //nbttagcompound = NBTCompressedStreamTools.a((DataInput) datainputstream);
+            // Poweruser start
+            try {
+                nbttagcompound = NBTCompressedStreamTools.a((DataInput) datainputstream);
+            } catch(IOException e) {
+                world.getLogger().severe("An IOException occurred, while trying to load the NBTTagCompound of chunk (" + i + ";" + j + ") in world " + world.getWorld().getName() + ": " + e.getMessage());
+                return null;
+            }
+            // Poweruser end
         }
 
         return this.a(world, i, j, nbttagcompound);
