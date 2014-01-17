@@ -1,6 +1,7 @@
 package net.minecraft.server;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
@@ -30,7 +31,8 @@ public class NBTCompressedStreamTools {
     }
 
     public static void a(NBTTagCompound nbttagcompound, OutputStream outputstream) throws IOException { // Poweruser - added throws IOException
-        DataOutputStream dataoutputstream = new DataOutputStream(new GZIPOutputStream(outputstream));
+        //DataOutputStream dataoutputstream = new DataOutputStream(new GZIPOutputStream(outputstream));
+        DataOutputStream dataoutputstream = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(outputstream))); // Poweruser
 
         try {
             a(nbttagcompound, (DataOutput) dataoutputstream);
@@ -55,7 +57,8 @@ public class NBTCompressedStreamTools {
 
     public static byte[] a(NBTTagCompound nbttagcompound) throws IOException { // Poweruser - added throws IOException
         ByteArrayOutputStream bytearrayoutputstream = new ByteArrayOutputStream();
-        DataOutputStream dataoutputstream = new DataOutputStream(new GZIPOutputStream(bytearrayoutputstream));
+        //DataOutputStream dataoutputstream = new DataOutputStream(new GZIPOutputStream(bytearrayoutputstream));
+        DataOutputStream dataoutputstream = new DataOutputStream(new BufferedOutputStream(new GZIPOutputStream(bytearrayoutputstream))); // Poweruser
 
         try {
             a(nbttagcompound, (DataOutput) dataoutputstream);
