@@ -59,25 +59,22 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
     }
     
     @Override
-    public void buildAndSendPacket(PacketBuilderBuffer pbb, Object checkAndSendLock) {
+    public void buildAndSendPacket(PacketBuilderBuffer pbb) {
         boolean packetSent = false;
         Packet51MapChunk packet = new Packet51MapChunk(pbb, chunk, flag, i);
         if(this.multipleConnections) {
-            ArrayList tileentities = null;
-            // TODO: Im currently not sure if synchronizing is still required here, needs to be checked
-            synchronized(checkAndSendLock) {
-                if(this.sendTileEntities) {
-                    tileentities = new ArrayList();
-                    tileentities.addAll(chunk.tileEntities.values());
-                }
-                for(int a = 0; a < this.connections.length; a++) {
-                    if(this.chunkQueues[a] != null && this.connections[a] != null && this.networkManagers[a] != null) {
-                        if(this.chunkQueues[a].isOnServer(chunk.x, chunk.z)) {
-                            this.validOnes.add(this.networkManagers[a]);
-                            this.connections[a] = null;
-                            this.chunkQueues[a] = null;
-                            this.networkManagers[a] = null;
-                        }
+            ArrayList<TileEntity> tileentities = null;
+            if(this.sendTileEntities) {
+                tileentities = new ArrayList<TileEntity>();
+                tileentities.addAll(chunk.tileEntities.values());
+            }
+            for(int a = 0; a < this.connections.length; a++) {
+                if(this.chunkQueues[a] != null && this.connections[a] != null && this.networkManagers[a] != null) {
+                    if(this.chunkQueues[a].isOnServer(chunk.x, chunk.z)) {
+                        this.validOnes.add(this.networkManagers[a]);
+                        this.connections[a] = null;
+                        this.chunkQueues[a] = null;
+                        this.networkManagers[a] = null;
                     }
                 }
             }
@@ -88,7 +85,7 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
                     n.queueChunks(packet);
                     if(this.sendTileEntities) {
                         for(int i = 0; i < tileentities.size(); i++) {
-                            TileEntity te = (TileEntity) (tileentities.get(i));
+                            TileEntity te = tileentities.get(i);
                             Packet p = te.getUpdatePacket();
                             if(p != null) {
                                 n.queueChunks(p);
@@ -102,12 +99,10 @@ public class PBJob51MapChunk implements PacketBuilderJobInterface {
             this.networkManagers = null;
         } else {
             if(this.chunkQueue != null &&  this.connection != null && this.networkManager != null) {
-                synchronized(checkAndSendLock) {
-                    if(!this.chunkQueue.isOnServer(chunk.x, chunk.z)) {
-                        packetSent = true;
-                        packet.setPendingUses(1);
-                        this.networkManager.queueChunks(packet);
-                    }
+                if(!this.chunkQueue.isOnServer(chunk.x, chunk.z)) {
+                    packetSent = true;
+                    packet.setPendingUses(1);
+                    this.networkManager.queueChunks(packet);
                 }
             }
             this.connection = null;

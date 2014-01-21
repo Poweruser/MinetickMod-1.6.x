@@ -35,8 +35,12 @@ public class PBJob56MapChunkBulk implements PacketBuilderJobInterface {
     }
     
     @Override
-    public void buildAndSendPacket(PacketBuilderBuffer pbb, Object checkAndSendLock) {
-        if(this.networkManager == null) {
+    public void buildAndSendPacket(PacketBuilderBuffer pbb) {
+        if(this.networkManager == null || this.chunkQueue == null && this.connection == null) {
+            if(this.chunks != null) {
+                this.chunks.clear();
+            }
+            this.clear();
             return;
         }
         boolean highPriority = false;
@@ -45,48 +49,43 @@ public class PBJob56MapChunkBulk implements PacketBuilderJobInterface {
         Packet56MapChunkBulk packet = new Packet56MapChunkBulk(pbb, this.chunks);
         boolean allStillListed = true;
         int[] vec = PlayerChunkManager.get2DDirectionVector(this.connection.player);
-        // TODO: Im currently not sure if synchronizing is still required here, needs to be checked
-        synchronized(checkAndSendLock) {
-            Iterator<Chunk> iter = this.chunks.iterator();
-            while(iter.hasNext()) {
-                Chunk c = iter.next();
-                if(this.chunkQueue != null && this.connection != null) {
-                    if(!this.chunkQueue.isOnServer(c.x, c.z)) {
-                        if(!highPriority && PlayerChunkManager.isWithinRadius(c.x, c.z, playerX + vec[0], playerZ + vec[1], 1).equals(ChunkPosEnum.INSIDE)) {
-                            highPriority = true;
-                        }
-                        allStillListed = false;
-                        iter.remove();
-                    }
+        Iterator<Chunk> iter = this.chunks.iterator();
+        while(iter.hasNext()) {
+            Chunk c = iter.next();
+            if(!this.chunkQueue.isOnServer(c.x, c.z)) {
+                if(!highPriority && PlayerChunkManager.isWithinRadius(c.x, c.z, playerX + vec[0], playerZ + vec[1], 1).equals(ChunkPosEnum.INSIDE)) {
+                    highPriority = true;
                 }
+                allStillListed = false;
+                iter.remove();
             }
-            if(allStillListed) {
-                packet.setPendingUses(1);
-                if(highPriority) {
-                    this.connection.sendPacket(packet);
-                } else {
-                    this.networkManager.queueChunks(packet);
-                }
-                ArrayList arraylist1 = new ArrayList();
-                for(Chunk c : this.chunks) {
-                    arraylist1.addAll(c.tileEntities.values());
-                }
-                Iterator iterator2 = arraylist1.iterator();
-                EntityPlayer entityplayer = this.connection.player;
-                while (iterator2.hasNext()) {
-                    TileEntity tileentity = (TileEntity) iterator2.next();
-                    if (tileentity != null) {
-                        Packet p = tileentity.getUpdatePacket();
-                        if(p != null) {
-                            this.networkManager.queueChunks(p);
-                        }
-                    }
-                }
-                entityplayer.chunksForTracking.addAll(this.chunks);
-                this.chunks.clear();
+        }
+        if(allStillListed) {
+            packet.setPendingUses(1);
+            if(highPriority) {
+                this.connection.sendPacket(packet);
             } else {
-                packet.discard();
+                this.networkManager.queueChunks(packet);
             }
+            ArrayList<TileEntity> arraylist1 = new ArrayList<TileEntity>();
+            for(Chunk c : this.chunks) {
+                arraylist1.addAll(c.tileEntities.values());
+            }
+            Iterator<TileEntity> iterator2 = arraylist1.iterator();
+            EntityPlayer entityplayer = this.connection.player;
+            while (iterator2.hasNext()) {
+                TileEntity tileentity = (TileEntity) iterator2.next();
+                if (tileentity != null) {
+                    Packet p = tileentity.getUpdatePacket();
+                    if(p != null) {
+                        this.networkManager.queueChunks(p);
+                    }
+                }
+            }
+            entityplayer.chunksForTracking.addAll(this.chunks);
+            this.chunks.clear();
+        } else {
+            packet.discard();
         }
         if(!allStillListed && !this.chunks.isEmpty()) {
             PacketBuilderThreadPool.addJobStatic(new PBJob56MapChunkBulk(this.connection, this.chunks, this.chunkQueue));
