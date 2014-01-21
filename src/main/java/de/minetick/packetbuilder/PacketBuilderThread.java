@@ -53,6 +53,8 @@ public class PacketBuilderThread extends Observable implements Runnable {
                 this.notifyObservers();
             }
         }
+        this.buildBuffer.clear();
+        this.buildBuffer = null;
     }
 
     public void addJob(PacketBuilderJobInterface job) {
@@ -73,7 +75,7 @@ public class PacketBuilderThread extends Observable implements Runnable {
         }        
     }
 
-    public void clearCache() {
-        this.buildBuffer.clear();
+    public void adjustCache() {
+        this.buildBuffer.releaseUnusedBuffers();
     }
 }
