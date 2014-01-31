@@ -720,7 +720,7 @@ public abstract class PlayerList {
                     this.indexCounter = 0;
                 }
                 EntityPlayer entityplayer = (EntityPlayer) this.players.get(this.indexCounter);
-                Packet packet = new PacketPlayOutPlayerInfo(entityplayer.listName, true, entityplayer.ping);
+                Packet packet = new Packet201PlayerInfo(entityplayer.listName, true, entityplayer.ping);
                 for (int i = 0; i < this.players.size(); ++i) {
                     EntityPlayer receiver = ((EntityPlayer) this.players.get(i));
                     if (receiver.getBukkitEntity().canSee(entityplayer.getBukkitEntity())) {
