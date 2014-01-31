@@ -79,7 +79,7 @@ public class NBTCompressedStreamTools {
         }
     }
 
-    public static void a(NBTTagCompound nbttagcompound, DataOutput dataoutput) {
+    public static void a(NBTTagCompound nbttagcompound, DataOutput dataoutput) throws IOException { // Poweruser - added throws IOException
         NBTBase.a(nbttagcompound, dataoutput);
     }
 }

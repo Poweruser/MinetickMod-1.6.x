@@ -2,6 +2,7 @@ package net.minecraft.server;
 
 import java.io.DataInput;
 import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,7 +21,7 @@ public class NBTTagCompound extends NBTBase {
         super(s);
     }
 
-    void write(DataOutput dataoutput) {
+    void write(DataOutput dataoutput) throws IOException { // Poweruser - added throws IOException
         Iterator iterator = this.map.values().iterator();
 
         while (iterator.hasNext()) {
@@ -32,7 +33,7 @@ public class NBTTagCompound extends NBTBase {
         dataoutput.writeByte(0);
     }
 
-    void load(DataInput datainput, int i) {
+    void load(DataInput datainput, int i) throws IOException { // Poweruser - added throws IOException
         if (i > 512) {
             throw new RuntimeException("Tried to read NBT tag with too high complexity, depth > 512");
         } else {
