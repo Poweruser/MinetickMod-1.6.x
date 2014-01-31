@@ -34,8 +34,8 @@ public class PacketCompressionCommand extends Command {
                     level = Integer.parseInt(args[0]);
                 } catch(NumberFormatException e) {}
                 if(level >= 1 && level <= 9) {
-                    Packet51MapChunk.targetCompressionLevel = level;
-                    Packet56MapChunkBulk.targetCompressionLevel = level;
+                    Packet51MapChunk.changeCompressionLevel(level);
+                    Packet56MapChunkBulk.changeCompressionLevel(level);
                     sender.sendMessage("Packet compression was set to level: " + level);
                 } else {
                     this.sendHelp(sender);

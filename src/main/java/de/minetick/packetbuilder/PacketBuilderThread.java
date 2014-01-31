@@ -74,8 +74,4 @@ public class PacketBuilderThread extends Observable implements Runnable {
             this.waitObject.notifyAll();
         }        
     }
-
-    public void adjustCache() {
-        this.buildBuffer.releaseUnusedBuffers();
-    }
 }
