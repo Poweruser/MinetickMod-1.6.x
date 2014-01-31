@@ -3,8 +3,24 @@ package net.minecraft.server;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.HashMap;
 
 public abstract class NBTBase {
+
+    // Poweruser start
+    protected static HashMap<String, String> storedStrings = new HashMap<String, String>();
+
+    public static String getStoredString(String name, boolean store) {
+        String str = storedStrings.get(name);
+        if(str == null) {
+            if(store) {
+                storedStrings.put(name, name);
+            }
+            str = name;
+        }
+        return str;
+    }
+    // Poweruser end
 
     public static final String[] b = new String[] { "END", "BYTE", "SHORT", "INT", "LONG", "FLOAT", "DOUBLE", "BYTE[]", "STRING", "LIST", "COMPOUND", "INT[]"};
     private String name;
@@ -47,7 +63,8 @@ public abstract class NBTBase {
         if (b0 == 0) {
             return new NBTTagEnd();
         } else {
-            String s = datainput.readUTF();
+            //String s = datainput.readUTF();
+            String s = getStoredString(datainput.readUTF(), true); // Poweruser
             NBTBase nbtbase = createTag(b0, s);
 
             try {

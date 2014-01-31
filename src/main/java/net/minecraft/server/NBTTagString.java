@@ -25,7 +25,8 @@ public class NBTTagString extends NBTBase {
     }
 
     void load(DataInput datainput, int i) throws IOException { // Poweruser - added throws IOException
-        this.data = datainput.readUTF();
+        //this.data = datainput.readUTF();
+        this.data = getStoredString(datainput.readUTF(), true); // Poweruser
     }
 
     public byte getTypeId() {
