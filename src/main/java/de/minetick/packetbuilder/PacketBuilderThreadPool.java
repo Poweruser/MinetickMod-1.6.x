@@ -15,7 +15,6 @@ public class PacketBuilderThreadPool implements Observer {
     private static PacketBuilderThreadPool pool;
     private static int targetPoolSize;
     private boolean adjustCacheSizes = false;
-    private int jobCounter = 0;
     
     public PacketBuilderThreadPool(int poolsize) {
         poolsize = Math.max(1, poolsize);
@@ -42,17 +41,6 @@ public class PacketBuilderThreadPool implements Observer {
     public void addJob(PacketBuilderJobInterface job) {
         if(this.active) {
             synchronized(this.jobLock) {
-                this.jobCounter++;
-                /*
-                 * Adjusting the caches shouldn't happen too frequently
-                 * as new memory must be allocated on the next high load then.
-                 * The garbage must be collected at some point as well.
-                 * Every 10000 jobs is a guesstimate. A higher count might be better
-                 */
-                if(this.jobCounter >= 10000) {
-                    this.jobCounter = 0;
-                    this.adjustCacheSizes = true;
-                }
                 if(this.availableThreads.isEmpty()) {
                     this.waitingJobs.add(job);
                 } else {
@@ -73,12 +61,6 @@ public class PacketBuilderThreadPool implements Observer {
                         thread.fastAddJob(this.waitingJobs.poll());
                     } else {
                         this.availableThreads.add(thread);
-                        if(this.adjustCacheSizes && (this.allThreads.size() == this.availableThreads.size())) {
-                            for(PacketBuilderThread pbt: this.allThreads) {
-                                pbt.adjustCache();
-                            }
-                            this.adjustCacheSizes = false;
-                        }
                     }
                 } else {
                     thread.deleteObserver(this);
