@@ -40,7 +40,7 @@ public class AntiXRay {
 
     public static void adjustThreadPoolSize(int size) {
         ScheduledExecutorService service = new ScheduledThreadPoolExecutor (
-                size, new MinetickThreadFactory(Thread.MIN_PRIORITY));
+                size, new MinetickThreadFactory(Thread.MIN_PRIORITY, "MinetickMod_AntiXRay"));
         ScheduledExecutorService oldOne = scheduledExecutorService;
         scheduledExecutorService = service;
         if(oldOne != null) {

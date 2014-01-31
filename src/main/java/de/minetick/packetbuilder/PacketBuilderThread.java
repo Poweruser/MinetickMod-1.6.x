@@ -16,7 +16,7 @@ public class PacketBuilderThread extends Observable implements Runnable {
         this.buildBuffer = new PacketBuilderBuffer();
         this.waitObject = new Object();
         this.thread = new Thread(this);
-        this.thread.setName("PacketBuilderThread-" + threadCounter);
+        this.thread.setName("MinetickMod_PacketBuilderThread-" + threadCounter);
         threadCounter++;
         /*
          *  These threads create so much cpu load, that they have an impact on the main thread

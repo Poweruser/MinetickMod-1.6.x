@@ -107,6 +107,7 @@ public class ThreadPool {
             this.wt.addObserver(this);
             this.t = new Thread(this.wt);
             this.t.setPriority(Thread.NORM_PRIORITY + 1);
+            this.t.setName("MinetickMod_WorldTicker-" + this.id);
             this.t.start();
         }
 
