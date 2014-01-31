@@ -5,13 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.WeakHashMap;
 
 import org.bukkit.event.block.BlockRedstoneEvent; // CraftBukkit
 
 public class BlockRedstoneTorch extends BlockTorch {
 
     private boolean isOn;
-    private static Map b = new HashMap();
+    //private static Map b = new HashMap();
+    private static Map b = new WeakHashMap(); // Poweruser
 
     private boolean a(World world, int i, int j, int k, boolean flag) {
         if (!b.containsKey(world)) {
