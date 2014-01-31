@@ -79,6 +79,17 @@ public abstract class EntityLiving extends Entity {
     public int maxAirTicks = 300;
     // CraftBukkit end
 
+    // Poweruser start
+    private boolean allowDeletion = false;
+    private boolean checkedForDeletion = false;
+
+    private void killIfLongerAliveThan(int minutes) {
+        if(this.allowDeletion && this.ticksLived >= minutes * 1200) {
+            this.die();
+        }
+    }
+    // Poweruser end
+
     public EntityLiving(World world) {
         super(world);
         this.az();
@@ -1339,6 +1350,16 @@ public abstract class EntityLiving extends Entity {
 
         this.world.methodProfiler.b();
         this.aY += f2;
+
+        // Poweruser start
+        if(!this.checkedForDeletion) {
+            this.checkedForDeletion = true;
+            this.allowDeletion = MinetickMod.isEntityAllowedToBeDeleted(this);
+        }
+        if(this.allowDeletion && !this.isImportantEntity) {
+            this.killIfLongerAliveThan(MinetickMod.getMaxEntityLifeTime());
+        }
+        // Poweruser end
     }
 
     protected float f(float f, float f1) {
