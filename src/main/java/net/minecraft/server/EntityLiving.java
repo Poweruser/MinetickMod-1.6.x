@@ -13,6 +13,8 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 // CraftBukkit end
 
+import de.minetick.MinetickMod;
+
 public abstract class EntityLiving extends Entity {
 
     private static final UUID b = UUID.fromString("662A6B8D-DA3E-4C1C-8813-96EA6097278D");
@@ -78,6 +80,17 @@ public abstract class EntityLiving extends Entity {
     public int expToDrop;
     public int maxAirTicks = 300;
     // CraftBukkit end
+
+    // Poweruser start
+    private boolean allowDeletion = false;
+    private boolean checkedForDeletion = false;
+
+    private void killIfLongerAliveThan(int minutes) {
+        if(this.allowDeletion && this.ticksLived >= minutes * 1200) {
+            this.die();
+        }
+    }
+    // Poweruser end
 
     public EntityLiving(World world) {
         super(world);
@@ -1338,6 +1351,16 @@ public abstract class EntityLiving extends Entity {
 
         this.world.methodProfiler.b();
         this.aY += f2;
+
+        // Poweruser start
+        if(!this.checkedForDeletion) {
+            this.checkedForDeletion = true;
+            this.allowDeletion = MinetickMod.isEntityAllowedToBeDeleted(this);
+        }
+        if(this.allowDeletion && !this.isImportantEntity) {
+            this.killIfLongerAliveThan(MinetickMod.getMaxEntityLifeTime());
+        }
+        // Poweruser end
     }
 
     protected float f(float f, float f1) {

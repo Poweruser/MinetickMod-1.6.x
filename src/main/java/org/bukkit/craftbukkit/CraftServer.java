@@ -1411,5 +1411,13 @@ public final class CraftServer implements Server {
     public List<String> getMinetickModNotGeneratingWorlds() {
         return configuration.getStringList("minetickmod.notGeneratingWorlds");
     }
+
+    public int getMinetickModMaxEntityLifeTime() {
+        return configuration.getInt("minetickmod.maxEntityLifeTime");
+    }
+
+    public List<String> getMinetickModEntitiesWithLimitedLifeTime() {
+        return configuration.getStringList("minetickmod.entitiesWithLimitedLifeTime");
+    }
     // Poweruser end
 }

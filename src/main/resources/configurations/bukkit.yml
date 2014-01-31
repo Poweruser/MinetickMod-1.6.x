@@ -63,3 +63,5 @@ minetickmod:
     packetBuilderThreadPoolSize: -1
     packetsPerTick: 1
     notGeneratingWorlds: []
+    maxEntityLifeTime: 10
+    entitiesWithLimitedLifeTime: []
