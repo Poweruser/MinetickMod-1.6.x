@@ -25,4 +25,6 @@ To load up additional worlds, I can recommend the plugin [Multiverse](http://dev
 An important guideline in this project is to do as little changes as possible, but as much as necessary.
 Therefore this project is not, and will not be, a complete rewrite of Minecrafts server side, to get as much benefit out of parallel processing as possible. Instead I carefully examine and profile the various parts of the server code and decide then, what is worth to be optimized with a reasonable amount of work.
 
-In this repository, every Minecraft version of this mod will have its own branch. I probably won't do them all, just for the most important ones.
+This repository hosts the versions for 1.6.2 and 1.6.4, 1.7.2 has its own repository here:    
+https://github.com/Poweruser/MinetickMod-1.7.2      
+Future versions will probably each have their own repo as well.
