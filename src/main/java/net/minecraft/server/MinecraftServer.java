@@ -434,6 +434,7 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
             if (this.n != null && this.n.d()) {
                 this.n.e();
             }
+            this.minetickMod.shutdown(); // Poweruser
         }
     }
 
@@ -520,7 +521,6 @@ public abstract class MinecraftServer implements ICommandListener, Runnable, IMo
             this.a(crashreport);
         } finally {
             try {
-                this.minetickMod.shutdown(); // Poweruser
                 this.stop();
                 this.isStopped = true;
             } catch (Throwable throwable1) {
