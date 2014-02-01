@@ -38,7 +38,7 @@ public class MinetickMod {
     private Profiler profiler;
     private ThreadPool threadPool;
     private int timerDelay = 45;
-    private ScheduledExecutorService timerService = Executors.newScheduledThreadPool(2);
+    private ScheduledExecutorService timerService = Executors.newScheduledThreadPool(2, new MinetickThreadFactory("MinetickMod_TimerService"));
     private ScheduledFuture<Object> tickTimerTask;
     private TickTimer tickTimerObject;
     private TickCounter tickCounterObject;
