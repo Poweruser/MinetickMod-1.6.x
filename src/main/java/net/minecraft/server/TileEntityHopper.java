@@ -463,7 +463,8 @@ public class TileEntityHopper extends TileEntity implements IHopper {
     }
 
     private static boolean canMergeItems(ItemStack itemstack, ItemStack itemstack1) {
-        return itemstack.id != itemstack1.id ? false : (itemstack.getData() != itemstack1.getData() ? false : (itemstack.count > itemstack.getMaxStackSize() ? false : ItemStack.equals(itemstack, itemstack1)));
+        //return itemstack.id != itemstack1.id ? false : (itemstack.getData() != itemstack1.getData() ? false : (itemstack.count > itemstack.getMaxStackSize() ? false : ItemStack.equals(itemstack, itemstack1)));
+        return itemstack.id != itemstack1.id ? false : (itemstack.getData() != itemstack1.getData() ? false : (itemstack.count > itemstack.getMaxStackSize() ? false : ItemStack.equals(itemstack, itemstack1))); // Poweruser - stacks cant merge when count >= maxStackSize
     }
 
     public double aA() {
