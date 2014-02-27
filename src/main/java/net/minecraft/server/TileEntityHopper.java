@@ -43,15 +43,17 @@ public class TileEntityHopper extends TileEntity implements IHopper {
     // CraftBukkit end
 
     // Poweruser start
-    private static boolean doesInventoryHaveEnoughSpaceForItem(IInventory iinventory, ItemStack itemstack) {
+    private static int doesInventoryHaveEnoughSpaceForItem(IInventory iinventory, ItemStack itemstack, int facing) {
         int size = iinventory.getSize();
         for(int i = 0; i < size; i++) {
-            ItemStack slot = iinventory.getItem(i);
-            if(slot == null || canMergeItems(slot, itemstack)) {
-                return true;
+            if(canPlaceItemInInventory(iinventory, itemstack, i, facing)) {
+                ItemStack slot = iinventory.getItem(i);
+                if(slot == null || canMergeItems(slot, itemstack)) {
+                    return i;
+                }
             }
         }
-        return false;
+        return -1;
     }
     // Poweruser end
 
@@ -220,7 +222,9 @@ public class TileEntityHopper extends TileEntity implements IHopper {
                     // Poweruser start
                     ItemStack copyOfItemBeingPushed = itemstack.cloneItemStack();
                     copyOfItemBeingPushed.count = 1;
-                    if(!doesInventoryHaveEnoughSpaceForItem(iinventory, copyOfItemBeingPushed)) {
+                    int facing = Facing.OPPOSITE_FACING[BlockHopper.c(this.p())];
+                    int possibleInventorySlot = doesInventoryHaveEnoughSpaceForItem(iinventory, copyOfItemBeingPushed, facing);
+                    if(possibleInventorySlot < 0) {
                         continue;
                     }
                     // Poweruser end
@@ -243,7 +247,8 @@ public class TileEntityHopper extends TileEntity implements IHopper {
                         this.c(8); // Delay hopper checks
                         return false;
                     }
-                    ItemStack itemstack1 = addItem(iinventory, CraftItemStack.asNMSCopy(event.getItem()), Facing.OPPOSITE_FACING[BlockHopper.c(this.p())]);
+                    //ItemStack itemstack1 = addItem(iinventory, CraftItemStack.asNMSCopy(event.getItem()), Facing.OPPOSITE_FACING[BlockHopper.c(this.p())]);
+                    ItemStack itemstack1 = addItem(iinventory, possibleInventorySlot, CraftItemStack.asNMSCopy(event.getItem()), facing); // Poweruser
 
                     if (itemstack1 == null || itemstack1.count == 0) {
                         if (event.getItem().equals(oitemstack)) {
@@ -307,7 +312,9 @@ public class TileEntityHopper extends TileEntity implements IHopper {
             // Poweruser start
             ItemStack copyOfItemBeingSuck = iinventory.getItem(i).cloneItemStack();
             copyOfItemBeingSuck.count = 1;
-            if(!doesInventoryHaveEnoughSpaceForItem(ihopper, copyOfItemBeingSuck)) {
+            int facing = -1;
+            int possibleInventorySlot = doesInventoryHaveEnoughSpaceForItem(ihopper, copyOfItemBeingSuck, facing);
+            if(possibleInventorySlot < 0) {
                 return false;
             }
             // Poweruser end
@@ -337,7 +344,8 @@ public class TileEntityHopper extends TileEntity implements IHopper {
 
                 return false;
             }
-            ItemStack itemstack2 = addItem(ihopper, CraftItemStack.asNMSCopy(event.getItem()), -1);
+            //ItemStack itemstack2 = addItem(ihopper, CraftItemStack.asNMSCopy(event.getItem()), -1);
+            ItemStack itemstack2 = addItem(ihopper, possibleInventorySlot, CraftItemStack.asNMSCopy(event.getItem()), facing); // Poweruser
 
             if (itemstack2 == null || itemstack2.count == 0) {
                 if (event.getItem().equals(oitemstack)) {
@@ -364,7 +372,9 @@ public class TileEntityHopper extends TileEntity implements IHopper {
         } else {
             // Poweruser start
             ItemStack copyOfItemBeingAdded = entityitem.getItemStack().cloneItemStack();
-            if(!doesInventoryHaveEnoughSpaceForItem(iinventory, copyOfItemBeingAdded)) {
+            int facing = -1;
+            int possibleInventorySlot = doesInventoryHaveEnoughSpaceForItem(iinventory, copyOfItemBeingAdded, facing);
+            if(possibleInventorySlot < 0) {
                 return false;
             }
             // Poweruser end
@@ -378,7 +388,8 @@ public class TileEntityHopper extends TileEntity implements IHopper {
             // CraftBukkit end
 
             ItemStack itemstack = entityitem.getItemStack().cloneItemStack();
-            ItemStack itemstack1 = addItem(iinventory, itemstack, -1);
+            //ItemStack itemstack1 = addItem(iinventory, itemstack, -1);
+            ItemStack itemstack1 = addItem(iinventory, possibleInventorySlot, itemstack, facing); // Poweruser
 
             if (itemstack1 != null && itemstack1.count != 0) {
                 entityitem.setItemStack(itemstack1);
@@ -392,15 +403,33 @@ public class TileEntityHopper extends TileEntity implements IHopper {
     }
 
     public static ItemStack addItem(IInventory iinventory, ItemStack itemstack, int i) {
+    // Poweruser start
+        return addItem(iinventory, -1, itemstack, i);
+    }
+
+    public static ItemStack addItem(IInventory iinventory, int possibleInventorySlot, ItemStack itemstack, int i) {
+    // Poweruser end
         if (iinventory instanceof IWorldInventory && i > -1) {
             IWorldInventory iworldinventory = (IWorldInventory) iinventory;
             int[] aint = iworldinventory.getSlotsForFace(i);
+
+            // Poweruser start
+            if(possibleInventorySlot >= 0 && possibleInventorySlot < aint.length) {
+                itemstack = tryMoveInItem(iinventory, itemstack, possibleInventorySlot, i);
+            }
+            // Poweruser end
 
             for (int j = 0; j < aint.length && itemstack != null && itemstack.count > 0; ++j) {
                 itemstack = tryMoveInItem(iinventory, itemstack, aint[j], i);
             }
         } else {
             int k = iinventory.getSize();
+
+            // Poweruser start
+            if(possibleInventorySlot >= 0 && possibleInventorySlot < k) {
+                itemstack = tryMoveInItem(iinventory, itemstack, possibleInventorySlot, i);
+            }
+            // Poweruser end
 
             for (int l = 0; l < k && itemstack != null && itemstack.count > 0; ++l) {
                 itemstack = tryMoveInItem(iinventory, itemstack, l, i);
