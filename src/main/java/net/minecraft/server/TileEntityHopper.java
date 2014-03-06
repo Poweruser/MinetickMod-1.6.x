@@ -44,12 +44,26 @@ public class TileEntityHopper extends TileEntity implements IHopper {
 
     // Poweruser start
     private static int doesInventoryHaveEnoughSpaceForItem(IInventory iinventory, ItemStack itemstack, int facing) {
-        int size = iinventory.getSize();
-        for(int i = 0; i < size; i++) {
-            if(canPlaceItemInInventory(iinventory, itemstack, i, facing)) {
-                ItemStack slot = iinventory.getItem(i);
-                if(slot == null || canMergeItems(slot, itemstack)) {
-                    return i;
+        if (iinventory instanceof IWorldInventory && facing > -1) {
+            IWorldInventory iworldinventory = (IWorldInventory) iinventory;
+            int[] possibleSlots = iworldinventory.getSlotsForFace(facing);
+            for(int i = 0; i < possibleSlots.length; i++) {
+                int slotId = possibleSlots[i];
+                if(canPlaceItemInInventory(iinventory, itemstack, slotId, facing)) {
+                    ItemStack slot = iinventory.getItem(slotId);
+                    if(slot == null || canMergeItems(slot, itemstack)) {
+                        return slotId;
+                    }
+                }
+            }
+        } else {
+            int size = iinventory.getSize();
+            for(int i = 0; i < size; i++) {
+                if(canPlaceItemInInventory(iinventory, itemstack, i, facing)) {
+                    ItemStack slot = iinventory.getItem(i);
+                    if(slot == null || canMergeItems(slot, itemstack)) {
+                        return i;
+                    }
                 }
             }
         }
