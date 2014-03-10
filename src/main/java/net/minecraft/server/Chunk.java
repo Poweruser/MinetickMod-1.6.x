@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit; // CraftBukkit
 
@@ -65,7 +66,7 @@ public class Chunk {
         this.b = new int[256];
         this.c = new boolean[256];
         //this.tileEntities = new HashMap();
-        this.tileEntities = Collections.synchronizedMap(new HashMap()); // Poweruser
+        this.tileEntities = new ConcurrentHashMap(16, 0.75F, 1); // Poweruser
         this.u = 4096;
         this.entitySlices = new List[16];
         this.world = world;
