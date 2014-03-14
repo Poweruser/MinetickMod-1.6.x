@@ -11,16 +11,7 @@ public class BlockRedstoneWire extends Block {
 
     private boolean a = true;
 
-    //private Set b = new HashSet();
-
-    // Poweruser start
-    private static final ThreadLocal<Set<ChunkPosition>> threadLocalSet_b = new ThreadLocal<Set<ChunkPosition>>() {
-        @Override
-        protected Set<ChunkPosition> initialValue() {
-            return new HashSet<ChunkPosition>();
-        }
-    };
-    // Poweruser end
+    private Set b = new HashSet();
 
     public BlockRedstoneWire(int i) {
         super(i, Material.ORIENTABLE);
@@ -49,24 +40,12 @@ public class BlockRedstoneWire extends Block {
 
     private void k(World world, int i, int j, int k) {
         this.a(world, i, j, k, i, j, k);
-        /*
         ArrayList arraylist = new ArrayList(this.b);
 
         this.b.clear();
 
         for (int l = 0; l < arraylist.size(); ++l) {
             ChunkPosition chunkposition = (ChunkPosition) arraylist.get(l);
-        */
-
-        // Poweruser start
-        Set<ChunkPosition> set = threadLocalSet_b.get();
-        ArrayList<ChunkPosition> arraylist = new ArrayList<ChunkPosition>(set);
-
-        set.clear();
-
-        for (int l = 0; l < arraylist.size(); ++l) {
-            ChunkPosition chunkposition = arraylist.get(l);
-        // Poweruser end
 
             world.applyPhysics(chunkposition.x, chunkposition.y, chunkposition.z, this.id);
         }
@@ -143,7 +122,6 @@ public class BlockRedstoneWire extends Block {
 
         if (k1 != l1) {
             world.setData(i, j, k, l1, 2);
-            /*
             this.b.add(new ChunkPosition(i, j, k));
             this.b.add(new ChunkPosition(i - 1, j, k));
             this.b.add(new ChunkPosition(i + 1, j, k));
@@ -151,18 +129,6 @@ public class BlockRedstoneWire extends Block {
             this.b.add(new ChunkPosition(i, j + 1, k));
             this.b.add(new ChunkPosition(i, j, k - 1));
             this.b.add(new ChunkPosition(i, j, k + 1));
-            */
-
-            // Poweruser start
-            Set<ChunkPosition> set = threadLocalSet_b.get();
-            set.add(new ChunkPosition(i, j, k));
-            set.add(new ChunkPosition(i - 1, j, k));
-            set.add(new ChunkPosition(i + 1, j, k));
-            set.add(new ChunkPosition(i, j - 1, k));
-            set.add(new ChunkPosition(i, j + 1, k));
-            set.add(new ChunkPosition(i, j, k - 1));
-            set.add(new ChunkPosition(i, j, k + 1));
-            // Poweruser end
         }
     }
 
